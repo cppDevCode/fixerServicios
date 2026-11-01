@@ -12,7 +12,7 @@ export const Layout = () => {
           <h1>Fixer 🛠️</h1>
         </div>
         <nav className="user-nav">
-          <Link to="/login">Cerrar Sesión / Login</Link>
+          <Link to="/login" style={{ backgroundColor: '#FFF7ED', color: '#F97316', padding: '0.5rem 1rem', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>Cerrar Sesión / Login</Link>
         </nav>
       </header>
 
@@ -21,9 +21,9 @@ export const Layout = () => {
         <aside className="sidebar">
           <h3>Módulos</h3>
           <ul>
-            <li><Link to="/prestadores">1. Prestadores (Alejandro)</Link></li>
-            <li><Link to="/resenas">2. Reseñas (Marianela)</Link></li>
-            <li><Link to="/usuarios">3. Usuarios (Julieta)</Link></li>
+            <li><Link to="/prestadores">1. Prestadores</Link></li>
+            <li><Link to="/resenas">2. Reseñas</Link></li>
+            <li><Link to="/usuarios">3. Usuarios</Link></li>
           </ul>
         </aside>
 

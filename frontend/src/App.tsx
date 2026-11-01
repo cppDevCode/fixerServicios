@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Layout } from '../components/layout/Layout';
+import { LoginPage } from '../pages/LoginPage';
+import { UsuariosPage } from '../pages/UsuariosPage';
+import { PrestadoresPlaceholder, ResenasPlaceholder } from '../pages/Placeholders';
 
-const App: React.FC = () => {
-  const [status, setStatus] = useState<string>('Verificando conexión...');
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-
-  useEffect(() => {
-    fetch(`${apiUrl}/health`)
-      .then((res) => res.json())
-      .then((data) => setStatus(`Backend conectado con pnpm: ${data.status}`))
-      .catch(() => setStatus('Error conectando al backend'));
-  }, [apiUrl]);
-
+function App() {
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Fixer - Prototipo Modular</h1>
-      <p>Estado: <strong>{status}</strong></p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route element={<Layout />}>
+          {/* Redirección de la ruta raíz al módulo de usuarios */}
+          <Route path="/" element={<Navigate to="/usuarios" replace />} />
+          <Route path="/prestadores" element={<PrestadoresPlaceholder />} />
+          <Route path="/resenas" element={<ResenasPlaceholder />} />
+          <Route path="/usuarios" element={<UsuariosPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;
