@@ -3,6 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: base
     container_name: fixer_backend
     ports:
       - "3000:3000"
@@ -17,6 +18,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: dev
     container_name: fixer_frontend
     ports:
       - "5173:5173"
@@ -25,4 +27,4 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command pnpm run dev
+    command: pnpm dev
