@@ -1,0 +1,29 @@
+{
+    "name": "fixer-backend",
+    "version": "1.0.0",
+    "description": "Backend para Fixer",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.ts",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.9.0",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/node": "^26.13.0",
+        "eslint": "^9.9.0",
+        "tsx": "^4.19.0",
+        "typescript": "^7.0.0"
+        "typescript-eslint": "^8.2.0"
+    }
+}
