@@ -47,7 +47,7 @@ export class PrestadorService {
             } else if (typeof valA === 'number' && typeof valB === 'number') {
                 comparacion = valA - valB;
             } else {
-                comparacion = String(ValA).localeCompare(String(B));
+                comparacion = String(valA).localeCompare(String(valB));
             }
             return order === 'desc' ? -comparacion : comparacion;
         });
