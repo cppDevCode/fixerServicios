@@ -1,5 +1,5 @@
 export interface IPrestador {
-    id: string;
+    id: number;
     nombre: string;
     apellido: string;
     matricula?: string;
