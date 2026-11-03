@@ -42,3 +42,61 @@ describe('API Reseñas - Consultas', () => {
         expect(res.body.datos).toBeNull();
     });
 });
+
+describe('API Reseñas - Alta y baja', () => {
+    const datosValidos = {
+        prestadorId: 1,
+        usuarioId: 1,
+        calificacion: 4,
+        comentario: 'Muy buen trabajo',
+    };
+
+    it('POST /api/v1/resenas crea la reseña y queda disponible en memoria', async () => {
+        const res = await request(app)
+        .post('/api/v1/resenas')
+        .send(datosValidos)
+        .expect(201);
+
+        expect(res.body.codigo).toBe(201);
+        expect(res.body.datos).toMatchObject(datosValidos);
+        expect(res.body.datos.id).toBeTypeOf('number');
+
+        const consulta = await request(app)
+        .get(`/api/v1/resenas/${res.body.datos.id}`)
+        .expect(200);
+
+        expect(consulta.body.datos.comentario).toBe(datosValidos.comentario);
+    });
+
+    it.each([
+        ['calificación fuera de rango', { ...datosValidos, calificacion: 6 }],
+        ['calificación no entera', { ...datosValidos, calificacion: 3.5 }],
+        ['comentario vacío', { ...datosValidos, comentario: '   ' }],
+        ['prestadorId faltante', { usuarioId: 1, calificacion: 4, comentario: 'Bien' }],
+    ])('POST /api/v1/resenas responde 400 con %s', async (_caso, body) => {
+        const res = await request(app)
+        .post('/api/v1/resenas')
+        .send(body)
+        .expect(400);
+
+        expect(res.body.codigo).toBe(400);
+        expect(res.body.datos).toBeNull();
+    });
+
+    it('DELETE /api/v1/resenas/:id elimina la reseña y deja de existir', async () => {
+        const creada = await request(app)
+        .post('/api/v1/resenas')
+        .send(datosValidos)
+        .expect(201);
+        const id = creada.body.datos.id;
+
+        await request(app).delete(`/api/v1/resenas/${id}`).expect(200);
+        await request(app).get(`/api/v1/resenas/${id}`).expect(404);
+    });
+
+    it('DELETE /api/v1/resenas/:id responde 404 si no existe', async () => {
+        const res = await request(app).delete('/api/v1/resenas/9999').expect(404);
+
+        expect(res.body.codigo).toBe(404);
+    });
+});
