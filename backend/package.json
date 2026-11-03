@@ -7,12 +7,13 @@
     "scripts": {
         "dev": "tsx watch src/app.ts",
         "build": "tsc",
-        "start": "node dist/app.ts",
+        "start": "node dist/app.js",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "test": "vitest run",
         "test:unit": "vitest run unit.test",
         "test:integration": "vitest run integration.test",
+        "test:e2e": "vitest run e2e.test",
         "test:watch": "vitest"
     },
     "dependencies": {
