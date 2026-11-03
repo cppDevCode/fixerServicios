@@ -38,7 +38,7 @@ export class ResenaService {
         return {
             items,
             meta: {
-                page,
+                pagina: page,
                 limit,
                 total,
                 totalPages: Math.ceil(total / limit),
