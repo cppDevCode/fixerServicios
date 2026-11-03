@@ -8,7 +8,7 @@ export class PrestadorService {
 
     public listar(filtros: IFiltrosPrestador) {
         const page = Math.max(1, filtros.page || 1);
-        const limit = Math.max(1, filtros.limit || 1);
+        const limit = Math.max(1, filtros.limit || 10);
         const order = filtros.order === 'desc' ? 'desc' : 'asc';
         const sortBy = filtros.sortBy || 'nombre';
 
