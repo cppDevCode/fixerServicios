@@ -24,9 +24,15 @@ export class UsuarioService {
     const total = usuarios.length;
     const startIndex = (page - 1) * limit;
     const items = usuarios.slice(startIndex, startIndex + limit);
+    const usuariosSeguros = items.map((u) => {
+      const copia = { ...u };
+      copia.passwordHash = undefined as any;
+      copia.respuestaSecretaHash = undefined as any;
+      return copia;
+    });
 
     return {
-      items,
+      items: usuariosSeguros,
       meta: {
         page,
         limit,
