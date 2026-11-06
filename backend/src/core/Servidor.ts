@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import prestadorRoutes from '../route/prestador.route'
 import resenaRoutes from '../route/resena.route'
+import usuarioRoutes from '../route/usuario.route';
+import { errorHandler } from '../middlewares/errorHandler';
 
 export class Servidor {
     private app: Application;
@@ -10,6 +12,7 @@ export class Servidor {
         this.app = express();
         this.middlewares();
         this.rutas();
+        this.manejoErrores();
     }
 
     private middlewares() {
@@ -23,6 +26,11 @@ export class Servidor {
         });
         this.app.use('/api/v1/prestadores', prestadorRoutes);
         this.app.use('/api/v1/resenas', resenaRoutes);
+        this.app.use('/api/v1', usuarioRoutes); 
+    }
+
+    private manejoErrores() {
+        this.app.use(errorHandler);
     }
 
     obtenerApp(): Application {
