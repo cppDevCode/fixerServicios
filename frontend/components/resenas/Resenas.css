@@ -1,10 +1,11 @@
-
 /* Contenedor principal */
 
 .listado-resenas-contenedor {
     width: 100%;
     max-width: 850px;
+    min-width: 0;
     margin: 0 auto;
+    box-sizing: border-box;
     font-family: var(--font-family);
     color: var(--color-text);
 }
@@ -12,8 +13,10 @@
 /* Resumen de calificaciones */
 
 .resumen-calificaciones {
+    min-width: 0;
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
+    box-sizing: border-box;
     background: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -24,6 +27,7 @@
     color: var(--color-primary);
     font-size: 1.375rem;
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .resumen-calificaciones__promedio {
@@ -90,12 +94,15 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    min-width: 0;
 }
 
 /* Tarjetas individuales */
 
 .tarjeta-resena {
+    min-width: 0;
     padding: var(--spacing-lg);
+    box-sizing: border-box;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -183,7 +190,9 @@
 /* Estados: carga, vacío y error */
 
 .estado-resenas {
+    min-width: 0;
     padding: var(--spacing-xl);
+    box-sizing: border-box;
     background: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -230,12 +239,24 @@
         font-size: 1.1875rem;
     }
 
+    .resumen-calificaciones__promedio {
+        gap: var(--spacing-sm);
+    }
+
     .resumen-calificaciones__promedio strong {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
+    }
+
+    .resumen-calificaciones__promedio > span {
+        flex-basis: 100%;
     }
 
     .tarjeta-resena {
         padding: var(--spacing-md);
+    }
+
+    .tarjeta-resena__encabezado {
+        align-items: flex-start;
     }
 
     .paginacion-resenas {
