@@ -17,5 +17,6 @@ export interface RespuestaApi<T> {
         limit: number;
         total: number;
         totalPages: number;
+        promedio?: number;
     };
 }

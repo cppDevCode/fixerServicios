@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { IResena } from '../../interfaces/resena.interface';
 import { obtenerResenas } from '../../services/resena.service';
 import { TarjetaResena } from './TarjetaResena';
+import { Estrellas } from './Estrellas';
 
 interface ListadoResenasProps {
     prestadorId: number;
@@ -10,15 +11,15 @@ interface ListadoResenasProps {
 
 const LIMITE = 5;
 
-export function ListadoResenas({
-    prestadorId,
-    }: ListadoResenasProps) {
+export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
     const [resenas, setResenas] = useState<IResena[]>([]);
     const [pagina, setPagina] = useState(1);
     const [totalPaginas, setTotalPaginas] = useState(0);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [reintento, setReintento] = useState(0);
+    const [promedio, setPromedio] = useState(0);
+    const [totalResenas, setTotalResenas] = useState(0);
 
     useEffect(() => {
         setPagina(1);
@@ -28,34 +29,37 @@ export function ListadoResenas({
         let activo = true;
 
         async function cargarResenas() {
-        setCargando(true);
-        setError(null);
+            setCargando(true);
+            setError(null);
 
-        try {
-            const respuesta = await obtenerResenas(
-            prestadorId,
-            pagina,
-            LIMITE
-            );
+            try {
+                const respuesta = await obtenerResenas(
+                    prestadorId,
+                    pagina,
+                    LIMITE
+                );
 
-            if (!activo) return;
+                if (!activo) return;
 
-            setResenas(respuesta.datos);
-            setTotalPaginas(respuesta.meta?.totalPages ?? 0);
-        } catch {
-            if (!activo) return;
+                setResenas(respuesta.datos);
+                setTotalPaginas(respuesta.meta?.totalPages ?? 0);
+                setPromedio(respuesta.meta?.promedio ?? 0);
+                setTotalResenas(respuesta.meta?.total ?? 0);
 
-            setError('No pudimos cargar las reseñas.');
-            setResenas([]);
-        } finally {
-            if (activo) setCargando(false);
-        }
+            } catch {
+                if (!activo) return;
+
+                setError('No pudimos cargar las reseñas.');
+                setResenas([]);
+            } finally {
+                if (activo) setCargando(false);
+            }
         }
 
         void cargarResenas();
 
         return () => {
-        activo = false;
+            activo = false;
         };
     }, [prestadorId, pagina, reintento]);
 
@@ -65,12 +69,12 @@ export function ListadoResenas({
 
     if (error) {
         return (
-        <section>
-            <p role="alert">{error}</p>
-            <button onClick={() => setReintento((n) => n + 1)}>
-            Reintentar
-            </button>
-        </section>
+            <section>
+                <p role="alert">{error}</p>
+                <button onClick={() => setReintento((n) => n + 1)}>
+                    Reintentar
+                </button>
+            </section>
         );
     }
 
@@ -80,31 +84,52 @@ export function ListadoResenas({
 
     return (
         <section aria-label="Reseñas del profesional">
-        <div className="listado-resenas">
-            {resenas.map((resena) => (
-            <TarjetaResena key={resena.id} resena={resena} />
-            ))}
-        </div>
 
-        <nav aria-label="Paginación de reseñas">
-            <button
-            disabled={pagina === 1}
-            onClick={() => setPagina((p) => p - 1)}
-            >
-            Anterior
-            </button>
+            <header className="resumen-calificaciones">
+                <h2>Opiniones de clientes</h2>
 
-            <span>
-            Página {pagina} de {totalPaginas}
-            </span>
+                <div className="resumen-calificaciones__promedio">
+                    <strong>
+                        {promedio.toFixed(1).replace('.', ',')}
+                    </strong>
 
-            <button
-            disabled={pagina >= totalPaginas}
-            onClick={() => setPagina((p) => p + 1)}
-            >
-            Siguiente
-            </button>
-        </nav>
+                    <Estrellas calificacion={promedio} />
+
+                    <span>
+                        {totalResenas}{' '}
+                        {totalResenas === 1 ? 'opinión' : 'opiniones'}
+                    </span>
+                </div>
+            </header>
+
+            <div className="listado-resenas">
+                {resenas.map((resena) => (
+                    <TarjetaResena
+                        key={resena.id}
+                        resena={resena}
+                    />
+                ))}
+            </div>
+
+            <nav aria-label="Paginación de reseñas">
+                <button
+                    disabled={pagina === 1}
+                    onClick={() => setPagina((p) => p - 1)}
+                >
+                    Anterior
+                </button>
+
+                <span>
+                    Página {pagina} de {totalPaginas}
+                </span>
+
+                <button
+                    disabled={pagina >= totalPaginas}
+                    onClick={() => setPagina((p) => p + 1)}
+                >
+                    Siguiente
+                </button>
+            </nav>
         </section>
     );
 }
