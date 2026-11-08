@@ -4,6 +4,7 @@ import type { IResena } from '../../interfaces/resena.interface';
 import { obtenerResenas } from '../../services/resena.service';
 import { TarjetaResena } from './TarjetaResena';
 import { Estrellas } from './Estrellas';
+import './Resenas.css';
 
 interface ListadoResenasProps {
     prestadorId: number;
@@ -64,12 +65,16 @@ export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
     }, [prestadorId, pagina, reintento]);
 
     if (cargando) {
-        return <p>Cargando reseñas...</p>;
+        return (
+            <p className="estado-resenas" role="status">
+                Cargando reseñas...
+            </p>
+        );
     }
 
     if (error) {
         return (
-            <section>
+            <section className="estado-resenas estado-resenas--error">
                 <p role="alert">{error}</p>
                 <button onClick={() => setReintento((n) => n + 1)}>
                     Reintentar
@@ -79,12 +84,18 @@ export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
     }
 
     if (resenas.length === 0) {
-        return <p>Este profesional todavía no tiene reseñas.</p>;
+        return (
+            <p className="estado-resenas">
+                Este profesional todavía no tiene reseñas.
+            </p>
+        );
     }
 
     return (
-        <section aria-label="Reseñas del profesional">
-
+        <section
+            className="listado-resenas-contenedor"
+            aria-label="Reseñas del profesional"
+        >
             <header className="resumen-calificaciones">
                 <h2>Opiniones de clientes</h2>
 
@@ -111,25 +122,32 @@ export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
                 ))}
             </div>
 
-            <nav aria-label="Paginación de reseñas">
-                <button
-                    disabled={pagina === 1}
-                    onClick={() => setPagina((p) => p - 1)}
+            {totalPaginas > 1 && (
+                <nav
+                    className="paginacion-resenas"
+                    aria-label="Paginación de reseñas"
                 >
-                    Anterior
-                </button>
+                    <button
+                        type="button"
+                        disabled={pagina === 1}
+                        onClick={() => setPagina((p) => p - 1)}
+                    >
+                        Anterior
+                    </button>
 
-                <span>
-                    Página {pagina} de {totalPaginas}
-                </span>
+                    <span>
+                        Página {pagina} de {totalPaginas}
+                    </span>
 
-                <button
-                    disabled={pagina >= totalPaginas}
-                    onClick={() => setPagina((p) => p + 1)}
-                >
-                    Siguiente
-                </button>
-            </nav>
+                    <button
+                        type="button"
+                        disabled={pagina >= totalPaginas}
+                        onClick={() => setPagina((p) => p + 1)}
+                    >
+                        Siguiente
+                    </button>
+                </nav>
+            )}
         </section>
     );
 }

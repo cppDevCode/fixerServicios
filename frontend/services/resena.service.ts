@@ -4,10 +4,9 @@ import type {
     RespuestaApi,
 } from '../interfaces/resena.interface';
 
-const API_URL =
-    import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+const API_URL = '/api/v1/resenas';
 
-    export async function obtenerResenas(
+export async function obtenerResenas(
     prestadorId: number,
     pagina = 1,
     limite = 5
@@ -19,7 +18,7 @@ const API_URL =
     });
 
     const respuesta = await fetch(
-        `${API_URL}/api/v1/resenas?${parametros}`
+        `${API_URL}?${parametros}`
     );
 
     if (!respuesta.ok) {
