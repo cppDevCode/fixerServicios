@@ -8,6 +8,13 @@ export interface IResena {
     createdAt: string;
 }
 
+export interface ICrearResena {
+    prestadorId: number;
+    usuarioId: number;
+    calificacion: number;
+    comentario: string;
+}
+
 export interface RespuestaApi<T> {
     codigo: number;
     msj: string;

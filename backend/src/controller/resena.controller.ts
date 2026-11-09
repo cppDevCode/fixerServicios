@@ -79,6 +79,43 @@ export class ResenaController {
         }
     }
 
+    public actualizar = (req: Request, res: Response): void => {
+        try {
+            const id = Number(req.params.id);
+
+            const resenaActualizada = this.service.actualizar(
+                id,
+                req.body ?? {}
+            );
+
+            if (!resenaActualizada) {
+                res.status(404).json({
+                    codigo: 404,
+                    msj: `Reseña con id ${id} no encontrada`,
+                    datos: null
+                });
+                return;
+            }
+
+            res.status(200).json({
+                codigo: 200,
+                msj: 'Reseña actualizada exitosamente',
+                datos: resenaActualizada
+            });
+        } catch (error) {
+            if (error instanceof ErrorValidacion) {
+                res.status(400).json({
+                    codigo: 400,
+                    msj: error.message,
+                    datos: null
+                });
+                return;
+            }
+
+            throw error;
+        }
+    }
+
     public eliminar = (req: Request, res: Response): void => {
         const id = Number(req.params.id);
 

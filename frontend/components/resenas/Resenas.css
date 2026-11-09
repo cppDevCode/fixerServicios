@@ -228,6 +228,139 @@
     outline-offset: 3px;
 }
 
+/* Formulario de reseñas */
+
+.formulario-resena {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.formulario-resena h3 {
+    margin: 0;
+    color: var(--color-text);
+}
+
+.formulario-resena__calificacion {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.formulario-resena__calificacion legend {
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.formulario-resena__estrellas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.formulario-resena__estrella {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-rating-empty);
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.formulario-resena__estrella--activa {
+    color: var(--color-rating);
+}
+
+.formulario-resena__estrella:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.formulario-resena__estrella:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.formulario-resena label {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.formulario-resena textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    resize: vertical;
+}
+
+.formulario-resena textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.formulario-resena__error {
+    margin: 0;
+    color: var(--color-error);
+}
+
+.formulario-resena__exito {
+    margin: 0;
+    color: var(--color-success);
+}
+
+.formulario-resena__enviar {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-resena__enviar:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+.formulario-resena__enviar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .formulario-resena {
+        padding: var(--spacing-md);
+    }
+
+    .formulario-resena__enviar {
+        width: 100%;
+    }
+}
+
 /* Responsive */
 
 @media (max-width: 600px) {
