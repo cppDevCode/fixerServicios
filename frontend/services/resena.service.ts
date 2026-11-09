@@ -1,8 +1,5 @@
 
-import type {
-    IResena,
-    RespuestaApi,
-} from '../interfaces/resena.interface';
+import type { IResena, ICrearResena, RespuestaApi, } from '../interfaces/resena.interface';
 
 const API_URL = '/api/v1/resenas';
 
@@ -26,4 +23,26 @@ export async function obtenerResenas(
     }
 
     return respuesta.json() as Promise<RespuestaApi<IResena[]>>;
+}
+
+export async function crearResena(
+    datos: ICrearResena
+): Promise<RespuestaApi<IResena>> {
+    const respuesta = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos),
+    });
+
+    const resultado = await respuesta.json() as RespuestaApi<IResena>;
+
+    if (!respuesta.ok) {
+        throw new Error(
+            resultado.msj || 'No se pudo crear la reseña'
+        );
+    }
+
+    return resultado;
 }
