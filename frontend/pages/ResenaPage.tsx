@@ -1,16 +1,24 @@
 import { useState } from 'react';
+import type { IResena } from '../interfaces/resena.interface';
 import { ListadoResenas } from '../components/resenas/ListadoResenas';
 import { FormularioResena } from '../components/resenas/FormularioResena';
 
 export function ResenasPage() {
     const [prestadorId, setPrestadorId] = useState(1);
     const [versionResenas, setVersionResenas] = useState(0);
+    const [resenaEditar, setResenaEditar] = useState<IResena | null>(null);
 
-    // Temp hasta integrar el usuario autenticado.
+    // Valores temporales para probar el módulo sin autenticación.
     const usuarioId = 2;
 
     const actualizarResenas = () => {
         setVersionResenas((version) => version + 1);
+        setResenaEditar(null);
+    };
+
+    const cambiarPrestador = (nuevoId: number) => {
+        setPrestadorId(nuevoId);
+        setResenaEditar(null);
     };
 
     return (
@@ -37,22 +45,25 @@ export function ResenasPage() {
                         const valor = Number(evento.target.value);
 
                         if (Number.isInteger(valor) && valor > 0) {
-                            setPrestadorId(valor);
+                            cambiarPrestador(valor);
                         }
                     }}
                 />
             </section>
 
             <FormularioResena
-                key={`formulario-${prestadorId}`}
+                key={`formulario-${prestadorId}-${resenaEditar?.id ?? 'nuevo'}`}
                 prestadorId={prestadorId}
                 usuarioId={usuarioId}
-                onResenaCreada={actualizarResenas}
+                resenaEditar={resenaEditar}
+                onResenaGuardada={actualizarResenas}
+                onCancelarEdicion={() => setResenaEditar(null)}
             />
 
             <ListadoResenas
                 key={`${prestadorId}-${versionResenas}`}
                 prestadorId={prestadorId}
+                onEditarResena={setResenaEditar}
             />
         </main>
     );

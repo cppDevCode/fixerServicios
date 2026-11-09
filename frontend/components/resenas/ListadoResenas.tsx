@@ -8,11 +8,15 @@ import './Resenas.css';
 
 interface ListadoResenasProps {
     prestadorId: number;
+    onEditarResena?: (resena: IResena) => void;
 }
 
 const LIMITE = 5;
 
-export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
+export function ListadoResenas({
+    prestadorId,
+    onEditarResena,
+}: ListadoResenasProps) {
     const [resenas, setResenas] = useState<IResena[]>([]);
     const [pagina, setPagina] = useState(1);
     const [totalPaginas, setTotalPaginas] = useState(0);
@@ -118,9 +122,11 @@ export function ListadoResenas({ prestadorId }: ListadoResenasProps) {
                     <TarjetaResena
                         key={resena.id}
                         resena={resena}
+                        onEditar={onEditarResena}
                     />
                 ))}
             </div>
+            
 
             {totalPaginas > 1 && (
                 <nav

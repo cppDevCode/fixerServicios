@@ -396,3 +396,79 @@
         gap: var(--spacing-sm);
     }
 }
+
+.formulario-resena__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.formulario-resena__cancelar {
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-resena__cancelar:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.formulario-resena__cancelar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.formulario-resena__cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tarjeta-resena__acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tarjeta-resena__editar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tarjeta-resena__editar:hover {
+    background: var(--color-surface-alt);
+}
+
+.tarjeta-resena__editar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .formulario-resena__acciones {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formulario-resena__cancelar {
+        width: 100%;
+    }
+}
+

@@ -1,22 +1,36 @@
-import { useState, type FormEvent } from 'react';
-import { crearResena } from '../../services/resena.service';
+import { useEffect, useState, type FormEvent } from 'react';
+import { crearResena, actualizarResena } from '../../services/resena.service';
+import type { IResena } from '../../interfaces/resena.interface';
 
 interface FormularioResenaProps {
     prestadorId: number;
     usuarioId: number;
-    onResenaCreada?: () => void;
+    resenaEditar?: IResena | null;
+    onResenaGuardada?: () => void;
+    onCancelarEdicion?: () => void;
 }
 
 export function FormularioResena({
     prestadorId,
     usuarioId,
-    onResenaCreada,
+    resenaEditar = null,
+    onResenaGuardada,
+    onCancelarEdicion,
 }: FormularioResenaProps) {
     const [calificacion, setCalificacion] = useState(0);
     const [comentario, setComentario] = useState('');
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState('');
     const [exito, setExito] = useState(false);
+
+    const modoEdicion = resenaEditar !== null;
+
+    useEffect(() => {
+        setCalificacion(resenaEditar?.calificacion ?? 0);
+        setComentario(resenaEditar?.comentario ?? '');
+        setError('');
+        setExito(false);
+    }, [resenaEditar]);
 
     const enviarResena = async (evento: FormEvent<HTMLFormElement>) => {
         evento.preventDefault();
@@ -36,22 +50,34 @@ export function FormularioResena({
         setEnviando(true);
 
         try {
-            await crearResena({
-                prestadorId,
-                usuarioId,
-                calificacion,
-                comentario: comentario.trim(),
-            });
+            if (resenaEditar) {
+                await actualizarResena(resenaEditar.id, {
+                    calificacion,
+                    comentario: comentario.trim(),
+                });
+            } else {
+                await crearResena({
+                    prestadorId,
+                    usuarioId,
+                    calificacion,
+                    comentario: comentario.trim(),
+                });
+            }
 
-            setCalificacion(0);
-            setComentario('');
-            setExito(true);
-            onResenaCreada?.();
+            if (!modoEdicion) {
+                setCalificacion(0);
+                setComentario('');
+                setExito(true);
+            }
+
+            onResenaGuardada?.();
         } catch (error) {
             setError(
                 error instanceof Error
                     ? error.message
-                    : 'No se pudo publicar la reseña.'
+                    : modoEdicion
+                        ? 'No se pudo actualizar la reseña.'
+                        : 'No se pudo publicar la reseña.'
             );
         } finally {
             setEnviando(false);
@@ -64,7 +90,9 @@ export function FormularioResena({
             onSubmit={enviarResena}
             noValidate
         >
-            <h3>Dejá tu reseña</h3>
+            <h3>
+                {modoEdicion ? 'Editar reseña' : 'Dejá tu reseña'}
+            </h3>
 
             <fieldset className="formulario-resena__calificacion">
                 <legend>Tu calificación</legend>
@@ -116,13 +144,32 @@ export function FormularioResena({
                 </p>
             )}
 
-            <button
-                className="formulario-resena__enviar"
-                type="submit"
-                disabled={enviando}
-            >
-                {enviando ? 'Publicando...' : 'Publicar reseña'}
-            </button>
+            <div className="formulario-resena__acciones">
+                <button
+                    className="formulario-resena__enviar"
+                    type="submit"
+                    disabled={enviando}
+                >
+                    {enviando
+                        ? modoEdicion
+                            ? 'Guardando...'
+                            : 'Publicando...'
+                        : modoEdicion
+                            ? 'Guardar cambios'
+                            : 'Publicar reseña'}
+                </button>
+
+                {modoEdicion && (
+                    <button
+                        type="button"
+                        className="formulario-resena__cancelar"
+                        onClick={onCancelarEdicion}
+                        disabled={enviando}
+                    >
+                        Cancelar edición
+                    </button>
+                )}
+            </div>
         </form>
     );
 }

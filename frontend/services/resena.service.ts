@@ -46,3 +46,26 @@ export async function crearResena(
 
     return resultado;
 }
+
+export async function actualizarResena(
+    id: number,
+    datos: Pick<ICrearResena, 'calificacion' | 'comentario'>
+): Promise<RespuestaApi<IResena>> {
+    const respuesta = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos),
+    });
+
+    const resultado = await respuesta.json() as RespuestaApi<IResena>;
+
+    if (!respuesta.ok) {
+        throw new Error(
+            resultado.msj || 'No se pudo actualizar la reseña'
+        );
+    }
+
+    return resultado;
+}
