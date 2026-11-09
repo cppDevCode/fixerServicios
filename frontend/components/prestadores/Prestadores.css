@@ -1,0 +1,460 @@
+/* Contenedor general del módulo de Prestadores */
+
+.prestadores-pagina {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.prestadores-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgb(36 52 71 / 4%);
+}
+
+.prestadores-encabezado h1,
+.prestadores-encabezado h2 {
+    margin: 0 0 6px;
+    color: var(--color-primary);
+    font-size: 1.625rem;
+    font-weight: 700;
+}
+
+.prestadores-encabezado p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+}
+
+.prestadores-encabezado__acciones {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+/* Botones reutilizables del módulo */
+
+.btn-prestador {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-prestador--primario {
+    background: var(--color-primary);
+    color: var(--color-surface);
+    border-color: var(--color-primary);
+}
+
+.btn-prestador--primario:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.btn-prestador--secundario {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    border-color: var(--color-border);
+}
+
+.btn-prestador--secundario:hover:not(:disabled) {
+    background: #dce9fc;
+}
+
+.btn-prestador--peligro {
+    background: #fef2f2;
+    color: var(--color-error);
+    border-color: #fecaca;
+}
+
+.btn-prestador--peligro:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+.btn-prestador:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Barra de filtros, búsqueda y exportación */
+
+.prestadores-controles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.prestadores-filtros-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, minmax(130px, 1fr));
+    gap: var(--spacing-md);
+    align-items: end;
+}
+
+.prestadores-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.prestadores-campo label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.prestadores-campo input,
+.prestadores-campo select,
+.prestadores-campo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.prestadores-campo input:focus,
+.prestadores-campo select:focus,
+.prestadores-campo textarea:focus {
+    border-color: var(--color-primary);
+}
+
+.prestadores-barra-inferior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border);
+}
+
+.prestadores-exportacion {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.prestadores-exportacion select {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.875rem;
+}
+
+/* Tabla de prestadores */
+
+.prestadores-tabla-contenedor {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+}
+
+.prestadores-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.prestadores-tabla th {
+    background: var(--color-background);
+    padding: 12px 16px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 700;
+}
+
+.prestadores-tabla td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.prestadores-tabla tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.prestadores-tabla tbody tr:hover {
+    background-color: var(--color-surface-alt);
+}
+
+.prestador-nombre-celda {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.prestador-subtexto {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+/* Badges de rubro y garantía */
+
+.badge-prestador {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-prestador--rubro {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+}
+
+.badge-prestador--garantia-si {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-prestador--garantia-no {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.rating-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.rating-chip__estrella {
+    color: var(--color-rating);
+}
+
+/* Paginación */
+
+.prestadores-paginacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.prestadores-paginacion__controles {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* Estados e indicadores */
+
+.prestadores-estado {
+    padding: var(--spacing-xl);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.prestadores-estado--error {
+    color: var(--color-error);
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.prestadores-alerta {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.prestadores-alerta--exito {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.prestadores-alerta--error {
+    background: #fef2f2;
+    color: var(--color-error);
+    border: 1px solid #fecaca;
+}
+
+/* Vista de detalle del prestador */
+
+.prestador-detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+}
+
+.prestador-ficha {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.prestador-ficha__cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-md);
+}
+
+.prestador-ficha__cabecera h2 {
+    margin: 0 0 6px;
+    color: var(--color-primary);
+    font-size: 1.4rem;
+}
+
+.prestador-ficha__atributos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.prestador-atributo {
+    background: var(--color-background);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.prestador-atributo span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.prestador-atributo strong {
+    font-size: 0.95rem;
+    color: var(--color-text);
+}
+
+/* Formulario de prestador */
+
+.formulario-prestador {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.formulario-prestador h3 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 1.2rem;
+}
+
+.formulario-prestador__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.formulario-prestador__telefono {
+    display: grid;
+    grid-template-columns: 90px 100px 1fr;
+    gap: var(--spacing-sm);
+}
+
+.formulario-prestador__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.formulario-prestador__acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 900px) {
+    .prestadores-filtros-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .prestador-detalle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .prestadores-filtros-grid,
+    .formulario-prestador__grid,
+    .formulario-prestador__telefono,
+    .prestador-ficha__atributos {
+        grid-template-columns: 1fr;
+    }
+}
