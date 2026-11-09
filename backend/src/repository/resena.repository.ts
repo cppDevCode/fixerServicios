@@ -22,6 +22,22 @@ export class ResenaRepository {
         return nueva;
     }
 
+    update(
+        id: number,
+        datos: Pick<IResena, 'calificacion' | 'comentario'>
+    ): IResena | undefined {
+        const resena = this.resenas.find((r) => r.id === id);
+
+        if (!resena) {
+            return undefined;
+        }
+
+        resena.calificacion = datos.calificacion;
+        resena.comentario = datos.comentario;
+
+        return { ...resena };
+    }
+
     delete(id: number): boolean {
         const index = this.resenas.findIndex((r) => r.id === id);
         if (index === -1) return false;
