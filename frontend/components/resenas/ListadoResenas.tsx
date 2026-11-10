@@ -1,10 +1,16 @@
 
 import { useEffect, useState } from 'react';
+
 import type { IResena } from '../../interfaces/resena.interface';
 import { obtenerResenas } from '../../services/resena.service';
-import { exportarValoraciones } from '../../services/exportarValoraciones.service';
+import {
+    exportarValoraciones,
+    type FormatoExportacion,
+} from '../../services/exportarValoraciones.service';
+
 import { TarjetaResena } from './TarjetaResena';
 import { Estrellas } from './Estrellas';
+
 import './Resenas.css';
 
 interface ListadoResenasProps {
@@ -29,8 +35,10 @@ export function ListadoResenas({
 
     // Estados de exportación
     const [exportando, setExportando] = useState(false);
+
     const [errorExportacion, setErrorExportacion] =
         useState<string | null>(null);
+
     const [menuExportacionAbierto, setMenuExportacionAbierto] =
         useState(false);
 
@@ -55,16 +63,26 @@ export function ListadoResenas({
                 if (!activo) return;
 
                 setResenas(respuesta.datos);
-                setTotalPaginas(respuesta.meta?.totalPages ?? 0);
-                setPromedio(respuesta.meta?.promedio ?? 0);
-                setTotalResenas(respuesta.meta?.total ?? 0);
+                setTotalPaginas(
+                    respuesta.meta?.totalPages ?? 0
+                );
+                setPromedio(
+                    respuesta.meta?.promedio ?? 0
+                );
+                setTotalResenas(
+                    respuesta.meta?.total ?? 0
+                );
             } catch {
                 if (!activo) return;
 
-                setError('No pudimos cargar las reseñas.');
+                setError(
+                    'No pudimos cargar las reseñas.'
+                );
                 setResenas([]);
             } finally {
-                if (activo) setCargando(false);
+                if (activo) {
+                    setCargando(false);
+                }
             }
         }
 
@@ -75,7 +93,9 @@ export function ListadoResenas({
         };
     }, [prestadorId, pagina, reintento]);
 
-    async function manejarExportacion() {
+    async function manejarExportacion(
+        formato: FormatoExportacion
+    ) {
         if (exportando) return;
 
         setExportando(true);
@@ -83,7 +103,10 @@ export function ListadoResenas({
         setMenuExportacionAbierto(false);
 
         try {
-            await exportarValoraciones(prestadorId);
+            await exportarValoraciones(
+                prestadorId,
+                formato
+            );
         } catch (error) {
             setErrorExportacion(
                 error instanceof Error
@@ -97,7 +120,10 @@ export function ListadoResenas({
 
     if (cargando) {
         return (
-            <p className="estado-resenas" role="status">
+            <p
+                className="estado-resenas"
+                role="status"
+            >
                 Cargando reseñas...
             </p>
         );
@@ -107,9 +133,12 @@ export function ListadoResenas({
         return (
             <section className="estado-resenas estado-resenas--error">
                 <p role="alert">{error}</p>
+
                 <button
                     type="button"
-                    onClick={() => setReintento((n) => n + 1)}
+                    onClick={() =>
+                        setReintento((n) => n + 1)
+                    }
                 >
                     Reintentar
                 </button>
@@ -135,10 +164,14 @@ export function ListadoResenas({
 
                 <div className="resumen-calificaciones__promedio">
                     <strong>
-                        {promedio.toFixed(1).replace('.', ',')}
+                        {promedio
+                            .toFixed(1)
+                            .replace('.', ',')}
                     </strong>
 
-                    <Estrellas calificacion={promedio} />
+                    <Estrellas
+                        calificacion={promedio}
+                    />
 
                     <span>
                         {totalResenas}{' '}
@@ -159,7 +192,7 @@ export function ListadoResenas({
                 ))}
             </div>
 
-            {/* Menú de exportación */}
+            {/* Exportación de valoraciones */}
             <div className="resenas-exportacion">
                 <div className="resenas-exportacion__menu">
                     {menuExportacionAbierto && (
@@ -167,7 +200,9 @@ export function ListadoResenas({
                             <button
                                 type="button"
                                 onClick={() => {
-                                    void manejarExportacion();
+                                    void manejarExportacion(
+                                        'xlsx'
+                                    );
                                 }}
                                 disabled={exportando}
                             >
@@ -176,8 +211,12 @@ export function ListadoResenas({
 
                             <button
                                 type="button"
-                                disabled
-                                title="Próximamente"
+                                onClick={() => {
+                                    void manejarExportacion(
+                                        'pdf'
+                                    );
+                                }}
+                                disabled={exportando}
                             >
                                 PDF (.pdf)
                             </button>
@@ -193,7 +232,9 @@ export function ListadoResenas({
                             )
                         }
                         disabled={exportando}
-                        aria-expanded={menuExportacionAbierto}
+                        aria-expanded={
+                            menuExportacionAbierto
+                        }
                         aria-haspopup="true"
                     >
                         {exportando
@@ -220,7 +261,9 @@ export function ListadoResenas({
                     <button
                         type="button"
                         disabled={pagina === 1}
-                        onClick={() => setPagina((p) => p - 1)}
+                        onClick={() =>
+                            setPagina((p) => p - 1)
+                        }
                     >
                         Anterior
                     </button>
@@ -231,8 +274,12 @@ export function ListadoResenas({
 
                     <button
                         type="button"
-                        disabled={pagina >= totalPaginas}
-                        onClick={() => setPagina((p) => p + 1)}
+                        disabled={
+                            pagina >= totalPaginas
+                        }
+                        onClick={() =>
+                            setPagina((p) => p + 1)
+                        }
                     >
                         Siguiente
                     </button>
