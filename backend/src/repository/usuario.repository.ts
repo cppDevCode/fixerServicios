@@ -85,4 +85,8 @@ export class UsuarioRepository {
     usuariosMock.push(nuevoUsuario);
     return nuevoUsuario;
   }
+
+    async findAllUbicaciones(): Promise<IUbicacion[]> {
+    return ubicacionesMock;
+  }
 }

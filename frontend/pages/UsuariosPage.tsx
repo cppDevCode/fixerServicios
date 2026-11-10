@@ -65,7 +65,7 @@ export const UsuariosPage = () => {
       <div className="search-bar">
         <input
           type="text"
-          placeholder="Buscar por nombre, apellido o email..."
+          placeholder="Buscar por nombre, apellido, email o ciudad..."
           value={search}
           onChange={handleSearch}
           className="search-input"
