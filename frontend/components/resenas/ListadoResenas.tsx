@@ -2,10 +2,10 @@
 import { useEffect, useState } from 'react';
 import type { IResena } from '../../interfaces/resena.interface';
 import { obtenerResenas } from '../../services/resena.service';
+import { exportarValoraciones } from '../../services/exportarValoraciones.service';
 import { TarjetaResena } from './TarjetaResena';
 import { Estrellas } from './Estrellas';
 import './Resenas.css';
-import { exportarValoraciones } from '../../services/exportarValoraciones.service';
 
 interface ListadoResenasProps {
     prestadorId: number;
@@ -26,8 +26,13 @@ export function ListadoResenas({
     const [reintento, setReintento] = useState(0);
     const [promedio, setPromedio] = useState(0);
     const [totalResenas, setTotalResenas] = useState(0);
+
+    // Estados de exportación
     const [exportando, setExportando] = useState(false);
-    const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
+    const [errorExportacion, setErrorExportacion] =
+        useState<string | null>(null);
+    const [menuExportacionAbierto, setMenuExportacionAbierto] =
+        useState(false);
 
     useEffect(() => {
         setPagina(1);
@@ -53,7 +58,6 @@ export function ListadoResenas({
                 setTotalPaginas(respuesta.meta?.totalPages ?? 0);
                 setPromedio(respuesta.meta?.promedio ?? 0);
                 setTotalResenas(respuesta.meta?.total ?? 0);
-
             } catch {
                 if (!activo) return;
 
@@ -71,12 +75,12 @@ export function ListadoResenas({
         };
     }, [prestadorId, pagina, reintento]);
 
-
     async function manejarExportacion() {
         if (exportando) return;
 
         setExportando(true);
         setErrorExportacion(null);
+        setMenuExportacionAbierto(false);
 
         try {
             await exportarValoraciones(prestadorId);
@@ -91,7 +95,6 @@ export function ListadoResenas({
         }
     }
 
-
     if (cargando) {
         return (
             <p className="estado-resenas" role="status">
@@ -104,7 +107,10 @@ export function ListadoResenas({
         return (
             <section className="estado-resenas estado-resenas--error">
                 <p role="alert">{error}</p>
-                <button onClick={() => setReintento((n) => n + 1)}>
+                <button
+                    type="button"
+                    onClick={() => setReintento((n) => n + 1)}
+                >
                     Reintentar
                 </button>
             </section>
@@ -124,25 +130,8 @@ export function ListadoResenas({
             className="listado-resenas-contenedor"
             aria-label="Reseñas del profesional"
         >
-            
-        <header className="resumen-calificaciones">
-            <h2>Opiniones de clientes</h2>
-
-            <button
-                type="button"
-                onClick={() => void manejarExportacion()}
-                disabled={exportando}
-                aria-label="Exportar valoraciones a Excel"
-            >
-                {exportando ? 'Exportando...' : 'Exportar Excel'}
-            </button>
-
-            {errorExportacion && (
-                <p role="alert" className="estado-resenas--error">
-                    {errorExportacion}
-                </p>
-            )}
-
+            <header className="resumen-calificaciones">
+                <h2>Opiniones de clientes</h2>
 
                 <div className="resumen-calificaciones__promedio">
                     <strong>
@@ -153,7 +142,9 @@ export function ListadoResenas({
 
                     <span>
                         {totalResenas}{' '}
-                        {totalResenas === 1 ? 'opinión' : 'opiniones'}
+                        {totalResenas === 1
+                            ? 'opinión'
+                            : 'opiniones'}
                     </span>
                 </div>
             </header>
@@ -167,7 +158,59 @@ export function ListadoResenas({
                     />
                 ))}
             </div>
-            
+
+            {/* Menú de exportación */}
+            <div className="resenas-exportacion">
+                <div className="resenas-exportacion__menu">
+                    {menuExportacionAbierto && (
+                        <div className="resenas-exportacion__opciones">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void manejarExportacion();
+                                }}
+                                disabled={exportando}
+                            >
+                                Excel (.xlsx)
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled
+                                title="Próximamente"
+                            >
+                                PDF (.pdf)
+                            </button>
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        className="resenas-exportacion__boton"
+                        onClick={() =>
+                            setMenuExportacionAbierto(
+                                (abierto) => !abierto
+                            )
+                        }
+                        disabled={exportando}
+                        aria-expanded={menuExportacionAbierto}
+                        aria-haspopup="true"
+                    >
+                        {exportando
+                            ? 'Generando archivo...'
+                            : '↓ Exportar valoraciones ▾'}
+                    </button>
+                </div>
+
+                {errorExportacion && (
+                    <p
+                        role="alert"
+                        className="resenas-exportacion__error"
+                    >
+                        {errorExportacion}
+                    </p>
+                )}
+            </div>
 
             {totalPaginas > 1 && (
                 <nav

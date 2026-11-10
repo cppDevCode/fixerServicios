@@ -1,3 +1,4 @@
+
 /* Contenedor principal */
 
 .listado-resenas-contenedor {
@@ -264,7 +265,7 @@
 .formulario-resena__estrellas {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--spacing-sm);
 }
 
 .formulario-resena__estrella {
@@ -336,7 +337,7 @@
     border: 0;
     border-radius: var(--radius-md);
     background: var(--color-primary);
-    color: white;
+    color: var(--color-surface);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -351,14 +352,171 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
-    .formulario-resena {
-        padding: var(--spacing-md);
-    }
+/* Acciones del formulario */
 
-    .formulario-resena__enviar {
-        width: 100%;
-    }
+.formulario-resena__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.formulario-resena__cancelar {
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-resena__cancelar:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.formulario-resena__cancelar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.formulario-resena__cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Acciones de las tarjetas */
+
+.tarjeta-resena__acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tarjeta-resena__editar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tarjeta-resena__editar:hover {
+    background: var(--color-surface-alt);
+}
+
+.tarjeta-resena__editar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Exportación de valoraciones */
+
+.resenas-exportacion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+}
+
+.resenas-exportacion__menu {
+    position: relative;
+}
+
+.resenas-exportacion__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px var(--spacing-md);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.resenas-exportacion__boton:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.resenas-exportacion__boton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resenas-exportacion__boton:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+/* Menú desplegable */
+
+.resenas-exportacion__opciones {
+    position: absolute;
+    bottom: calc(100% + var(--spacing-sm));
+    right: 0;
+    z-index: 10;
+    min-width: 200px;
+    padding: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+}
+
+.resenas-exportacion__opciones button {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.resenas-exportacion__opciones button:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.resenas-exportacion__opciones button:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: -2px;
+}
+
+.resenas-exportacion__opciones button:disabled {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resenas-exportacion__error {
+    margin: 0;
+    color: var(--color-error);
+    font-size: 0.875rem;
+    text-align: right;
 }
 
 /* Responsive */
@@ -397,71 +555,15 @@
     }
 }
 
-.formulario-resena__acciones {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    align-items: center;
-}
-
-.formulario-resena__cancelar {
-    min-height: 44px;
-    padding: 12px 20px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text);
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.formulario-resena__cancelar:hover:not(:disabled) {
-    background: var(--color-surface-alt);
-}
-
-.formulario-resena__cancelar:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-.formulario-resena__cancelar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.tarjeta-resena__acciones {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.tarjeta-resena__editar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-primary);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.tarjeta-resena__editar:hover {
-    background: var(--color-surface-alt);
-}
-
-.tarjeta-resena__editar:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
 @media (max-width: 480px) {
+    .formulario-resena {
+        padding: var(--spacing-md);
+    }
+
+    .formulario-resena__enviar {
+        width: 100%;
+    }
+
     .formulario-resena__acciones {
         flex-direction: column;
         align-items: stretch;
@@ -471,4 +573,3 @@
         width: 100%;
     }
 }
-
