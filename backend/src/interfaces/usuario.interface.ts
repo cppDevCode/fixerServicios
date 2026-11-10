@@ -6,6 +6,8 @@ export interface IUsuario {
   passwordHash: string; 
   rol: 'USUARIO' | 'PRESTADOR' | 'ADMIN';
   ubicacionId?: string;
+  codigopostal?: string;
+  radio?: number;
   preguntaSecreta?: string;
   respuestaSecretaHash?: string;
   createdAt: string;

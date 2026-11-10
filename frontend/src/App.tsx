@@ -4,6 +4,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { RegistroPage } from './../pages/RegistroPage';
 import { RecuperarPasswordPage } from './../pages/RecuperarPasswordPage'; 
 import { UsuariosPage } from '../pages/UsuariosPage';
+import { UsuarioDetallePage } from '../pages/UsuarioDetallePage';
 import { PrestadoresPlaceholder, ResenasPlaceholder } from '../pages/Placeholders';
 
 function App() {
@@ -13,12 +14,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegistroPage />} />
         <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
+        
         <Route element={<Layout />}>
           {/* Redirección de la ruta raíz al módulo de usuarios */}
           <Route path="/" element={<Navigate to="/usuarios" replace />} />
           <Route path="/prestadores" element={<PrestadoresPlaceholder />} />
           <Route path="/resenas" element={<ResenasPlaceholder />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
+          <Route path="/usuarios/:id" element={<UsuarioDetallePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
