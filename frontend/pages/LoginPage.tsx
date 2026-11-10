@@ -67,7 +67,7 @@ export const LoginPage = () => {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              placeholder="bruna@example.com"
+              placeholder="nombre@mail.com"
               style={{ width: '100%', padding: '0.75rem', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '0.95rem' }} 
             />
           </div>
@@ -78,7 +78,7 @@ export const LoginPage = () => {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              placeholder="123456"
+              placeholder="••••••••"
               style={{ width: '100%', padding: '0.75rem', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '0.95rem' }} 
             />
           </div>

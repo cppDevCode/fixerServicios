@@ -91,22 +91,20 @@ export class UsuarioService {
     };
   }
 
-  // Lógica de Recuperación
+    // Lógica de Recuperación
   async obtenerPreguntaSecreta(email: string) {
     const user = await this.repo.findByEmail(email);
     if (!user) throw new Error('Usuario no encontrado');
-    return { preguntaSecreta: user.preguntaSecreta };
+    return { id: user.id, preguntaSecreta: user.preguntaSecreta };
   }
 
   async recuperarPassword(email: string, respuestaPlana: string) {
     const user = await this.repo.findByEmail(email);
     if (!user) throw new Error('Usuario no encontrado');
 
-   
     if (user.respuestaSecretaHash !== respuestaPlana) {
       throw new Error('Respuesta secreta incorrecta');
     }
 
     return { mensaje: 'Contraseña restablecida exitosamente' };
-  }
-}
+  }}
