@@ -69,3 +69,26 @@ export async function actualizarResena(
 
     return resultado;
 }
+
+
+export async function obtenerTodasLasResenas(
+    prestadorId: number
+): Promise<IResena[]> {
+    const limite = 100;
+    const primeraPagina = await obtenerResenas(prestadorId, 1, limite);
+
+    const resenas = [...primeraPagina.datos];
+    const totalPaginas = primeraPagina.meta?.totalPages ?? 1;
+
+    for (let pagina = 2; pagina <= totalPaginas; pagina++) {
+        const respuesta = await obtenerResenas(
+            prestadorId,
+            pagina,
+            limite
+        );
+
+        resenas.push(...respuesta.datos);
+    }
+
+    return resenas;
+}

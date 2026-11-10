@@ -5,6 +5,7 @@ import { obtenerResenas } from '../../services/resena.service';
 import { TarjetaResena } from './TarjetaResena';
 import { Estrellas } from './Estrellas';
 import './Resenas.css';
+import { exportarValoraciones } from '../../services/exportarValoraciones.service';
 
 interface ListadoResenasProps {
     prestadorId: number;
@@ -25,6 +26,8 @@ export function ListadoResenas({
     const [reintento, setReintento] = useState(0);
     const [promedio, setPromedio] = useState(0);
     const [totalResenas, setTotalResenas] = useState(0);
+    const [exportando, setExportando] = useState(false);
+    const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
 
     useEffect(() => {
         setPagina(1);
@@ -68,6 +71,27 @@ export function ListadoResenas({
         };
     }, [prestadorId, pagina, reintento]);
 
+
+    async function manejarExportacion() {
+        if (exportando) return;
+
+        setExportando(true);
+        setErrorExportacion(null);
+
+        try {
+            await exportarValoraciones(prestadorId);
+        } catch (error) {
+            setErrorExportacion(
+                error instanceof Error
+                    ? error.message
+                    : 'No se pudo exportar el reporte de valoraciones.'
+            );
+        } finally {
+            setExportando(false);
+        }
+    }
+
+
     if (cargando) {
         return (
             <p className="estado-resenas" role="status">
@@ -100,8 +124,25 @@ export function ListadoResenas({
             className="listado-resenas-contenedor"
             aria-label="Reseñas del profesional"
         >
-            <header className="resumen-calificaciones">
-                <h2>Opiniones de clientes</h2>
+            
+        <header className="resumen-calificaciones">
+            <h2>Opiniones de clientes</h2>
+
+            <button
+                type="button"
+                onClick={() => void manejarExportacion()}
+                disabled={exportando}
+                aria-label="Exportar valoraciones a Excel"
+            >
+                {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
+
+            {errorExportacion && (
+                <p role="alert" className="estado-resenas--error">
+                    {errorExportacion}
+                </p>
+            )}
+
 
                 <div className="resumen-calificaciones__promedio">
                     <strong>
