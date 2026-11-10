@@ -46,3 +46,49 @@ export async function crearResena(
 
     return resultado;
 }
+
+export async function actualizarResena(
+    id: number,
+    datos: Pick<ICrearResena, 'calificacion' | 'comentario'>
+): Promise<RespuestaApi<IResena>> {
+    const respuesta = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos),
+    });
+
+    const resultado = await respuesta.json() as RespuestaApi<IResena>;
+
+    if (!respuesta.ok) {
+        throw new Error(
+            resultado.msj || 'No se pudo actualizar la reseña'
+        );
+    }
+
+    return resultado;
+}
+
+
+export async function obtenerTodasLasResenas(
+    prestadorId: number
+): Promise<IResena[]> {
+    const limite = 100;
+    const primeraPagina = await obtenerResenas(prestadorId, 1, limite);
+
+    const resenas = [...primeraPagina.datos];
+    const totalPaginas = primeraPagina.meta?.totalPages ?? 1;
+
+    for (let pagina = 2; pagina <= totalPaginas; pagina++) {
+        const respuesta = await obtenerResenas(
+            prestadorId,
+            pagina,
+            limite
+        );
+
+        resenas.push(...respuesta.datos);
+    }
+
+    return resenas;
+}
