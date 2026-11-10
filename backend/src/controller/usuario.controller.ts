@@ -57,6 +57,34 @@ export class UsuarioController {
     }
   };
 
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { nombre, apellido, email, password, preguntaSecreta, respuestaSecreta } = req.body;
+      
+      if (!nombre || !apellido || !email || !password) {
+        return res.status(400).json({ code: 400, msg: 'Faltan datos obligatorios', data: null });
+      }
+
+      const nuevoUsuario = await this.service.crearUsuario({
+        nombre,
+        apellido,
+        email,
+        passwordHash: password,
+        rol: 'USUARIO',
+        preguntaSecreta,
+        respuestaSecretaHash: respuestaSecreta,
+        ubicacionId: undefined,
+      });
+
+      res.status(201).json({ code: 201, msg: 'Usuario registrado exitosamente', data: nuevoUsuario });
+    } catch (error: any) {
+      if (error.message === 'El email ya está registrado') {
+        return res.status(400).json({ code: 400, msg: error.message, data: null });
+      }
+      next(error);
+    }
+  };
+  
   // --- MÉTODOS DE AUTH ---
 
   login = async (req: Request, res: Response, next: NextFunction) => {

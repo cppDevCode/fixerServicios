@@ -62,6 +62,14 @@ export class UsuarioService {
     return updated;
   }
 
+  async crearUsuario(data: Omit<IUsuario, 'id' | 'createdAt'>) {
+    const existing = await this.repo.findByEmail(data.email);
+    if (existing) {
+      throw new Error('El email ya está registrado');
+    }
+    return await this.repo.create(data);
+  }
+  
   // Lógica de Autenticación
   async login(email: string, passwordPlana: string) {
     const user = await this.repo.findByEmail(email);

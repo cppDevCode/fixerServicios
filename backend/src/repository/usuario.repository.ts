@@ -74,4 +74,15 @@ export class UsuarioRepository {
   async findUbicacionById(id: string): Promise<IUbicacion | undefined> {
     return ubicacionesMock.find(u => u.id === id);
   }
+
+  async create(data: Omit<IUsuario, 'id' | 'createdAt'>): Promise<IUsuario> {
+    const nuevoId = (usuariosMock.length + 1).toString();
+    const nuevoUsuario: IUsuario = {
+      ...data,
+      id: nuevoId,
+      createdAt: new Date().toISOString(),
+    };
+    usuariosMock.push(nuevoUsuario);
+    return nuevoUsuario;
+  }
 }
