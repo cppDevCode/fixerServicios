@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "../backend/node_modules/.bin/vitest run",
+    "test:unit": "../backend/node_modules/.bin/vitest run unit.test",
+    "test:integration": "../backend/node_modules/.bin/vitest run integration.test",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "lucide-react": "^1.70.0",
