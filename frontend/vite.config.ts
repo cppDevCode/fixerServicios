@@ -1,6 +1,10 @@
-
+import { existsSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+
+const proxyTarget =
+  process.env.VITE_PROXY_TARGET ||
+  (existsSync('/.dockerenv') ? 'http://backend:3000' : 'http://localhost:3000');
 
 export default defineConfig({
   plugins: [react()],
@@ -9,7 +13,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: proxyTarget,
         changeOrigin: true,
       },
     },
