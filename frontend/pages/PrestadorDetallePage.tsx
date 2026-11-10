@@ -10,6 +10,9 @@ import {
     obtenerCategorias,
     obtenerPrestadorPorId,
 } from '../services/prestador.service';
+import { ListadoResenas } from '../components/resenas/ListadoResenas';
+import { FormularioResena } from '../components/resenas/FormularioResena';
+import type { IResena } from '../interfaces/resena.interface';
 
 export function PrestadorDetallePage() {
     const { id } = useParams<{ id: string }>();
@@ -22,6 +25,8 @@ export function PrestadorDetallePage() {
     const [cargando, setCargando] = useState(true);
     const [eliminando, setEliminando] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [versionResenas, setVersionResenas] = useState(0);
+    const [resenaEditar, setResenaEditar] = useState<IResena | null>(null);
 
     useEffect(() => {
         let activo = true;
@@ -94,6 +99,11 @@ export function PrestadorDetallePage() {
             setEliminando(false);
         }
     };
+    
+    const actualizarResenas = () => {
+        setVersionResenas((version) => version + 1);
+        setResenaEditar(null);
+    };
 
     return (
         <div className="prestadores-pagina">
@@ -146,94 +156,113 @@ export function PrestadorDetallePage() {
                     </Link>
                 </div>
             ) : (
-                <div className="prestador-detalle-grid">
-                    <article
-                        className="prestador-ficha"
-                        aria-label="Ficha técnica del prestador"
-                    >
-                        <div className="prestador-ficha__cabecera">
-                            <div>
-                                <h2>
-                                    {prestador.nombre} {prestador.apellido}
-                                </h2>
-                                <span className="prestador-subtexto">
-                                    ID Profesional #{prestador.id}
+                    <>
+                        <div className="prestador-detalle-grid">
+                        <article
+                            className="prestador-ficha"
+                            aria-label="Ficha técnica del prestador"
+                        >
+                            <div className="prestador-ficha__cabecera">
+                                <div>
+                                    <h2>
+                                        {prestador.nombre} {prestador.apellido}
+                                    </h2>
+                                    <span className="prestador-subtexto">
+                                        ID Profesional #{prestador.id}
+                                    </span>
+                                </div>
+
+                                <span className="badge-prestador badge-prestador--rubro">
+                                    {prestador.categoriaId}
                                 </span>
                             </div>
 
-                            <span className="badge-prestador badge-prestador--rubro">
-                                {prestador.categoriaId}
-                            </span>
-                        </div>
+                            <div className="prestador-ficha__atributos">
+                                <div className="prestador-atributo">
+                                    <span>Matrícula</span>
+                                    <strong>
+                                        {prestador.matricula ?? 'Sin matrícula'}
+                                    </strong>
+                                </div>
 
-                        <div className="prestador-ficha__atributos">
-                            <div className="prestador-atributo">
-                                <span>Matrícula</span>
-                                <strong>
-                                    {prestador.matricula ?? 'Sin matrícula'}
-                                </strong>
+                                <div className="prestador-atributo">
+                                    <span>Experiencia</span>
+                                    <strong>
+                                        {prestador.aniosExperiencia} años
+                                    </strong>
+                                </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Teléfono de contacto</span>
+                                    <strong>
+                                        {formatearTelefonoPrestador(
+                                            prestador.telefono
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Garantía de trabajo</span>
+                                    <strong>
+                                        {prestador.ofreceGarantia
+                                            ? 'Sí, ofrece garantía'
+                                            : 'No ofrece garantía'}
+                                    </strong>
+                                </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Calificación promedio</span>
+                                    <strong>
+                                        ★{' '}
+                                        {prestador.ratingPromedio !== undefined
+                                            ? prestador.ratingPromedio.toFixed(1)
+                                            : 'Sin calificaciones'}
+                                    </strong>
+                                </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Rubro principal</span>
+                                    <strong>{prestador.categoriaId}</strong>
+                                </div>
                             </div>
 
                             <div className="prestador-atributo">
-                                <span>Experiencia</span>
-                                <strong>
-                                    {prestador.aniosExperiencia} años
-                                </strong>
+                                <span>Acerca del profesional</span>
+                                <p style={{ margin: '6px 0 0', lineHeight: 1.5 }}>
+                                    {prestador.acercaDe ||
+                                        'Sin descripción registrada.'}
+                                </p>
                             </div>
+                        </article>
 
-                            <div className="prestador-atributo">
-                                <span>Teléfono de contacto</span>
-                                <strong>
-                                    {formatearTelefonoPrestador(
-                                        prestador.telefono
-                                    )}
-                                </strong>
-                            </div>
+                        <FormularioPrestador
+                            key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}`}
+                            categorias={categorias}
+                            prestadorInicial={prestador}
+                            titulo="Editar datos del prestador"
+                            textoBoton="Guardar cambios"
+                            onGuardado={(actualizado) => setPrestador(actualizado)}
+                        />
+                    </div>
 
-                            <div className="prestador-atributo">
-                                <span>Garantía de trabajo</span>
-                                <strong>
-                                    {prestador.ofreceGarantia
-                                        ? 'Sí, ofrece garantía'
-                                        : 'No ofrece garantía'}
-                                </strong>
-                            </div>
+                    <section aria-label="Reseñas y calificaciones del profesional">
+                        <FormularioResena
+                            key={`formulario-${prestador.id}-${resenaEditar?.id ?? 'nuevo'}`}
+                            prestadorId={prestador.id}
+                            usuarioId={2} // Temporal: reemplazar cuando exista autenticación
+                            resenaEditar={resenaEditar}
+                            onResenaGuardada={actualizarResenas}
+                            onCancelarEdicion={() => setResenaEditar(null)}
+                        />
 
-                            <div className="prestador-atributo">
-                                <span>Calificación promedio</span>
-                                <strong>
-                                    ★{' '}
-                                    {prestador.ratingPromedio !== undefined
-                                        ? prestador.ratingPromedio.toFixed(1)
-                                        : 'Sin calificaciones'}
-                                </strong>
-                            </div>
-
-                            <div className="prestador-atributo">
-                                <span>Rubro principal</span>
-                                <strong>{prestador.categoriaId}</strong>
-                            </div>
-                        </div>
-
-                        <div className="prestador-atributo">
-                            <span>Acerca del profesional</span>
-                            <p style={{ margin: '6px 0 0', lineHeight: 1.5 }}>
-                                {prestador.acercaDe ||
-                                    'Sin descripción registrada.'}
-                            </p>
-                        </div>
-                    </article>
-
-                    <FormularioPrestador
-                        key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}`}
-                        categorias={categorias}
-                        prestadorInicial={prestador}
-                        titulo="Editar datos del prestador"
-                        textoBoton="Guardar cambios"
-                        onGuardado={(actualizado) => setPrestador(actualizado)}
-                    />
-                </div>
-            )}
-        </div>
-    );
+                        <ListadoResenas
+                            key={`${prestador.id}-${versionResenas}`}
+                            prestadorId={prestador.id}
+                            onEditarResena={setResenaEditar}
+                        />
+                    </section>
+                </>
+                )}
+            </div>
+        );
 }
