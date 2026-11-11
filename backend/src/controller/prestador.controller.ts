@@ -49,7 +49,7 @@ export class PrestadorController {
     }
 
     public crear = (req: Request, res: Response): void => {
-        const {nombre, apellido, categoriaId, aniosExperiencia, acercaDe, ofreceGarantia, telefono} = req.body;
+        const {nombre, apellido, fotoUrl, categoriaId, aniosExperiencia, acercaDe, ofreceGarantia, telefono} = req.body;
 
         if (!nombre || !apellido || !categoriaId) {
             res.status(400).json({
@@ -60,9 +60,15 @@ export class PrestadorController {
             return;
         }
 
+        const fotoLimpia =
+            typeof fotoUrl === 'string' && fotoUrl.trim() !== ''
+                ? fotoUrl.trim()
+                : undefined;
+
         const nuevo: IPrestador = this.service.crear({
             nombre,
             apellido,
+            fotoUrl: fotoLimpia,
             matricula: req.body.matricula,
             aniosExperiencia: Number(aniosExperiencia) || 0,
             acercaDe: acercaDe || '',
