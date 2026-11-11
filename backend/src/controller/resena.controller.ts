@@ -1,3 +1,4 @@
+
 import { Request, Response } from "express";
 import { IResena } from "../interfaces/resena.interface";
 import { RespuestaApi } from "../interfaces/respuestaApi.interface";
@@ -9,17 +10,28 @@ export class ResenaController {
     public listar = (req: Request, res: Response): void => {
         const { prestadorId, page, limit } = req.query;
 
+        const idPrestador = prestadorId
+            ? Number(prestadorId)
+            : undefined;
+
         const { items, meta } = this.service.listar({
-            prestadorId: prestadorId ? Number(prestadorId) : undefined,
+            prestadorId: idPrestador,
             page: page ? Number(page) : undefined,
             limit: limit ? Number(limit) : undefined
         });
+
+        const promedio = idPrestador !== undefined
+            ? this.service.obtenerRating(idPrestador)
+            : undefined;
 
         const respuesta: RespuestaApi<IResena[]> = {
             codigo: 200,
             msj: 'Reseñas obtenidas correctamente',
             datos: items,
-            meta
+            meta: {
+                ...meta,
+                ...(promedio !== undefined ? { promedio } : {})
+            }
         };
 
         res.status(200).json(respuesta);
@@ -63,6 +75,43 @@ export class ResenaController {
                 });
                 return;
             }
+            throw error;
+        }
+    }
+
+    public actualizar = (req: Request, res: Response): void => {
+        try {
+            const id = Number(req.params.id);
+
+            const resenaActualizada = this.service.actualizar(
+                id,
+                req.body ?? {}
+            );
+
+            if (!resenaActualizada) {
+                res.status(404).json({
+                    codigo: 404,
+                    msj: `Reseña con id ${id} no encontrada`,
+                    datos: null
+                });
+                return;
+            }
+
+            res.status(200).json({
+                codigo: 200,
+                msj: 'Reseña actualizada exitosamente',
+                datos: resenaActualizada
+            });
+        } catch (error) {
+            if (error instanceof ErrorValidacion) {
+                res.status(400).json({
+                    codigo: 400,
+                    msj: error.message,
+                    datos: null
+                });
+                return;
+            }
+
             throw error;
         }
     }

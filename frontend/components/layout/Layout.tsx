@@ -24,6 +24,8 @@ export const Layout = () => {
             <li><Link to="/prestadores">Prestadores</Link></li>
             <li><Link to="/resenas">Reseñas</Link></li>
             <li><Link to="/usuarios">Usuarios</Link></li>
+            <li><Link to="/prestadores">1. Prestadores</Link></li>
+            <li><Link to="/usuarios">3. Usuarios</Link></li>
           </ul>
         </aside>
 

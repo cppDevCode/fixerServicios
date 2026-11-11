@@ -1,0 +1,575 @@
+
+/* Contenedor principal */
+
+.listado-resenas-contenedor {
+    width: 100%;
+    max-width: 850px;
+    min-width: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+    color: var(--color-text);
+}
+
+/* Resumen de calificaciones */
+
+.resumen-calificaciones {
+    min-width: 0;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-sizing: border-box;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.resumen-calificaciones h2 {
+    margin: 0 0 var(--spacing-md);
+    color: var(--color-primary);
+    font-size: 1.375rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.resumen-calificaciones__promedio {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.resumen-calificaciones__promedio strong {
+    color: var(--color-primary);
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.resumen-calificaciones__promedio > span {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Estrellas de calificación */
+
+.estrellas {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+}
+
+.estrella {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    font-size: 22px;
+    line-height: 22px;
+}
+
+.estrella__vacia,
+.estrella__relleno {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.estrella__vacia {
+    width: 100%;
+    color: var(--color-rating-empty);
+}
+
+.estrella__relleno {
+    color: var(--color-rating);
+}
+
+/* Listado de reseñas */
+
+.listado-resenas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    min-width: 0;
+}
+
+/* Tarjetas individuales */
+
+.tarjeta-resena {
+    min-width: 0;
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: box-shadow 0.2s ease;
+}
+
+.tarjeta-resena:hover {
+    box-shadow: 0 4px 18px rgb(40 96 136 / 9%);
+}
+
+.tarjeta-resena__encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.tarjeta-resena__encabezado span {
+    color: var(--color-primary);
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.tarjeta-resena__encabezado time {
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+}
+
+.tarjeta-resena p {
+    margin: var(--spacing-md) 0 0;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+/* Paginación */
+
+.paginacion-resenas {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.paginacion-resenas button {
+    min-height: 44px;
+    padding: 10px 18px;
+    background: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    color: var(--color-surface);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.paginacion-resenas button:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+.paginacion-resenas button:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.paginacion-resenas button:disabled {
+    background: var(--color-surface-alt);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+
+.paginacion-resenas span {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Estados: carga, vacío y error */
+
+.estado-resenas {
+    min-width: 0;
+    padding: var(--spacing-xl);
+    box-sizing: border-box;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.estado-resenas--error {
+    color: var(--color-error);
+}
+
+.estado-resenas button {
+    min-height: 44px;
+    margin-top: var(--spacing-md);
+    padding: 10px 18px;
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--color-surface);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.estado-resenas button:hover {
+    background: var(--color-primary-hover);
+}
+
+.estado-resenas button:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+/* Formulario de reseñas */
+
+.formulario-resena {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.formulario-resena h3 {
+    margin: 0;
+    color: var(--color-text);
+}
+
+.formulario-resena__calificacion {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.formulario-resena__calificacion legend {
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.formulario-resena__estrellas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.formulario-resena__estrella {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-rating-empty);
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.formulario-resena__estrella--activa {
+    color: var(--color-rating);
+}
+
+.formulario-resena__estrella:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.formulario-resena__estrella:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.formulario-resena label {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.formulario-resena textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    resize: vertical;
+}
+
+.formulario-resena textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.formulario-resena__error {
+    margin: 0;
+    color: var(--color-error);
+}
+
+.formulario-resena__exito {
+    margin: 0;
+    color: var(--color-success);
+}
+
+.formulario-resena__enviar {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-surface);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-resena__enviar:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+.formulario-resena__enviar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Acciones del formulario */
+
+.formulario-resena__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.formulario-resena__cancelar {
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-resena__cancelar:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.formulario-resena__cancelar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.formulario-resena__cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Acciones de las tarjetas */
+
+.tarjeta-resena__acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tarjeta-resena__editar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tarjeta-resena__editar:hover {
+    background: var(--color-surface-alt);
+}
+
+.tarjeta-resena__editar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Exportación de valoraciones */
+
+.resenas-exportacion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+}
+
+.resenas-exportacion__menu {
+    position: relative;
+}
+
+.resenas-exportacion__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px var(--spacing-md);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.resenas-exportacion__boton:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.resenas-exportacion__boton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resenas-exportacion__boton:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+/* Menú desplegable */
+
+.resenas-exportacion__opciones {
+    position: absolute;
+    bottom: calc(100% + var(--spacing-sm));
+    right: 0;
+    z-index: 10;
+    min-width: 200px;
+    padding: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+}
+
+.resenas-exportacion__opciones button {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.resenas-exportacion__opciones button:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+}
+
+.resenas-exportacion__opciones button:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: -2px;
+}
+
+.resenas-exportacion__opciones button:disabled {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resenas-exportacion__error {
+    margin: 0;
+    color: var(--color-error);
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+    .resumen-calificaciones {
+        padding: var(--spacing-md);
+    }
+
+    .resumen-calificaciones h2 {
+        font-size: 1.1875rem;
+    }
+
+    .resumen-calificaciones__promedio {
+        gap: var(--spacing-sm);
+    }
+
+    .resumen-calificaciones__promedio strong {
+        font-size: 2.25rem;
+    }
+
+    .resumen-calificaciones__promedio > span {
+        flex-basis: 100%;
+    }
+
+    .tarjeta-resena {
+        padding: var(--spacing-md);
+    }
+
+    .tarjeta-resena__encabezado {
+        align-items: flex-start;
+    }
+
+    .paginacion-resenas {
+        gap: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .formulario-resena {
+        padding: var(--spacing-md);
+    }
+
+    .formulario-resena__enviar {
+        width: 100%;
+    }
+
+    .formulario-resena__acciones {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formulario-resena__cancelar {
+        width: 100%;
+    }
+}

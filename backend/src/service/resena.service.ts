@@ -86,6 +86,42 @@ export class ResenaService {
         });
     }
 
+    actualizar(
+        id: number,
+        datos: Pick<IResena, 'calificacion' | 'comentario'>
+        ): IResena | undefined {
+        if (!esIdValido(id)) {
+            throw new ErrorValidacion('El ID de la reseña es inválido');
+        }
+
+        const { calificacion, comentario } = datos;
+
+        if (
+            typeof calificacion !== 'number' ||
+            !Number.isInteger(calificacion) ||
+            calificacion < 1 ||
+            calificacion > 5
+        ) {
+            throw new ErrorValidacion(
+                'La calificación debe ser un entero entre 1 y 5'
+            );
+        }
+
+        if (
+            typeof comentario !== 'string' ||
+            comentario.trim() === ''
+        ) {
+            throw new ErrorValidacion(
+                'El comentario es obligatorio'
+            );
+        }
+
+        return this.repository.update(id, {
+            calificacion,
+            comentario: comentario.trim(),
+        });
+    }
+
     eliminar(id: number): boolean {
         return this.repository.delete(id);
     }
