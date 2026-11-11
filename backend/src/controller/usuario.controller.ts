@@ -57,6 +57,34 @@ export class UsuarioController {
     }
   };
 
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { nombre, apellido, email, password, preguntaSecreta, respuestaSecreta } = req.body;
+      
+      if (!nombre || !apellido || !email || !password) {
+        return res.status(400).json({ code: 400, msg: 'Faltan datos obligatorios', data: null });
+      }
+
+      const nuevoUsuario = await this.service.crearUsuario({
+        nombre,
+        apellido,
+        email,
+        passwordHash: password,
+        rol: 'USUARIO',
+        preguntaSecreta,
+        respuestaSecretaHash: respuestaSecreta,
+        ubicacionId: undefined,
+      });
+
+      res.status(201).json({ code: 201, msg: 'Usuario registrado exitosamente', data: nuevoUsuario });
+    } catch (error: any) {
+      if (error.message === 'El email ya está registrado') {
+        return res.status(400).json({ code: 400, msg: error.message, data: null });
+      }
+      next(error);
+    }
+  };
+  
   // --- MÉTODOS DE AUTH ---
 
   login = async (req: Request, res: Response, next: NextFunction) => {
@@ -79,7 +107,7 @@ export class UsuarioController {
         data: result
       });
     } catch (error: unknown) {
-      // Si es error de credenciales, devolvemos 401
+      
       if (error instanceof Error && error.message === 'Credenciales inválidas') {
         return res.status(401).json({
           code: 401,
@@ -92,28 +120,18 @@ export class UsuarioController {
     }
   };
 
-  getPreguntaSecreta = async (req: Request, res: Response, next: NextFunction) => {
+    getPreguntaSecreta = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
-
       const result = await this.service.obtenerPreguntaSecreta(email);
-
-      res.status(200).json({
-        code: 200,
-        msg: 'Pregunta obtenida',
-        data: result
-      });
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message === 'Usuario no encontrado') {
-        return res.status(404).json({
-          code: 404,
-          msg: error.message,
-          data: null
-        });
+      res.status(200).json({ code: 200, msg: 'Pregunta obtenida', data: result });
+    } catch (error: any) {
+      if (error.message === 'Usuario no encontrado') {
+        return res.status(404).json({ code: 404, msg: error.message, data: null });
       }
-
       next(error);
     }
+
   };
 
   recuperarPassword = async (req: Request, res: Response, next: NextFunction) => {
@@ -128,6 +146,23 @@ export class UsuarioController {
         data: result
       });
     } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  cambiarPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, nuevaPassword } = req.body;
+      if (!email || !nuevaPassword) {
+        return res.status(400).json({ code: 400, msg: 'Faltan datos obligatorios', data: null });
+      }
+      
+      const user = await this.service.obtenerPreguntaSecreta(email); 
+    
+      await this.service.actualizarUsuario(user.id, { passwordHash: nuevaPassword });
+      
+      res.status(200).json({ code: 200, msg: 'Contraseña actualizada exitosamente', data: null });
+    } catch (error: any) {
       next(error);
     }
   };

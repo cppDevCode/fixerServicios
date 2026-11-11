@@ -8,10 +8,11 @@ const controller = new UsuarioController();
 router.post('/auth/login', controller.login);
 router.post('/auth/pregunta-secreta', controller.getPreguntaSecreta);
 router.post('/auth/recuperar-password', controller.recuperarPassword);
-
+router.post('/auth/cambiar-password', controller.cambiarPassword);
 // Rutas de Usuarios 
 router.get('/usuarios', controller.getAll);
 router.get('/usuarios/:id', controller.getById);
+router.post('/usuarios', controller.create);
 router.patch('/usuarios/:id', controller.update);
 
 export default router;

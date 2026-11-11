@@ -1,5 +1,7 @@
 // frontend/pages/UsuariosPage.tsx
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 
 interface IUsuario {
   id: string;
@@ -19,7 +21,6 @@ export const UsuariosPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dejamos la URL directa para evitar el error de import.meta.env por ahora
   const API_URL = 'http://localhost:3000/api/v1';
 
   useEffect(() => {
@@ -49,11 +50,27 @@ export const UsuariosPage = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [page, search]); // Quitamos API_URL de las dependencias porque ahora es una constante fija
+  }, [page, search]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     setPage(1);
+  };
+
+  const handleExport = () => {
+    const datosParaExportar = usuarios.map(u => ({
+      'ID': u.id,
+      'Nombre': u.nombre,
+      'Apellido': u.apellido,
+      'Email': u.email,
+      'Rol': u.rol,
+      'Ubicación ID': u.ubicacionId || '-'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(datosParaExportar);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
+    XLSX.writeFile(workbook, 'Padron_Usuarios.xlsx');
   };
 
   return (
@@ -63,14 +80,21 @@ export const UsuariosPage = () => {
         <p>Administrá los usuarios registrados en la plataforma.</p>
       </div>
 
-      <div className="search-bar">
+      <div className="search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
         <input
           type="text"
-          placeholder="Buscar por nombre, apellido o email..."
+          placeholder="Buscar por nombre, email o ciudad..."
           value={search}
           onChange={handleSearch}
           className="search-input"
+          style={{ marginBottom: 0 }}
         />
+        <button 
+          onClick={handleExport}
+          style={{ padding: '0.75rem 1.5rem', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          📥 Exportar a Excel
+        </button>
       </div>
 
       {loading ? (
@@ -92,14 +116,16 @@ export const UsuariosPage = () => {
             <tbody>
               {usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>
-                    No se encontraron usuarios.
-                  </td>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No se encontraron usuarios.</td>
                 </tr>
               ) : (
                 usuarios.map((user) => (
                   <tr key={user.id}>
-                    <td>{user.id}</td>
+                    <td>
+                      <Link to={`/usuarios/${user.id}`} style={{ color: '#3B82F6', textDecoration: 'none', fontWeight: '600' }}>
+                        {user.id}
+                      </Link>
+                    </td>
                     <td>{user.nombre} {user.apellido}</td>
                     <td>{user.email}</td>
                     <td>
