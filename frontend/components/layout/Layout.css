@@ -1,3 +1,121 @@
+/* --- ESTILOS DEL LAYOUT GENERAL --- */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #F8FAFC;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #334155;
+}
+
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.global-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #3B82F6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  cursor: pointer;
+}
+
+.user-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn-header-login {
+  background-color: #FFF7ED;
+  color: #F97316;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-header-login:hover {
+  background-color: #FFEDD5;
+}
+
+.main-body {
+  display: flex;
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #FFFFFF;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #E2E8F0;
+  min-height: calc(100vh - 70px);
+}
+
+.sidebar h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94A3B8;
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  font-weight: 600;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 0.25rem;
+}
+
+.sidebar li a {
+  display: block;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: #475569;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.sidebar li a:hover {
+  background-color: #FFF7ED;
+  color: #F97316;
+}
+
+.content-area {
+  flex: 1;
+  padding: 2rem;
+  background-color: #F8FAFC;
+}
+
+.global-footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #FFFFFF;
+  border-top: 1px solid #E2E8F0;
+  color: #94A3B8;
+  font-size: 0.85rem;
+}
 /* Estilos para la página de Usuarios */
 .usuarios-container {
   background-color: #FFFFFF;
@@ -128,4 +246,145 @@
 .btn-pagination:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+/* Estilos perfil --- */
+.perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.perfil-title {
+  color: #1E293B;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.perfil-back-link {
+  color: #64748B;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.perfil-back-link:hover {
+  color: #F97316;
+}
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.perfil-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.perfil-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.perfil-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.perfil-input:focus {
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.perfil-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-save {
+  flex: 1;
+  padding: 0.85rem;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: #2563EB;
+}
+
+.btn-save:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.85rem;
+  background-color: #F1F5F9;
+  color: #475569;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #E2E8F0;
+}
+
+/* Boton exportar */
+.btn-export {
+  padding: 0.75rem 1.5rem;
+  background-color: #10B981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-export:hover {
+  background-color: #059669;
+}
+
+/* Barra de búsqueda  */
+.search-bar-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-bar-flex .search-input {
+  margin-bottom: 0;
+  max-width: 400px;
+}
+
+/* Link */
+.usuario-link {
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 600;
 }
