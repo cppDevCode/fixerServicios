@@ -52,6 +52,7 @@ export function ListadoPrestadores({
 
     const [formatoExportacion, setFormatoExportacion] =
         useState<FormatoExportacion>('pdf');
+    const [exportando, setExportando] = useState(false);
     const [mensajeExportacion, setMensajeExportacion] = useState<string | null>(
         null
     );
@@ -144,14 +145,22 @@ export function ListadoPrestadores({
         navigate(`/prestadores/${id}`);
     };
 
-    const manejarExportacion = () => {
-        const resultado = exportarCatalogoPrestadores(
-            prestadores,
-            formatoExportacion
-        );
-        setMensajeExportacion(
-            `Catálogo exportado (${resultado.nombreArchivo} - ${resultado.totalRegistros} registros).`
-        );
+    const manejarExportacion = async () => {
+        if (exportando) return;
+        setExportando(true);
+        setMensajeExportacion(null);
+
+        try {
+            const resultado = await exportarCatalogoPrestadores(
+                prestadores,
+                formatoExportacion
+            );
+            setMensajeExportacion(
+                `Catálogo exportado (${resultado.nombreArchivo} - ${resultado.totalRegistros} registros).`
+            );
+        } finally {
+            setExportando(false);
+        }
     };
 
     const limpiarFiltros = () => {
@@ -293,10 +302,18 @@ export function ListadoPrestadores({
                         <button
                             type="button"
                             className="btn-prestador btn-prestador--primario"
-                            onClick={manejarExportacion}
-                            disabled={cargando || prestadores.length === 0}
+                            onClick={() => {
+                                void manejarExportacion();
+                            }}
+                            disabled={
+                                cargando ||
+                                exportando ||
+                                prestadores.length === 0
+                            }
                         >
-                            Exportar Catálogo
+                            {exportando
+                                ? 'Exportando...'
+                                : 'Exportar Catálogo'}
                         </button>
                     </div>
                 </div>
