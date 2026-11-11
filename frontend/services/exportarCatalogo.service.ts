@@ -1,3 +1,4 @@
+import ExcelJS from 'exceljs';
 import type {
     FormatoExportacion,
     IPrestador,
@@ -5,7 +6,7 @@ import type {
 } from '../interfaces/prestador.interface';
 
 export interface ResultadoArchivoCatalogo {
-    contenido: string;
+    contenido: string | Uint8Array;
     mimeType: string;
     nombreArchivo: string;
     totalRegistros: number;
@@ -32,15 +33,6 @@ export function sanitizarTextoPdf(texto: string): string {
         .replace(/\\/g, '\\\\')
         .replace(/\(/g, '\\(')
         .replace(/\)/g, '\\)');
-}
-
-export function escaparXml(texto: string): string {
-    return texto
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
 }
 
 export function generarContenidoPdf(prestadores: IPrestador[]): string {
@@ -90,66 +82,84 @@ export function generarContenidoPdf(prestadores: IPrestador[]): string {
     ].join('\n');
 }
 
-export function generarContenidoXlsx(prestadores: IPrestador[]): string {
-    const encabezados = [
-        'ID',
-        'Nombre',
-        'Apellido',
-        'Rubro',
-        'Matrícula',
-        'Experiencia (años)',
-        'Garantía',
-        'Teléfono',
-        'Calificación',
-        'Acerca de',
+export async function generarExcelCatalogo(
+    prestadores: IPrestador[]
+): Promise<ExcelJS.Buffer> {
+    const libro = new ExcelJS.Workbook();
+
+    const hojaPrestadores = libro.addWorksheet('Catálogo Prestadores');
+
+    hojaPrestadores.columns = [
+        { header: 'ID', key: 'id', width: 10 },
+        { header: 'Nombre', key: 'nombre', width: 18 },
+        { header: 'Apellido', key: 'apellido', width: 18 },
+        { header: 'Rubro', key: 'rubro', width: 20 },
+        { header: 'Matrícula', key: 'matricula', width: 18 },
+        { header: 'Experiencia (años)', key: 'experiencia', width: 20 },
+        { header: 'Garantía', key: 'garantia', width: 14 },
+        { header: 'Teléfono', key: 'telefono', width: 22 },
+        { header: 'Calificación', key: 'calificacion', width: 15 },
+        { header: 'Acerca de', key: 'acercaDe', width: 45 },
     ];
 
-    const filaEncabezado = `<Row>${encabezados
-        .map((col) => `<Cell><Data ss:Type="String">${escaparXml(col)}</Data></Cell>`)
-        .join('')}</Row>`;
+    prestadores.forEach((p) => {
+        hojaPrestadores.addRow({
+            id: p.id,
+            nombre: p.nombre,
+            apellido: p.apellido,
+            rubro: p.categoriaId,
+            matricula: p.matricula ?? 'Sin matrícula',
+            experiencia: p.aniosExperiencia,
+            garantia: p.ofreceGarantia ? 'Sí' : 'No',
+            telefono: formatearTelefonoPrestador(p.telefono),
+            calificacion:
+                p.ratingPromedio !== undefined
+                    ? Number(p.ratingPromedio.toFixed(1))
+                    : '-',
+            acercaDe: p.acercaDe,
+        });
+    });
 
-    const filasDatos = prestadores
-        .map((p) => {
-            const matricula = p.matricula ?? 'Sin matrícula';
-            const garantia = p.ofreceGarantia ? 'Sí' : 'No';
-            const telefono = formatearTelefonoPrestador(p.telefono);
-            const rating = p.ratingPromedio !== undefined ? p.ratingPromedio.toFixed(1) : '-';
+    hojaPrestadores.getRow(1).font = { bold: true };
+    hojaPrestadores.getRow(1).alignment = {
+        vertical: 'middle',
+    };
 
-            return [
-                '<Row>',
-                `<Cell><Data ss:Type="Number">${p.id}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(p.nombre)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(p.apellido)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(p.categoriaId)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(matricula)}</Data></Cell>`,
-                `<Cell><Data ss:Type="Number">${p.aniosExperiencia}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(garantia)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(telefono)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(rating)}</Data></Cell>`,
-                `<Cell><Data ss:Type="String">${escaparXml(p.acercaDe)}</Data></Cell>`,
-                '</Row>',
-            ].join('');
-        })
-        .join('\n');
+    const hojaResumen = libro.addWorksheet('Resumen');
+    const conGarantia = prestadores.filter((p) => p.ofreceGarantia).length;
+    const calificados = prestadores.filter(
+        (p) => p.ratingPromedio !== undefined
+    );
+    const promedioGeneral =
+        calificados.length === 0
+            ? 0
+            : Math.round(
+                  (calificados.reduce(
+                      (acc, p) => acc + (p.ratingPromedio ?? 0),
+                      0
+                  ) /
+                      calificados.length) *
+                      10
+              ) / 10;
 
-    return [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<?mso-application progid="Excel.Sheet"?>',
-        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">',
-        '<Worksheet ss:Name="Catálogo Prestadores">',
-        '<Table>',
-        filaEncabezado,
-        filasDatos,
-        '</Table>',
-        '</Worksheet>',
-        '</Workbook>',
-    ].join('\n');
+    hojaResumen.addRow(['Métrica', 'Valor']);
+    hojaResumen.addRow([
+        'Total de prestadores exportados',
+        prestadores.length,
+    ]);
+    hojaResumen.addRow(['Prestadores con garantía', conGarantia]);
+    hojaResumen.addRow(['Calificación promedio general', promedioGeneral]);
+
+    hojaResumen.columns = [{ width: 32 }, { width: 18 }];
+    hojaResumen.getRow(1).font = { bold: true };
+
+    return libro.xlsx.writeBuffer();
 }
 
-export function generarArchivoCatalogo(
+export async function generarArchivoCatalogo(
     prestadores: IPrestador[],
     formato: FormatoExportacion
-): ResultadoArchivoCatalogo {
+): Promise<ResultadoArchivoCatalogo> {
     if (formato === 'pdf') {
         return {
             contenido: generarContenidoPdf(prestadores),
@@ -159,19 +169,22 @@ export function generarArchivoCatalogo(
         };
     }
 
+    const buffer = await generarExcelCatalogo(prestadores);
+
     return {
-        contenido: generarContenidoXlsx(prestadores),
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contenido: new Uint8Array(buffer),
+        mimeType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         nombreArchivo: 'catalogo-prestadores.xlsx',
         totalRegistros: prestadores.length,
     };
 }
 
-export function exportarCatalogoPrestadores(
+export async function exportarCatalogoPrestadores(
     prestadores: IPrestador[],
     formato: FormatoExportacion
-): ResultadoArchivoCatalogo {
-    const archivo = generarArchivoCatalogo(prestadores, formato);
+): Promise<ResultadoArchivoCatalogo> {
+    const archivo = await generarArchivoCatalogo(prestadores, formato);
 
     if (
         typeof window !== 'undefined' &&
@@ -179,7 +192,11 @@ export function exportarCatalogoPrestadores(
         typeof URL !== 'undefined' &&
         typeof URL.createObjectURL === 'function'
     ) {
-        const blob = new Blob([archivo.contenido], { type: archivo.mimeType });
+        const blobPart: BlobPart =
+            typeof archivo.contenido === 'string'
+                ? archivo.contenido
+                : new Uint8Array(archivo.contenido);
+        const blob = new Blob([blobPart], { type: archivo.mimeType });
         const url = URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;
@@ -189,7 +206,7 @@ export function exportarCatalogoPrestadores(
         enlace.click();
         document.body.removeChild(enlace);
         if (typeof URL.revokeObjectURL === 'function') {
-            URL.revokeObjectURL(url);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
     }
 
