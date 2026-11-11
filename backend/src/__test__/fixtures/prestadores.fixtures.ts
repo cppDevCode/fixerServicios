@@ -30,6 +30,7 @@ export const crearDatosPrestador = (
         nroTelefono: '45556666',
     },
     ratingPromedio: 4.7,
+    fotoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
     ...overrides,
 });
 
@@ -47,6 +48,7 @@ export const prestadoresFixture: IPrestador[] = [
         categoriaId: 'Plomería',
         aniosExperiencia: 10,
         ratingPromedio: 4.8,
+        fotoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
     }),
     crearPrestador({
         id: 2,
@@ -55,6 +57,7 @@ export const prestadoresFixture: IPrestador[] = [
         categoriaId: 'Electricidad',
         aniosExperiencia: 6,
         ratingPromedio: 4.6,
+        fotoUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
     }),
     crearPrestador({
         id: 3,
@@ -65,5 +68,6 @@ export const prestadoresFixture: IPrestador[] = [
         aniosExperiencia: 4,
         ofreceGarantia: false,
         ratingPromedio: 4.3,
+        fotoUrl: undefined,
     }),
 ];
