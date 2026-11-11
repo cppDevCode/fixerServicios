@@ -1,5 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import "./Layout.css";
+import fixerLogo from '../../assets/fixer-logo.png'; 
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -9,7 +10,11 @@ export const Layout = () => {
       {/* HEADER GLOBAL */}
       <header className="global-header">
         <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <h1>Fixer 🛠️</h1>
+          <img
+            src={fixerLogo}
+            alt="Fixer - Soluciones para tu hogar"
+            className="logo-img"
+          />
         </div>
         <nav className="user-nav">
           <Link to="/login" style={{ backgroundColor: '#FFF7ED', color: '#F97316', padding: '0.5rem 1rem', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>Cerrar Sesión / Login</Link>
