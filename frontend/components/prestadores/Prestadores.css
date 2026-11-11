@@ -225,6 +225,46 @@
     background-color: var(--color-surface-alt);
 }
 
+.prestador-celda-profesional {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-prestador {
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e2e8f0;
+    border: 2px solid var(--color-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgb(36 52 71 / 8%);
+}
+
+.avatar-prestador--sm {
+    width: 38px;
+    height: 38px;
+}
+
+.avatar-prestador--md {
+    width: 48px;
+    height: 48px;
+}
+
+.avatar-prestador--lg {
+    width: 76px;
+    height: 76px;
+}
+
+.avatar-prestador__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 .prestador-nombre-celda {
     font-weight: 600;
     color: var(--color-primary);
@@ -360,6 +400,12 @@
     padding-bottom: var(--spacing-md);
 }
 
+.prestador-ficha__identidad {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 .prestador-ficha__cabecera h2 {
     margin: 0 0 6px;
     color: var(--color-primary);
@@ -421,6 +467,32 @@
     display: grid;
     grid-template-columns: 90px 100px 1fr;
     gap: var(--spacing-sm);
+}
+
+.formulario-prestador__foto {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding: 12px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.formulario-prestador__foto-controles {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formulario-prestador__foto-acciones {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .formulario-prestador__checkbox {

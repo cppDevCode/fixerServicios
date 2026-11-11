@@ -15,6 +15,7 @@ export interface IPrestador {
     categoriaId: string;
     telefono: ITelefonoPrestador;
     ratingPromedio?: number;
+    fotoUrl?: string;
 }
 
 export interface ICategoria {
