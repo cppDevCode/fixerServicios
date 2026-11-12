@@ -16,6 +16,24 @@ import { FormularioResena } from '../components/resenas/FormularioResena';
 import type { IResena } from '../interfaces/resena.interface';
 
 export function PrestadorDetallePage() {
+    const obtenerUsuarioId = (): number | null => {
+        try {
+            const usuarioGuardado = localStorage.getItem('usuario');
+
+            if (!usuarioGuardado) return null;
+
+            const usuario = JSON.parse(usuarioGuardado);
+            const id = Number(usuario?.id);
+
+            return Number.isInteger(id) && id > 0
+            ? id
+            : null;
+        } catch {
+            return null;
+        }
+        };
+
+    const usuarioId = obtenerUsuarioId();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -255,18 +273,21 @@ export function PrestadorDetallePage() {
                     </div>
 
                     <section aria-label="Reseñas y calificaciones del profesional">
+                        {usuarioId !== null && (
                         <FormularioResena
                             key={`formulario-${prestador.id}-${resenaEditar?.id ?? 'nuevo'}`}
                             prestadorId={prestador.id}
-                            usuarioId={2} // Temporal: reemplazar cuando exista autenticación
+                            usuarioId={usuarioId}
                             resenaEditar={resenaEditar}
                             onResenaGuardada={actualizarResenas}
                             onCancelarEdicion={() => setResenaEditar(null)}
                         />
+                        )}
 
                         <ListadoResenas
                             key={`${prestador.id}-${versionResenas}`}
                             prestadorId={prestador.id}
+                            usuarioId={usuarioId ?? undefined}
                             onEditarResena={setResenaEditar}
                         />
                     </section>

@@ -15,6 +15,7 @@ import './Resenas.css';
 
 interface ListadoResenasProps {
     prestadorId: number;
+    usuarioId?:number;
     onEditarResena?: (resena: IResena) => void;
 }
 
@@ -22,6 +23,7 @@ const LIMITE = 5;
 
 export function ListadoResenas({
     prestadorId,
+    usuarioId,
     onEditarResena,
 }: ListadoResenasProps) {
     const [resenas, setResenas] = useState<IResena[]>([]);
@@ -187,9 +189,13 @@ export function ListadoResenas({
                     <TarjetaResena
                         key={resena.id}
                         resena={resena}
-                        onEditar={onEditarResena}
+                        onEditar={
+                        usuarioId !== undefined && usuarioId === resena.usuarioId
+                            ? onEditarResena
+                            : undefined
+                        }
                     />
-                ))}
+                    ))}
             </div>
 
             {/* Exportación de valoraciones */}

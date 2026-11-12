@@ -1,4 +1,3 @@
-// frontend/pages/UsuariosPage.tsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
@@ -28,9 +27,15 @@ export const UsuariosPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/usuarios?page=${page}&limit=5&search=${search}`);
+        const token = localStorage.getItem('token');
+              const response = await fetch(`${API_URL}/usuarios?page=${page}&limit=5&search=${search}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
         const result = await response.json();
-
         if (result.code === 200) {
           setUsuarios(result.data);
           setTotalPages(result.meta.totalPages);
@@ -39,16 +44,12 @@ export const UsuariosPage = () => {
           setError(result.msg || 'Error al cargar los usuarios');
         }
       } catch {
-        setError('No se pudo conectar con el servidor. Verificá que el backend esté corriendo.');
+        setError('No se pudo conectar con el servidor.');
       } finally {
         setLoading(false);
       }
     };
-
-    const timer = setTimeout(() => {
-      fetchUsuarios();
-    }, 300);
-
+    const timer = setTimeout(() => { fetchUsuarios(); }, 300);
     return () => clearTimeout(timer);
   }, [page, search]);
 
@@ -58,16 +59,11 @@ export const UsuariosPage = () => {
   };
 
   const handleExport = () => {
-    const datosParaExportar = usuarios.map(u => ({
-      'ID': u.id,
-      'Nombre': u.nombre,
-      'Apellido': u.apellido,
-      'Email': u.email,
-      'Rol': u.rol,
-      'Ubicación ID': u.ubicacionId || '-'
+    const datos = usuarios.map(u => ({
+      'ID': u.id, 'Nombre': u.nombre, 'Apellido': u.apellido,
+      'Email': u.email, 'Rol': u.rol, 'Ubicación ID': u.ubicacionId || '-'
     }));
-
-    const worksheet = XLSX.utils.json_to_sheet(datosParaExportar);
+    const worksheet = XLSX.utils.json_to_sheet(datos);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
     XLSX.writeFile(workbook, 'Padron_Usuarios.xlsx');
@@ -80,19 +76,15 @@ export const UsuariosPage = () => {
         <p>Administrá los usuarios registrados en la plataforma.</p>
       </div>
 
-      <div className="search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+      <div className="search-bar-flex">
         <input
           type="text"
           placeholder="Buscar por nombre, email o ciudad..."
           value={search}
           onChange={handleSearch}
           className="search-input"
-          style={{ marginBottom: 0 }}
         />
-        <button 
-          onClick={handleExport}
-          style={{ padding: '0.75rem 1.5rem', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        >
+        <button onClick={handleExport} className="btn-export">
           📥 Exportar a Excel
         </button>
       </div>
@@ -106,33 +98,21 @@ export const UsuariosPage = () => {
           <table className="usuarios-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Nombre Completo</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Ubicación ID</th>
+                <th>ID</th><th>Nombre Completo</th><th>Email</th><th>Rol</th><th>Ubicación ID</th>
               </tr>
             </thead>
             <tbody>
               {usuarios.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No se encontraron usuarios.</td>
-                </tr>
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No se encontraron usuarios.</td></tr>
               ) : (
                 usuarios.map((user) => (
                   <tr key={user.id}>
                     <td>
-                      <Link to={`/usuarios/${user.id}`} style={{ color: '#3B82F6', textDecoration: 'none', fontWeight: '600' }}>
-                        {user.id}
-                      </Link>
+                      <Link to={`/usuarios/${user.id}`} className="usuario-link">{user.id}</Link>
                     </td>
                     <td>{user.nombre} {user.apellido}</td>
                     <td>{user.email}</td>
-                    <td>
-                      <span className={`badge badge-${user.rol.toLowerCase()}`}>
-                        {user.rol}
-                      </span>
-                    </td>
+                    <td><span className={`badge badge-${user.rol.toLowerCase()}`}>{user.rol}</span></td>
                     <td>{user.ubicacionId || '-'}</td>
                   </tr>
                 ))
@@ -145,21 +125,9 @@ export const UsuariosPage = () => {
       <div className="pagination">
         <span>Total: {totalItems} usuarios</span>
         <div className="pagination-controls">
-          <button
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((p) => p - 1)}
-            className="btn-pagination"
-          >
-            Anterior
-          </button>
+          <button disabled={page <= 1 || loading} onClick={() => setPage(p => p - 1)} className="btn-pagination">Anterior</button>
           <span className="page-info">Página {page} de {totalPages}</span>
-          <button
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((p) => p + 1)}
-            className="btn-pagination"
-          >
-            Siguiente
-          </button>
+          <button disabled={page >= totalPages || loading} onClick={() => setPage(p => p + 1)} className="btn-pagination">Siguiente</button>
         </div>
       </div>
     </div>
