@@ -8,6 +8,7 @@ import {
     actualizarPrestador,
     CATEGORIAS_POR_DEFECTO,
     crearPrestador,
+    LOCALIDADES_POR_DEFECTO,
 } from '../../services/prestador.service';
 import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
@@ -36,6 +37,9 @@ export function FormularioPrestador({
     const [apellido, setApellido] = useState(prestadorInicial?.apellido ?? '');
     const [categoriaId, setCategoriaId] = useState(
         prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 'Plomería'
+    );
+    const [localidad, setLocalidad] = useState(
+        prestadorInicial?.localidad ?? LOCALIDADES_POR_DEFECTO[1] ?? 'Córdoba Capital'
     );
     const [matricula, setMatricula] = useState(prestadorInicial?.matricula ?? '');
     const [aniosExperiencia, setAniosExperiencia] = useState(
@@ -108,6 +112,7 @@ export function FormularioPrestador({
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
             categoriaId: rubroLimpio,
+            localidad: localidad.trim() || undefined,
             matricula: matricula.trim() ? matricula.trim() : undefined,
             aniosExperiencia: experienciaNumero,
             acercaDe: acercaDe.trim(),
@@ -214,6 +219,23 @@ export function FormularioPrestador({
                         {listaCategorias.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                                 {cat.nombre}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="prestadores-campo">
+                    <label htmlFor="prestador-localidad">Localidad</label>
+                    <select
+                        id="prestador-localidad"
+                        name="localidad"
+                        value={localidad}
+                        onChange={(e) => setLocalidad(e.target.value)}
+                        disabled={enviando}
+                    >
+                        {LOCALIDADES_POR_DEFECTO.map((loc) => (
+                            <option key={loc} value={loc}>
+                                {loc}
                             </option>
                         ))}
                     </select>

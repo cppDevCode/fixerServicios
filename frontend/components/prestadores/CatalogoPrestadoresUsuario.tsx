@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { ICategoria, IPrestador } from '../../interfaces/prestador.interface';
 import {
     CATEGORIAS_POR_DEFECTO,
+    LOCALIDADES_POR_DEFECTO,
     obtenerCategorias,
     obtenerPrestadores,
 } from '../../services/prestador.service';
@@ -42,6 +43,7 @@ export function CatalogoPrestadoresUsuario({
     const [busquedaInput, setBusquedaInput] = useState('');
     const [busquedaActiva, setBusquedaActiva] = useState('');
     const [rubroSeleccionado, setRubroSeleccionado] = useState('');
+    const [localidadSeleccionada, setLocalidadSeleccionada] = useState('');
     const [soloMatriculados, setSoloMatriculados] = useState(false);
     const [soloConGarantia, setSoloConGarantia] = useState(false);
     const [soloMejorCalificados, setSoloMejorCalificados] = useState(false);
@@ -94,6 +96,7 @@ export function CatalogoPrestadoresUsuario({
                     page: 1,
                     limit: 50,
                     rubro: rubroSeleccionado || undefined,
+                    localidad: localidadSeleccionada || undefined,
                     search: busquedaActiva || undefined,
                     sortBy: campoOrden,
                     order: direccionOrden,
@@ -123,12 +126,25 @@ export function CatalogoPrestadoresUsuario({
         };
     }, [
         rubroSeleccionado,
+        localidadSeleccionada,
         busquedaActiva,
         ordenSeleccionado,
         versionCatalogo,
         contadorActualizacion,
         prestadoresIniciales,
     ]);
+
+    const localidadesDisponibles = useMemo(() => {
+        const conjunto = new Set<string>(LOCALIDADES_POR_DEFECTO);
+        for (const p of prestadoresBase) {
+            if (p.localidad && p.localidad.trim() !== '') {
+                conjunto.add(p.localidad.trim());
+            }
+        }
+        return Array.from(conjunto).sort((a, b) =>
+            a.localeCompare(b, 'es', { sensitivity: 'base' })
+        );
+    }, [prestadoresBase]);
 
     const prestadoresFiltrados = useMemo(() => {
         const [campoOrden, direccionOrden] = ordenSeleccionado.split(':') as [
@@ -143,9 +159,16 @@ export function CatalogoPrestadoresUsuario({
                 if (rubroSeleccionado && p.categoriaId !== rubroSeleccionado) {
                     return false;
                 }
+                if (
+                    localidadSeleccionada &&
+                    (p.localidad ?? '').toLowerCase() !==
+                        localidadSeleccionada.toLowerCase()
+                ) {
+                    return false;
+                }
                 if (termino) {
                     const texto =
-                        `${p.nombre} ${p.apellido} ${p.categoriaId} ${p.acercaDe}`.toLowerCase();
+                        `${p.nombre} ${p.apellido} ${p.categoriaId} ${p.localidad ?? ''} ${p.acercaDe}`.toLowerCase();
                     if (!texto.includes(termino)) {
                         return false;
                     }
@@ -180,6 +203,7 @@ export function CatalogoPrestadoresUsuario({
     }, [
         prestadoresBase,
         rubroSeleccionado,
+        localidadSeleccionada,
         busquedaActiva,
         soloMatriculados,
         soloConGarantia,
@@ -223,6 +247,7 @@ export function CatalogoPrestadoresUsuario({
         setBusquedaInput('');
         setBusquedaActiva('');
         setRubroSeleccionado('');
+        setLocalidadSeleccionada('');
         setSoloMatriculados(false);
         setSoloConGarantia(false);
         setSoloMejorCalificados(false);
@@ -262,6 +287,9 @@ export function CatalogoPrestadoresUsuario({
                                 <span className="catalogo-usuario__criterio-destacado">
                                     &ldquo;{etiquetaCriterio}&rdquo;
                                 </span>
+                                {localidadSeleccionada
+                                    ? ` en ${localidadSeleccionada}`
+                                    : ''}
                             </h3>
                         </div>
                     </div>
@@ -314,6 +342,29 @@ export function CatalogoPrestadoresUsuario({
                             {categorias.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
                                     🔧 {cat.nombre}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            id="catalogo-filtro-localidad"
+                            data-testid="filtro-localidad"
+                            aria-label="Filtrar catálogo por localidad"
+                            className={`catalogo-filtro-pill ${
+                                localidadSeleccionada
+                                    ? 'catalogo-filtro-pill--activo'
+                                    : ''
+                            }`}
+                            value={localidadSeleccionada}
+                            onChange={(e) => {
+                                setLocalidadSeleccionada(e.target.value);
+                                setPaginaActual(1);
+                            }}
+                        >
+                            <option value="">📍 Todas las localidades</option>
+                            {localidadesDisponibles.map((loc) => (
+                                <option key={loc} value={loc}>
+                                    📍 {loc}
                                 </option>
                             ))}
                         </select>

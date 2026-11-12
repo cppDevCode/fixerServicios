@@ -122,7 +122,7 @@ export function TarjetaCatalogoPrestador({
                         </span>
 
                         <span className="catalogo-tarjeta__telefono">
-                            📞 {telefonoFormateado}
+                            📍 {prestador.localidad ?? 'Sin localidad'}
                         </span>
                     </div>
 
