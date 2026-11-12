@@ -22,6 +22,7 @@ export const Layout = () => {
           <h3>Módulos</h3>
           <ul>
             <li><Link to="/prestadores">1. Prestadores</Link></li>
+            <li><Link to="/prestadores/catalogo">Catálogo Público</Link></li>
             <li><Link to="/usuarios">3. Usuarios</Link></li>
           </ul>
         </aside>
