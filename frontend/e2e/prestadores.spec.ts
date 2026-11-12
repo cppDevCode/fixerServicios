@@ -157,4 +157,47 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
             'catalogo-prestadores.xlsx'
         );
     });
+
+    test('permite visualizar el catálogo de prestadores para el usuario con tarjetas, filtros rápidos y navegación al perfil', async ({
+        page,
+    }) => {
+        await page.goto('/prestadores');
+
+        await page.getByTestId('btn-alternar-vista-prestadores').click();
+
+        await expect(
+            page.getByTestId('catalogo-prestadores-usuario')
+        ).toBeVisible();
+        await expect(page.getByText('CRITERIO DE BÚSQUEDA')).toBeVisible();
+        await expect(
+            page.getByText(/Mostrando 16 profesionales disponibles/i)
+        ).toBeVisible();
+
+        // Verifica que se muestran 6 tarjetas por página (Página 1 de 3)
+        const tarjetas = page.getByTestId('tarjeta-catalogo-prestador');
+        await expect(tarjetas).toHaveCount(6);
+
+        // Filtro rápido de Mejor calificados (4.8+) y Matriculados
+        await page.getByTestId('filtro-mejor-calificados').click();
+        await page.getByTestId('filtro-matriculados').click();
+
+        // Búsqueda en el catálogo de usuario
+        await page.locator('#catalogo-busqueda-input').fill('Carlos');
+        await expect(tarjetas).toHaveCount(1);
+        await expect(tarjetas.first()).toContainText('Carlos Gómez');
+
+        // Botón Contactar despliega el teléfono del profesional
+        await tarjetas
+            .first()
+            .getByRole('button', { name: /Contactar/i })
+            .click();
+        await expect(tarjetas.first()).toContainText('+54 11 40001001');
+
+        // Botón Ver Perfil navega al detalle del prestador
+        await tarjetas
+            .first()
+            .getByRole('button', { name: /Ver Perfil/i })
+            .click();
+        await expect(page).toHaveURL(/\/prestadores\/1$/);
+    });
 });

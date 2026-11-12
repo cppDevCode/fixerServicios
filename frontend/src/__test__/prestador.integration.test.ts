@@ -75,6 +75,17 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
         );
         expect(busquedaSinTilde.meta?.total).toBe(1);
         expect(busquedaSinTilde.datos[0].id).toBe(1);
+
+        const porMayorPuntuacion = await obtenerPrestadores(
+            { sortBy: 'ratingPromedio', order: 'desc', limit: 6 },
+            apiBaseUrl
+        );
+        expect(porMayorPuntuacion.datos).toHaveLength(6);
+        expect(
+            porMayorPuntuacion.datos[0].ratingPromedio
+        ).toBeGreaterThanOrEqual(
+            porMayorPuntuacion.datos[5].ratingPromedio ?? 0
+        );
     });
 
     it('integra el ciclo completo de alta, detalle, actualización, baja y manejo de errores (400/404)', async () => {

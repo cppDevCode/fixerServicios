@@ -25,8 +25,14 @@ import {
     AvatarPrestador,
     SILUETA_PERSONA_DATA_URI,
 } from '../../components/prestadores/AvatarPrestador';
+import { CatalogoPrestadoresUsuario } from '../../components/prestadores/CatalogoPrestadoresUsuario';
 import { FormularioPrestador } from '../../components/prestadores/FormularioPrestador';
 import { ListadoPrestadores } from '../../components/prestadores/ListadoPrestadores';
+import {
+    calcularCantidadResenas,
+    obtenerTituloEspecialidad,
+    TarjetaCatalogoPrestador,
+} from '../../components/prestadores/TarjetaCatalogoPrestador';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -399,6 +405,44 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlListado).toContain('+54 11 40001001');
             expect(htmlListado).toContain('Exportar Catálogo');
             expect(htmlListado).toContain('Total: 2 registros');
+        });
+
+        it('TarjetaCatalogoPrestador y CatalogoPrestadoresUsuario renderizan la vista de catálogo para el usuario con filtros rápidos, tarjetas, fotos y siluetas', () => {
+            expect(obtenerTituloEspecialidad(prestadorMock)).toBe(
+                'Plomería Integral e Instalaciones Sanitarias'
+            );
+            expect(calcularCantidadResenas(prestadorMock)).toBeGreaterThan(80);
+
+            const htmlTarjeta = renderToStaticMarkup(
+                createElement(TarjetaCatalogoPrestador, {
+                    prestador: prestadorMock,
+                    onVerPerfil: vi.fn(),
+                })
+            );
+            expect(htmlTarjeta).toContain('Carlos Gómez');
+            expect(htmlTarjeta).toContain('Matrícula MAT-1001');
+            expect(htmlTarjeta).toContain('Ofrece garantía');
+            expect(htmlTarjeta).toContain('Ver Perfil');
+            expect(htmlTarjeta).toContain('Contactar');
+            expect(htmlTarjeta).toContain('data-tiene-foto="true"');
+            expect(htmlTarjeta).not.toContain('Tarifa orientativa');
+            expect(htmlTarjeta).not.toContain('Verificado Fixer');
+
+            const htmlCatalogo = renderToStaticMarkup(
+                createElement(CatalogoPrestadoresUsuario, {
+                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
+                    categoriasIniciales: CATEGORIAS_POR_DEFECTO,
+                })
+            );
+            expect(htmlCatalogo).toContain('CRITERIO DE BÚSQUEDA');
+            expect(htmlCatalogo).toContain('2 disponibles');
+            expect(htmlCatalogo).toContain('Matriculados');
+            expect(htmlCatalogo).toContain('Mejor calificados (4.8+)');
+            expect(htmlCatalogo).toContain('Actualizado en tiempo real');
+            expect(htmlCatalogo).toContain('data-tiene-foto="true"');
+            expect(htmlCatalogo).toContain('data-tiene-foto="false"');
+            expect(htmlCatalogo).not.toContain('Palermo &amp; Zona Norte');
+            expect(htmlCatalogo).not.toContain('Garantía Fixer Care');
         });
     });
 });
