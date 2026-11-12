@@ -8,6 +8,7 @@ export interface IPrestador {
     acercaDe: string;
     ofreceGarantia: boolean;
     categoriaId: string;
+    localidad?: string;
     telefono: {
         codPais: string;
         codArea: string;

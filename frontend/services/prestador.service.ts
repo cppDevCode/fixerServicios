@@ -21,6 +21,14 @@ export const CATEGORIAS_POR_DEFECTO: ICategoria[] = [
     { id: 'Refrigeración', nombre: 'Refrigeración' },
 ];
 
+export const LOCALIDADES_POR_DEFECTO: string[] = [
+    'CABA',
+    'Córdoba Capital',
+    'La Plata',
+    'Mendoza',
+    'Rosario',
+];
+
 export function construirQueryPrestadores(filtros: IFiltrosPrestador = {}): string {
     const parametros = new URLSearchParams();
 
@@ -32,6 +40,9 @@ export function construirQueryPrestadores(filtros: IFiltrosPrestador = {}): stri
     }
     if (filtros.rubro && filtros.rubro.trim() !== '') {
         parametros.set('rubro', filtros.rubro.trim());
+    }
+    if (filtros.localidad && filtros.localidad.trim() !== '') {
+        parametros.set('localidad', filtros.localidad.trim());
     }
     if (filtros.search && filtros.search.trim() !== '') {
         parametros.set('search', filtros.search.trim());

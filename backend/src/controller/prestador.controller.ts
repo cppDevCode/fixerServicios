@@ -7,12 +7,13 @@ export class PrestadorController {
     constructor(private readonly service = new PrestadorService) {}
 
     public listar = (req: Request, res: Response): void => {
-        const { page, limit, rubro, search, sortBy, order } = req.query;
+        const { page, limit, rubro, localidad, search, sortBy, order } = req.query;
         
         const { datos, meta } = this.service.listar({
             page: page ? Number(page) : undefined,
             limit: limit ? Number(limit) : undefined,
             rubro: rubro ? String(rubro) : undefined,
+            localidad: localidad ? String(localidad) : undefined,
             search: search ? String(search) : undefined,
             sortBy: sortBy ? (String(sortBy) as keyof IPrestador) : undefined,
             order: order === 'desc' ? 'desc' : 'asc'
@@ -65,6 +66,11 @@ export class PrestadorController {
                 ? fotoUrl.trim()
                 : undefined;
 
+        const localidadLimpia =
+            typeof req.body.localidad === 'string' && req.body.localidad.trim() !== ''
+                ? req.body.localidad.trim()
+                : undefined;
+
         const nuevo: IPrestador = this.service.crear({
             nombre,
             apellido,
@@ -74,6 +80,7 @@ export class PrestadorController {
             acercaDe: acercaDe || '',
             ofreceGarantia: Boolean(ofreceGarantia),
             categoriaId,
+            localidad: localidadLimpia,
             telefono: telefono || { codPais: '+54', codArea: '11', nroTelefono: ''},
             ratingPromedio: req.body.ratingPromedio
         });
