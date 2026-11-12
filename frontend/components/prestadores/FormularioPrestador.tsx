@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type {
     ICategoria,
     ICrearPrestador,
@@ -9,6 +9,7 @@ import {
     CATEGORIAS_POR_DEFECTO,
     crearPrestador,
 } from '../../services/prestador.service';
+import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
 export interface FormularioPrestadorProps {
@@ -58,12 +59,26 @@ export function FormularioPrestador({
             ? String(prestadorInicial.ratingPromedio)
             : '4.5'
     );
+    const [fotoUrl, setFotoUrl] = useState(prestadorInicial?.fotoUrl ?? '');
 
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esEdicion = Boolean(prestadorInicial?.id);
+
+    const manejarArchivoFoto = (evento: ChangeEvent<HTMLInputElement>) => {
+        const archivo = evento.target.files?.[0];
+        if (!archivo) return;
+
+        const lector = new FileReader();
+        lector.onload = () => {
+            if (typeof lector.result === 'string') {
+                setFotoUrl(lector.result);
+            }
+        };
+        lector.readAsDataURL(archivo);
+    };
 
     const manejarSubmit = async (evento: FormEvent<HTMLFormElement>) => {
         evento.preventDefault();
@@ -106,6 +121,11 @@ export function FormularioPrestador({
                 ratingNumero !== undefined && !Number.isNaN(ratingNumero)
                     ? ratingNumero
                     : undefined,
+            fotoUrl: fotoUrl.trim()
+                ? fotoUrl.trim()
+                : esEdicion
+                  ? ''
+                  : undefined,
         };
 
         setEnviando(true);
@@ -127,6 +147,7 @@ export function FormularioPrestador({
                 setMatricula('');
                 setAcercaDe('');
                 setNroTelefono('');
+                setFotoUrl('');
             }
 
             onGuardado?.(respuesta.datos);
@@ -238,6 +259,51 @@ export function FormularioPrestador({
                         onChange={(e) => setRatingPromedio(e.target.value)}
                         disabled={enviando}
                     />
+                </div>
+            </div>
+
+            <div className="prestadores-campo">
+                <label htmlFor="prestador-foto-url">
+                    Foto del prestador (opcional — si no se carga se muestra silueta por defecto)
+                </label>
+                <div className="formulario-prestador__foto">
+                    <AvatarPrestador
+                        nombre={nombre || 'Nuevo'}
+                        apellido={apellido || 'Prestador'}
+                        fotoUrl={fotoUrl}
+                        tamano="lg"
+                    />
+                    <div className="formulario-prestador__foto-controles">
+                        <input
+                            id="prestador-foto-url"
+                            name="fotoUrl"
+                            type="text"
+                            value={fotoUrl}
+                            onChange={(e) => setFotoUrl(e.target.value)}
+                            placeholder="URL de foto (ej: https://.../foto.jpg) o dejar vacío para silueta"
+                            disabled={enviando}
+                        />
+                        <div className="formulario-prestador__foto-acciones">
+                            <input
+                                id="prestador-foto-archivo"
+                                type="file"
+                                accept="image/*"
+                                aria-label="Subir archivo de foto"
+                                onChange={manejarArchivoFoto}
+                                disabled={enviando}
+                            />
+                            {fotoUrl.trim() && (
+                                <button
+                                    type="button"
+                                    className="btn-prestador btn-prestador--secundario"
+                                    onClick={() => setFotoUrl('')}
+                                    disabled={enviando}
+                                >
+                                    Quitar foto
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

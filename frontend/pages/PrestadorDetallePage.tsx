@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AvatarPrestador } from '../components/prestadores/AvatarPrestador';
 import { FormularioPrestador } from '../components/prestadores/FormularioPrestador';
 import '../components/prestadores/Prestadores.css';
 import type { ICategoria, IPrestador } from '../interfaces/prestador.interface';
@@ -163,13 +164,21 @@ export function PrestadorDetallePage() {
                             aria-label="Ficha técnica del prestador"
                         >
                             <div className="prestador-ficha__cabecera">
-                                <div>
-                                    <h2>
-                                        {prestador.nombre} {prestador.apellido}
-                                    </h2>
-                                    <span className="prestador-subtexto">
-                                        ID Profesional #{prestador.id}
-                                    </span>
+                                <div className="prestador-ficha__identidad">
+                                    <AvatarPrestador
+                                        nombre={prestador.nombre}
+                                        apellido={prestador.apellido}
+                                        fotoUrl={prestador.fotoUrl}
+                                        tamano="lg"
+                                    />
+                                    <div>
+                                        <h2>
+                                            {prestador.nombre} {prestador.apellido}
+                                        </h2>
+                                        <span className="prestador-subtexto">
+                                            ID Profesional #{prestador.id}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <span className="badge-prestador badge-prestador--rubro">
@@ -236,7 +245,7 @@ export function PrestadorDetallePage() {
                         </article>
 
                         <FormularioPrestador
-                            key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}`}
+                            key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
                             categorias={categorias}
                             prestadorInicial={prestador}
                             titulo="Editar datos del prestador"
