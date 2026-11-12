@@ -177,6 +177,12 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         const tarjetas = page.getByTestId('tarjeta-catalogo-prestador');
         await expect(tarjetas).toHaveCount(6);
 
+        // Filtro por localidad en el catálogo público
+        await page
+            .getByTestId('filtro-localidad')
+            .selectOption('Córdoba Capital');
+        await expect(tarjetas).toHaveCount(4);
+
         // Filtro rápido de Mejor calificados (4.8+) y Matriculados
         await page.getByTestId('filtro-mejor-calificados').click();
         await page.getByTestId('filtro-matriculados').click();

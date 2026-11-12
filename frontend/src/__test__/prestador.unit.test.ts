@@ -47,6 +47,7 @@ const prestadorMock: IPrestador = {
     acercaDe: 'Especialista en cañerías y filtraciones urgentes',
     ofreceGarantia: true,
     categoriaId: 'Plomería',
+    localidad: 'Córdoba Capital',
     telefono: {
         codPais: '+54',
         codArea: '11',
@@ -81,6 +82,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
                 page: 2,
                 limit: 15,
                 rubro: '  Plomería ',
+                localidad: '  Córdoba Capital ',
                 search: '  Carlos ',
                 sortBy: 'aniosExperiencia',
                 order: 'desc',
@@ -90,6 +92,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(params.get('page')).toBe('2');
             expect(params.get('limit')).toBe('15');
             expect(params.get('rubro')).toBe('Plomería');
+            expect(params.get('localidad')).toBe('Córdoba Capital');
             expect(params.get('search')).toBe('Carlos');
             expect(params.get('sortBy')).toBe('aniosExperiencia');
             expect(params.get('order')).toBe('desc');
@@ -421,6 +424,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
             expect(htmlTarjeta).toContain('Carlos Gómez');
             expect(htmlTarjeta).toContain('Matrícula MAT-1001');
+            expect(htmlTarjeta).toContain('Córdoba Capital');
             expect(htmlTarjeta).toContain('Ofrece garantía');
             expect(htmlTarjeta).toContain('Ver Perfil');
             expect(htmlTarjeta).toContain('Contactar');
@@ -436,6 +440,8 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
             expect(htmlCatalogo).toContain('CRITERIO DE BÚSQUEDA');
             expect(htmlCatalogo).toContain('2 disponibles');
+            expect(htmlCatalogo).toContain('Todas las localidades');
+            expect(htmlCatalogo).toContain('Córdoba Capital');
             expect(htmlCatalogo).toContain('Matriculados');
             expect(htmlCatalogo).toContain('Mejor calificados (4.8+)');
             expect(htmlCatalogo).toContain('Actualizado en tiempo real');

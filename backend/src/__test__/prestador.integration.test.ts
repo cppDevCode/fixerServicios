@@ -49,6 +49,12 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
             expect(
                 res.body.datos.every((p: { categoriaId: string }) => p.categoriaId === 'Plomería')
             ).toBe(true);
+
+            const resLocalidad = await request(app)
+                .get('/api/v1/prestadores')
+                .query({ localidad: 'Córdoba Capital' })
+                .expect(200);
+            expect(resLocalidad.body.meta.total).toBe(4);
         });
 
         it('permite búsqueda por texto (search) y ordenamiento descendente por años de experiencia', async () => {
