@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import ExcelJS from 'exceljs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { IPrestador } from '../../interfaces/prestador.interface';
@@ -13,12 +14,11 @@ import {
     obtenerPrestadorPorId,
 } from '../../services/prestador.service';
 import {
-    escaparXml,
     exportarCatalogoPrestadores,
     formatearTelefonoPrestador,
     generarArchivoCatalogo,
     generarContenidoPdf,
-    generarContenidoXlsx,
+    generarExcelCatalogo,
     sanitizarTextoPdf,
 } from '../../services/exportarCatalogo.service';
 import { FormularioPrestador } from '../../components/prestadores/FormularioPrestador';
@@ -235,7 +235,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
         });
     });
 
-    describe('exportarCatalogo.service.ts (Formateo y exportación en .pdf y .xlsx)', () => {
+    describe('exportarCatalogo.service.ts (Formateo y exportación en .pdf y .xlsx con ExcelJS)', () => {
         it('formatearTelefonoPrestador formatea teléfono estructurado y maneja teléfonos vacíos', () => {
             expect(
                 formatearTelefonoPrestador({
@@ -255,12 +255,9 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(formatearTelefonoPrestador(undefined)).toBe('Sin teléfono');
         });
 
-        it('sanitizarTextoPdf y escaparXml normalizan caracteres especiales', () => {
+        it('sanitizarTextoPdf normaliza tildes y escapa delimitadores PDF', () => {
             expect(sanitizarTextoPdf('Plomería (Cañerías)')).toBe(
                 'Plomeria \\(Canerias\\)'
-            );
-            expect(escaparXml('Gas & Agua <24hs> "Urgencias"')).toBe(
-                'Gas &amp; Agua &lt;24hs&gt; &quot;Urgencias&quot;'
             );
         });
 
@@ -273,24 +270,37 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(pdf).toContain('#1 Carlos Gomez | Plomeria | Mat: MAT-1001');
         });
 
-        it('generarContenidoXlsx construye un libro SpreadsheetML XML válido con encabezados y filas', () => {
-            const xlsx = generarContenidoXlsx([prestadorMock]);
+        it('generarExcelCatalogo construye un libro ExcelJS binario válido con hojas Catálogo Prestadores y Resumen', async () => {
+            const buffer = await generarExcelCatalogo([prestadorMock]);
 
-            expect(xlsx).toContain('<?mso-application progid="Excel.Sheet"?>');
-            expect(xlsx).toContain('<Worksheet ss:Name="Catálogo Prestadores">');
-            expect(xlsx).toContain('<Data ss:Type="String">Carlos</Data>');
-            expect(xlsx).toContain('<Data ss:Type="String">Gómez</Data>');
-            expect(xlsx).toContain('<Data ss:Type="String">MAT-1001</Data>');
-            expect(xlsx).toContain('<Data ss:Type="Number">10</Data>');
+            const libro = new ExcelJS.Workbook();
+            await libro.xlsx.load(buffer);
+
+            const hojaCatalogo = libro.getWorksheet('Catálogo Prestadores');
+            expect(hojaCatalogo).toBeDefined();
+            expect(hojaCatalogo?.getRow(1).font?.bold).toBe(true);
+            expect(hojaCatalogo?.getRow(2).getCell(1).value).toBe(1);
+            expect(hojaCatalogo?.getRow(2).getCell(2).value).toBe('Carlos');
+            expect(hojaCatalogo?.getRow(2).getCell(3).value).toBe('Gómez');
+            expect(hojaCatalogo?.getRow(2).getCell(4).value).toBe('Plomería');
+            expect(hojaCatalogo?.getRow(2).getCell(5).value).toBe('MAT-1001');
+            expect(hojaCatalogo?.getRow(2).getCell(6).value).toBe(10);
+
+            const hojaResumen = libro.getWorksheet('Resumen');
+            expect(hojaResumen).toBeDefined();
+            expect(hojaResumen?.getRow(2).getCell(2).value).toBe(1);
         });
 
-        it('generarArchivoCatalogo y exportarCatalogoPrestadores retornan metadatos exactos para .pdf y .xlsx', () => {
-            const archivoPdf = generarArchivoCatalogo([prestadorMock], 'pdf');
+        it('generarArchivoCatalogo y exportarCatalogoPrestadores retornan metadatos exactos para .pdf y .xlsx', async () => {
+            const archivoPdf = await generarArchivoCatalogo(
+                [prestadorMock],
+                'pdf'
+            );
             expect(archivoPdf.nombreArchivo).toBe('catalogo-prestadores.pdf');
             expect(archivoPdf.mimeType).toBe('application/pdf');
             expect(archivoPdf.totalRegistros).toBe(1);
 
-            const archivoXlsx = exportarCatalogoPrestadores(
+            const archivoXlsx = await exportarCatalogoPrestadores(
                 [prestadorMock],
                 'xlsx'
             );
@@ -299,6 +309,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             );
             expect(archivoXlsx.totalRegistros).toBe(1);
+            expect(archivoXlsx.contenido).toBeInstanceOf(Uint8Array);
         });
     });
 

@@ -13,7 +13,7 @@ En la **Fase 3**, **Alejandro L. Baldres** desarrolló el vertical completo de i
 Las decisiones arquitectónicas adoptadas garantizan:
 1. **Separación Estricta de Responsabilidades en el Cliente:** División modular entre contratos TypeScript ([`prestador.interface.ts`](../frontend/interfaces/prestador.interface.ts)), servicios de comunicación HTTP ([`prestador.service.ts`](../frontend/services/prestador.service.ts)), motor de generación documental ([`exportarCatalogo.service.ts`](../frontend/services/exportarCatalogo.service.ts)), componentes reutilizables ([`ListadoPrestadores.tsx`](../frontend/components/prestadores/ListadoPrestadores.tsx) y [`FormularioPrestador.tsx`](../frontend/components/prestadores/FormularioPrestador.tsx)) y vistas de enrutamiento ([`PrestadoresPage.tsx`](../frontend/pages/PrestadoresPage.tsx) y [`PrestadorDetallePage.tsx`](../frontend/pages/PrestadorDetallePage.tsx)).
 2. **Reactividad y Filtrado Combinado en Tiempo Real:** El listado paginado sincroniza reactivamente la barra de búsqueda (`search`), el filtro de rubro (`rubro`), el criterio y dirección de ordenamiento (`sortBy`, `order`) y el selector de filas por página (`limit`), reiniciando automáticamente el índice de página ante cualquier cambio de filtro.
-3. **Exportación Nativa de Catálogo (`.pdf` y `.xlsx`) sin Dependencias Externas Pesadas:** Implementación de un generador determinista de documentos **PDF 1.4 (`%PDF-1.4`)** y libros **Excel SpreadsheetML (`.xlsx`)** en memoria mediante `Blob` y `URL.createObjectURL`.
+3. **Exportación de Catálogo en `.pdf` y `.xlsx` con `ExcelJS`:** Implementación de un generador de documentos **PDF 1.4 (`%PDF-1.4`)** y libros binarios OpenXML (`.xlsx`) mediante **`ExcelJS` (`exceljs`)** con hojas de detalle y resumen en memoria mediante `Blob` y `URL.createObjectURL`.
 
 ```mermaid
 sequenceDiagram
@@ -98,7 +98,7 @@ El servicio [`exportarCatalogo.service.ts`](../frontend/services/exportarCatalog
 flowchart LR
     A["IPrestador[]\n(Registros filtrados)"] --> B{"Formato seleccionado"}
     B -->|pdf| C["generarContenidoPdf()\nEstructura %PDF-1.4 + Stream BT/ET"]
-    B -->|xlsx| D["generarContenidoXlsx()\nWorkbook SpreadsheetML XML"]
+    B -->|xlsx| D["generarExcelCatalogo()\nExcelJS.Workbook + writeBuffer()"]
     C --> E["Blob (application/pdf)\ncatalogo-prestadores.pdf"]
     D --> F["Blob (officedocument.spreadsheetml.sheet)\ncatalogo-prestadores.xlsx"]
     E --> G["URL.createObjectURL + <a download>\nDescarga en navegador"]
@@ -108,10 +108,13 @@ flowchart LR
 1. **Generación de PDF (`generarContenidoPdf`):**
    - Normaliza caracteres diacríticos y escapa delimitadores PostScript/PDF (`sanitizarTextoPdf`).
    - Construye los 5 objetos estructurales del estándar **PDF 1.4** (`Catalog`, `Pages`, `Page`, `Content Stream` con operadores `BT`, `/F1 9 Tf`, `Tm`, `Tj`, `ET` y fuente base `Helvetica`) cerrando con `trailer` y `%%EOF`.
-2. **Generación de Excel (`generarContenidoXlsx`):**
-   - Escapa entidades especiales XML (`escaparXml`) y estructura un documento **SpreadsheetML (`Excel.Sheet`)** con la hoja `"Catálogo Prestadores"`, fila de encabezados y celdas tipadas (`ss:Type="Number"` para ID y años de experiencia; `ss:Type="String"` para nombre, apellido, rubro, matrícula, garantía, teléfono, calificación y descripción).
+2. **Generación de Excel con `ExcelJS` (`generarExcelCatalogo`):**
+   - Instancia `new ExcelJS.Workbook()` y construye dos hojas de trabajo:
+     - **`Catálogo Prestadores`:** Define columnas con anchos calibrados (`ID`, `Nombre`, `Apellido`, `Rubro`, `Matrícula`, `Experiencia (años)`, `Garantía`, `Teléfono`, `Calificación`, `Acerca de`), aplica formato en negrita a la fila de encabezado (`getRow(1).font = { bold: true }`) e inserta cada registro tipado.
+     - **`Resumen`:** Sintetiza métricas clave del catálogo exportado (total de prestadores exportados, cantidad con garantía escrita y calificación promedio general).
+   - Exporta el archivo binario OpenXML mediante `libro.xlsx.writeBuffer()`.
 3. **Disparo de Descarga (`exportarCatalogoPrestadores`):**
-   - Empaqueta el contenido en una instancia de `Blob` con su `mimeType` oficial, genera una URL efímera con `URL.createObjectURL`, simula el clic sobre un elemento `<a download>` temporal y libera la memoria mediante `URL.revokeObjectURL`.
+   - Empaqueta el contenido (`string` o `Uint8Array`) en una instancia de `Blob` con su `mimeType` oficial, genera una URL efímera con `URL.createObjectURL`, simula el clic sobre un elemento `<a download>` temporal y libera la memoria de forma diferida (`setTimeout(() => URL.revokeObjectURL(url), 1000)`).
 
 ---
 
@@ -135,7 +138,7 @@ Se implementó la pirámide completa de pruebas tanto en Frontend como en Backen
 ### 6.1. Pruebas Unitarias
 - **Frontend ([`frontend/src/__test__/prestador.unit.test.ts`](../frontend/src/__test__/prestador.unit.test.ts)):**
   - Valida `construirQueryPrestadores` y todos los métodos de [`prestador.service.ts`](../frontend/services/prestador.service.ts) (`obtenerPrestadores`, `obtenerPrestadorPorId`, `crearPrestador`, `actualizarPrestador`, `eliminarPrestador`, `obtenerCategorias`) simulando `fetch` con respuestas exitosas y errores HTTP (`404`, `500`).
-  - Valida todas las funciones puras y de generación documental de [`exportarCatalogo.service.ts`](../frontend/services/exportarCatalogo.service.ts) (`formatearTelefonoPrestador`, `sanitizarTextoPdf`, `escaparXml`, `generarContenidoPdf`, `generarContenidoXlsx`, `generarArchivoCatalogo`, `exportarCatalogoPrestadores`).
+  - Valida todas las funciones puras y de generación documental de [`exportarCatalogo.service.ts`](../frontend/services/exportarCatalogo.service.ts) (`formatearTelefonoPrestador`, `sanitizarTextoPdf`, `generarContenidoPdf`, `generarExcelCatalogo` verificando la lectura del buffer binario con `ExcelJS.Workbook.xlsx.load`, `generarArchivoCatalogo` y `exportarCatalogoPrestadores`).
   - Verifica el renderizado de [`FormularioPrestador`](../frontend/components/prestadores/FormularioPrestador.tsx) (modo alta y modo edición) y [`ListadoPrestadores`](../frontend/components/prestadores/ListadoPrestadores.tsx) mediante `renderToStaticMarkup`.
 - **Backend Categorías ([`backend/src/__test__/categoria.unit.test.ts`](../backend/src/__test__/categoria.unit.test.ts)):**
   - 15 pruebas unitarias cubriendo `CategoriaRepository`, `CategoriaService` y `CategoriaController`.

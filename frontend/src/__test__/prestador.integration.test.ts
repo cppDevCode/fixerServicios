@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import ExcelJS from 'exceljs';
 import { Server } from 'http';
 import { AddressInfo } from 'net';
 import { Servidor } from '../../../backend/src/core/Servidor';
@@ -121,22 +122,36 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
         ).rejects.toThrow(`Prestador con id ${idNuevo} no encontrado`);
     });
 
-    it('integra la consulta filtrada de prestadores con la generación de archivos .pdf y .xlsx', async () => {
+    it('integra la consulta filtrada de prestadores con la generación de archivos .pdf y .xlsx mediante ExcelJS', async () => {
         const respuesta = await obtenerPrestadores(
             { rubro: 'Plomería', sortBy: 'nombre', order: 'asc' },
             apiBaseUrl
         );
 
-        const reportePdf = generarArchivoCatalogo(respuesta.datos, 'pdf');
+        const reportePdf = await generarArchivoCatalogo(respuesta.datos, 'pdf');
         expect(reportePdf.nombreArchivo).toBe('catalogo-prestadores.pdf');
         expect(reportePdf.totalRegistros).toBe(5);
         expect(reportePdf.contenido).toContain('Carlos Gomez');
         expect(reportePdf.contenido).toContain('Roberto Silva');
 
-        const reporteXlsx = generarArchivoCatalogo(respuesta.datos, 'xlsx');
+        const reporteXlsx = await generarArchivoCatalogo(
+            respuesta.datos,
+            'xlsx'
+        );
         expect(reporteXlsx.nombreArchivo).toBe('catalogo-prestadores.xlsx');
         expect(reporteXlsx.totalRegistros).toBe(5);
-        expect(reporteXlsx.contenido).toContain('<Data ss:Type="String">Carlos</Data>');
-        expect(reporteXlsx.contenido).toContain('<Data ss:Type="String">Roberto</Data>');
+        expect(reporteXlsx.contenido).toBeInstanceOf(Uint8Array);
+
+        const libro = new ExcelJS.Workbook();
+        await libro.xlsx.load(
+            (reporteXlsx.contenido as Uint8Array).buffer as ArrayBuffer
+        );
+
+        const hojaCatalogo = libro.getWorksheet('Catálogo Prestadores');
+        expect(hojaCatalogo?.getRow(2).getCell(2).value).toBe('Carlos');
+        expect(hojaCatalogo?.getRow(6).getCell(2).value).toBe('Roberto');
+
+        const hojaResumen = libro.getWorksheet('Resumen');
+        expect(hojaResumen?.getRow(2).getCell(2).value).toBe(5);
     });
 });
