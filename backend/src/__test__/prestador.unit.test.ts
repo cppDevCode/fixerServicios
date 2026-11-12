@@ -130,6 +130,28 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(resultado).toBeNull();
         });
 
+        it('create y update normalizan fotoUrl: recortan espacios y convierten cadenas vacías en undefined', () => {
+            const conFotoEspacios = repository.create(
+                crearDatosPrestador({
+                    nombre: 'ConFoto',
+                    fotoUrl: '  https://randomuser.me/api/portraits/men/50.jpg  ',
+                })
+            );
+            expect(conFotoEspacios.fotoUrl).toBe('https://randomuser.me/api/portraits/men/50.jpg');
+
+            const sinFoto = repository.create(
+                crearDatosPrestador({
+                    nombre: 'SinFoto',
+                    fotoUrl: '   ',
+                })
+            );
+            expect(sinFoto.fotoUrl).toBeUndefined();
+
+            // Limpiar foto existente mediante cadena vacía en update
+            const fotoEliminada = repository.update(conFotoEspacios.id, { fotoUrl: '' });
+            expect(fotoEliminada?.fotoUrl).toBeUndefined();
+        });
+
         it('delete elimina un prestador existente y retorna true, o false si no existe', () => {
             const eliminado = repository.delete(1);
             expect(eliminado).toBe(true);
@@ -413,8 +435,32 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
                     acercaDe: '',
                     ofreceGarantia: false,
                     telefono: { codPais: '+54', codArea: '11', nroTelefono: '' },
+                    fotoUrl: undefined,
                 }),
             });
+
+            const res201ConFoto = crearResMock();
+            controller.crear(
+                {
+                    body: {
+                        nombre: 'Valeria',
+                        apellido: 'Sosa',
+                        categoriaId: 'Pintura',
+                        fotoUrl: '  https://randomuser.me/api/portraits/women/22.jpg  ',
+                    },
+                } as unknown as Request,
+                res201ConFoto
+            );
+            expect(res201ConFoto.status).toHaveBeenCalledWith(201);
+            expect(res201ConFoto.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    codigo: 201,
+                    datos: expect.objectContaining({
+                        nombre: 'Valeria',
+                        fotoUrl: 'https://randomuser.me/api/portraits/women/22.jpg',
+                    }),
+                })
+            );
         });
 
         it('actualizar valida id requerido (400), no encontrado (404) y actualización exitosa (200)', () => {

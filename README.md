@@ -12,7 +12,7 @@ El desarrollo se estructuró verticalmente en **3 módulos autónomos**, donde c
 
 | Integrante | Módulo Asignado | Alcance Técnico Principal |Rama de Desarrollo |
 | :--- | :--- | :--- | :--- |
-| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores y Categorías** (`Prestador`, `Categoria`, `Rubro`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, API REST CRUD con filtros combinados y paginación (`/api/v1/prestadores`, `/api/v1/categorias`), UI de catálogo paginado, ficha técnica y formulario reactivo (`/prestadores`, `/prestadores/:id`), exportación en `.pdf` y `.xlsx` (`ExcelJS`) y suite de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
+| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores y Categorías** (`Prestador`, `Categoria`, `Rubro`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, API REST CRUD con soporte de foto de perfil (`fotoUrl`), filtros combinados y paginación (`/api/v1/prestadores`, `/api/v1/categorias`), UI de catálogo de usuario con tarjetas y filtros rápidos (`/prestadores/catalogo`), tabla de gestión paginada con avatar de foto o silueta de persona por defecto, ficha técnica y formulario reactivo (`/prestadores`, `/prestadores/:id`), exportación en `.pdf` y `.xlsx` (`ExcelJS`) y suite de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
 | **Marianela Belardinelli Beker** | **Módulo 2: Reseñas y Calificaciones** (`Reseña`, `Puntuación`, `Comentario`) | Configuración de Vitest, Supertest y fixtures, API REST CRUD de reseñas (`/api/v1/resenas`) con cálculo automático de promedio de estrellas, UI de feed de opiniones y formulario de alta/edición, exportación de métricas en `.pdf` (`jsPDF`) y `.xlsx` (`ExcelJS`), y suite de pruebas (Unit, Integration, E2E). | `feat/belardinelli-resena` |
 | **Julieta Dabús** | **Módulo 3: Usuarios, Acceso y Ubicación** (`Usuario`, `Ubicacion`, `CodigoPostal`) | Configuración de Playwright, middleware global de manejo de errores HTTP, API REST de autenticación y usuarios (`/api/v1/auth/*`, `/api/v1/usuarios`) con filtro universal y radio de cobertura, layout global (Header, Sidebar, Footer, Router), vistas de Login, Registro, Recuperación de clave, padrón de usuarios y exportación en `.xlsx`. | `feat/dabus-usuarios-auth` |
 
@@ -61,13 +61,15 @@ fixerServicios/
 │   ├── tsconfig.json                          # Configuración estricta de TypeScript (Bundler/DOM/JSX)
 │   ├── vite.config.ts                         # Configuración de Vite y proxy reverso automático (/api -> Backend)
 │   ├── vitest.config.ts                       # Configuración de Vitest para pruebas unitarias y de integración en cliente
+│   ├── assets/
+│   │   └── silueta-persona.svg                # Recurso vectorial de silueta por defecto para prestadores sin foto
 │   ├── styles/
 │   │   └── variables.css                      # Sistema de diseño y tokens CSS globales
 │   ├── interfaces/                            # Contratos de datos en cliente (prestador.interface.ts, resena.interface.ts)
 │   ├── services/                              # Clientes HTTP y motores de exportación (.pdf / .xlsx)
 │   ├── components/
 │   │   ├── layout/                            # Layout general (Header, Sidebar por módulo, Footer)
-│   │   ├── prestadores/                       # ListadoPrestadores, FormularioPrestador y estilos
+│   │   ├── prestadores/                       # AvatarPrestador, CatalogoPrestadoresUsuario, TarjetaCatalogoPrestador, ListadoPrestadores, FormularioPrestador y estilos
 │   │   └── resenas/                           # ListadoResenas, FormularioResena, TarjetaResena, Estrellas y estilos
 │   ├── pages/                                 # Vistas de página (PrestadoresPage, PrestadorDetallePage, ResenaPage, UsuariosPage, UsuarioDetallePage, LoginPage, RegistroPage, RecuperarPasswordPage)
 │   ├── src/
@@ -278,8 +280,8 @@ pnpm run build
 | **Sistema** | `GET` | `/api/v1/health` | Verificación de estado del servidor (`{ code: 200, msg: 'Ok', data: { status: 'up' } }`). |
 | **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores` | Listado paginado con soporte para `?page=1&limit=10&rubro=Plomería&search=...&sortBy=nombre&order=asc`. |
 | **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores/:id` | Obtiene la ficha técnica detallada de un prestador por su ID. |
-| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador en el catálogo. |
-| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos de un prestador. |
+| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador en el catálogo (incluyendo soporte opcional de fotografía `fotoUrl`). |
+| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos y/o foto de perfil de un prestador (enviar `fotoUrl: ""` restaura la silueta por defecto). |
 | **Módulo 1: Prestadores** | `DELETE` | `/api/v1/prestadores/:id` | Elimina un prestador del catálogo. |
 | **Módulo 1: Categorías** | `GET` | `/api/v1/categorias` | Lista los rubros profesionales ordenados alfabéticamente (soporta `?search=`). |
 | **Módulo 1: Categorías** | `POST` / `PUT` / `DELETE` | `/api/v1/categorias` | Alta, modificación y baja de categorías profesionales. |

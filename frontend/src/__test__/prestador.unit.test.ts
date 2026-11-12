@@ -21,8 +21,18 @@ import {
     generarExcelCatalogo,
     sanitizarTextoPdf,
 } from '../../services/exportarCatalogo.service';
+import {
+    AvatarPrestador,
+    SILUETA_PERSONA_DATA_URI,
+} from '../../components/prestadores/AvatarPrestador';
+import { CatalogoPrestadoresUsuario } from '../../components/prestadores/CatalogoPrestadoresUsuario';
 import { FormularioPrestador } from '../../components/prestadores/FormularioPrestador';
 import { ListadoPrestadores } from '../../components/prestadores/ListadoPrestadores';
+import {
+    calcularCantidadResenas,
+    obtenerTituloEspecialidad,
+    TarjetaCatalogoPrestador,
+} from '../../components/prestadores/TarjetaCatalogoPrestador';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -43,6 +53,15 @@ const prestadorMock: IPrestador = {
         nroTelefono: '40001001',
     },
     ratingPromedio: 4.8,
+    fotoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+};
+
+const prestadorSinFotoMock: IPrestador = {
+    ...prestadorMock,
+    id: 4,
+    nombre: 'Ana',
+    apellido: 'López',
+    fotoUrl: undefined,
 };
 
 describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
@@ -313,8 +332,36 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
         });
     });
 
-    describe('Componentes UI (FormularioPrestador y ListadoPrestadores)', () => {
-        it('FormularioPrestador renderiza campos vacíos en alta y campos precargados en edición', () => {
+    describe('Componentes UI (AvatarPrestador, FormularioPrestador y ListadoPrestadores)', () => {
+        it('AvatarPrestador muestra la foto del profesional cuando tiene fotoUrl y la silueta de persona cuando no tiene foto', () => {
+            const htmlConFoto = renderToStaticMarkup(
+                createElement(AvatarPrestador, {
+                    nombre: 'Carlos',
+                    apellido: 'Gómez',
+                    fotoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+                    tamano: 'md',
+                })
+            );
+            expect(htmlConFoto).toContain('data-tiene-foto="true"');
+            expect(htmlConFoto).toContain(
+                'src="https://randomuser.me/api/portraits/men/32.jpg"'
+            );
+            expect(htmlConFoto).toContain('alt="Foto de Carlos Gómez"');
+
+            const htmlSinFoto = renderToStaticMarkup(
+                createElement(AvatarPrestador, {
+                    nombre: 'Ana',
+                    apellido: 'López',
+                    fotoUrl: undefined,
+                    tamano: 'lg',
+                })
+            );
+            expect(htmlSinFoto).toContain('data-tiene-foto="false"');
+            expect(htmlSinFoto).toContain(`src="${SILUETA_PERSONA_DATA_URI}"`);
+            expect(htmlSinFoto).toContain('alt="Silueta de Ana López"');
+        });
+
+        it('FormularioPrestador renderiza campos vacíos con silueta en alta y campos precargados con foto en edición', () => {
             const htmlAlta = renderToStaticMarkup(
                 createElement(FormularioPrestador, {
                     titulo: 'Alta de prestador',
@@ -322,6 +369,8 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
             expect(htmlAlta).toContain('Alta de prestador');
             expect(htmlAlta).toContain('Crear prestador');
+            expect(htmlAlta).toContain('data-tiene-foto="false"');
+            expect(htmlAlta).not.toContain('Quitar foto');
 
             const htmlEdicion = renderToStaticMarkup(
                 createElement(FormularioPrestador, {
@@ -331,23 +380,69 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlEdicion).toContain('value="Carlos"');
             expect(htmlEdicion).toContain('value="Gómez"');
             expect(htmlEdicion).toContain('value="MAT-1001"');
+            expect(htmlEdicion).toContain(
+                'value="https://randomuser.me/api/portraits/men/32.jpg"'
+            );
+            expect(htmlEdicion).toContain('data-tiene-foto="true"');
+            expect(htmlEdicion).toContain('Quitar foto');
             expect(htmlEdicion).toContain('Guardar cambios');
         });
 
-        it('ListadoPrestadores renderiza la tabla paginada, filtros, selector de filas y botón Exportar Catálogo', () => {
+        it('ListadoPrestadores renderiza la tabla paginada con fotos, siluetas por defecto y botón Exportar Catálogo', () => {
             const htmlListado = renderToStaticMarkup(
                 createElement(ListadoPrestadores, {
-                    prestadoresIniciales: [prestadorMock],
+                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
                     categoriasIniciales: CATEGORIAS_POR_DEFECTO,
                 })
             );
 
             expect(htmlListado).toContain('Carlos Gómez');
+            expect(htmlListado).toContain('Ana López');
+            expect(htmlListado).toContain('data-tiene-foto="true"');
+            expect(htmlListado).toContain('data-tiene-foto="false"');
             expect(htmlListado).toContain('MAT-1001');
             expect(htmlListado).toContain('10 años');
             expect(htmlListado).toContain('+54 11 40001001');
             expect(htmlListado).toContain('Exportar Catálogo');
-            expect(htmlListado).toContain('Total: 1 registros');
+            expect(htmlListado).toContain('Total: 2 registros');
+        });
+
+        it('TarjetaCatalogoPrestador y CatalogoPrestadoresUsuario renderizan la vista de catálogo para el usuario con filtros rápidos, tarjetas, fotos y siluetas', () => {
+            expect(obtenerTituloEspecialidad(prestadorMock)).toBe(
+                'Plomería Integral e Instalaciones Sanitarias'
+            );
+            expect(calcularCantidadResenas(prestadorMock)).toBeGreaterThan(80);
+
+            const htmlTarjeta = renderToStaticMarkup(
+                createElement(TarjetaCatalogoPrestador, {
+                    prestador: prestadorMock,
+                    onVerPerfil: vi.fn(),
+                })
+            );
+            expect(htmlTarjeta).toContain('Carlos Gómez');
+            expect(htmlTarjeta).toContain('Matrícula MAT-1001');
+            expect(htmlTarjeta).toContain('Ofrece garantía');
+            expect(htmlTarjeta).toContain('Ver Perfil');
+            expect(htmlTarjeta).toContain('Contactar');
+            expect(htmlTarjeta).toContain('data-tiene-foto="true"');
+            expect(htmlTarjeta).not.toContain('Tarifa orientativa');
+            expect(htmlTarjeta).not.toContain('Verificado Fixer');
+
+            const htmlCatalogo = renderToStaticMarkup(
+                createElement(CatalogoPrestadoresUsuario, {
+                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
+                    categoriasIniciales: CATEGORIAS_POR_DEFECTO,
+                })
+            );
+            expect(htmlCatalogo).toContain('CRITERIO DE BÚSQUEDA');
+            expect(htmlCatalogo).toContain('2 disponibles');
+            expect(htmlCatalogo).toContain('Matriculados');
+            expect(htmlCatalogo).toContain('Mejor calificados (4.8+)');
+            expect(htmlCatalogo).toContain('Actualizado en tiempo real');
+            expect(htmlCatalogo).toContain('data-tiene-foto="true"');
+            expect(htmlCatalogo).toContain('data-tiene-foto="false"');
+            expect(htmlCatalogo).not.toContain('Palermo &amp; Zona Norte');
+            expect(htmlCatalogo).not.toContain('Garantía Fixer Care');
         });
     });
 });

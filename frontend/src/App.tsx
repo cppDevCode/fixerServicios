@@ -22,6 +22,7 @@ function App() {
           {/* Redirección de la ruta raíz al módulo de usuarios */}
           <Route path="/" element={<Navigate to="/usuarios" replace />} />
           <Route path="/prestadores" element={<PrestadoresPage />} />
+          <Route path="/prestadores/catalogo" element={<PrestadoresPage vistaInicial="catalogo" />} />
           <Route path="/prestadores/:id" element={<PrestadorDetallePage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
           <Route path="/usuarios/:id" element={<UsuarioDetallePage />} />
