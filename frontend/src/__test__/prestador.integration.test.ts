@@ -93,26 +93,34 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
                     nroTelefono: '47778888',
                 },
                 ratingPromedio: 4.9,
+                fotoUrl: 'https://randomuser.me/api/portraits/men/64.jpg',
             },
             apiBaseUrl
         );
 
         expect(creado.codigo).toBe(201);
+        expect(creado.datos.fotoUrl).toBe(
+            'https://randomuser.me/api/portraits/men/64.jpg'
+        );
         const idNuevo = creado.datos.id;
 
         const detalle = await obtenerPrestadorPorId(idNuevo, apiBaseUrl);
         expect(detalle.codigo).toBe(200);
         expect(detalle.datos.nombre).toBe('Luciano');
         expect(detalle.datos.matricula).toBe('MAT-3050');
+        expect(detalle.datos.fotoUrl).toBe(
+            'https://randomuser.me/api/portraits/men/64.jpg'
+        );
 
         const editado = await actualizarPrestador(
             idNuevo,
-            { aniosExperiencia: 12, ofreceGarantia: false },
+            { aniosExperiencia: 12, ofreceGarantia: false, fotoUrl: '' },
             apiBaseUrl
         );
         expect(editado.codigo).toBe(200);
         expect(editado.datos.aniosExperiencia).toBe(12);
         expect(editado.datos.ofreceGarantia).toBe(false);
+        expect(editado.datos.fotoUrl).toBeUndefined();
 
         const eliminado = await eliminarPrestador(idNuevo, apiBaseUrl);
         expect(eliminado.codigo).toBe(200);
