@@ -41,6 +41,9 @@ export function construirQueryPrestadores(filtros: IFiltrosPrestador = {}): stri
     if (filtros.rubro && filtros.rubro.trim() !== '') {
         parametros.set('rubro', filtros.rubro.trim());
     }
+    if (filtros.provincia && filtros.provincia.trim() !== '') {
+        parametros.set('provincia', filtros.provincia.trim());
+    }
     if (filtros.localidad && filtros.localidad.trim() !== '') {
         parametros.set('localidad', filtros.localidad.trim());
     }

@@ -8,8 +8,13 @@ import {
     actualizarPrestador,
     CATEGORIAS_POR_DEFECTO,
     crearPrestador,
-    LOCALIDADES_POR_DEFECTO,
 } from '../../services/prestador.service';
+import {
+    inferirProvinciaDeLocalidad,
+    obtenerLocalidadesPorProvincia,
+    PROVINCIAS_ARGENTINA,
+    PROVINCIAS_LOCALIDADES_ARGENTINA,
+} from '../../services/ubicacionesArgentina';
 import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
@@ -38,8 +43,15 @@ export function FormularioPrestador({
     const [categoriaId, setCategoriaId] = useState(
         prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 'Plomería'
     );
+    const provinciaInicial =
+        prestadorInicial?.provincia ??
+        inferirProvinciaDeLocalidad(prestadorInicial?.localidad);
+
+    const [provincia, setProvincia] = useState(provinciaInicial);
     const [localidad, setLocalidad] = useState(
-        prestadorInicial?.localidad ?? LOCALIDADES_POR_DEFECTO[1] ?? 'Córdoba Capital'
+        prestadorInicial?.localidad ??
+            obtenerLocalidadesPorProvincia(provinciaInicial)[0] ??
+            'Córdoba Capital'
     );
     const [matricula, setMatricula] = useState(prestadorInicial?.matricula ?? '');
     const [aniosExperiencia, setAniosExperiencia] = useState(
@@ -112,6 +124,7 @@ export function FormularioPrestador({
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
             categoriaId: rubroLimpio,
+            provincia: provincia.trim() || undefined,
             localidad: localidad.trim() || undefined,
             matricula: matricula.trim() ? matricula.trim() : undefined,
             aniosExperiencia: experienciaNumero,
@@ -225,18 +238,72 @@ export function FormularioPrestador({
                 </div>
 
                 <div className="prestadores-campo">
+                    <label htmlFor="prestador-provincia">Provincia</label>
+                    <select
+                        id="prestador-provincia"
+                        name="provincia"
+                        value={provincia}
+                        onChange={(e) => {
+                            const nuevaProvincia = e.target.value;
+                            setProvincia(nuevaProvincia);
+                            const localidadesDeProvincia =
+                                obtenerLocalidadesPorProvincia(nuevaProvincia);
+                            if (localidadesDeProvincia.length > 0) {
+                                setLocalidad(localidadesDeProvincia[0]);
+                            }
+                        }}
+                        disabled={enviando}
+                    >
+                        {PROVINCIAS_ARGENTINA.map((prov) => (
+                            <option key={prov} value={prov}>
+                                {prov}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="prestadores-campo">
                     <label htmlFor="prestador-localidad">Localidad</label>
                     <select
                         id="prestador-localidad"
                         name="localidad"
                         value={localidad}
-                        onChange={(e) => setLocalidad(e.target.value)}
+                        onChange={(e) => {
+                            const nuevaLocalidad = e.target.value;
+                            setLocalidad(nuevaLocalidad);
+                            const provInferida =
+                                inferirProvinciaDeLocalidad(nuevaLocalidad);
+                            if (provInferida) {
+                                setProvincia(provInferida);
+                            }
+                        }}
                         disabled={enviando}
                     >
-                        {LOCALIDADES_POR_DEFECTO.map((loc) => (
-                            <option key={loc} value={loc}>
-                                {loc}
-                            </option>
+                        <optgroup label={`Localidades de ${provincia}`}>
+                            {obtenerLocalidadesPorProvincia(provincia).map(
+                                (loc) => (
+                                    <option key={`${provincia}-${loc}`} value={loc}>
+                                        {loc}
+                                    </option>
+                                )
+                            )}
+                        </optgroup>
+                        {PROVINCIAS_LOCALIDADES_ARGENTINA.filter(
+                            (grupo) => grupo.provincia !== provincia
+                        ).map((grupo) => (
+                            <optgroup
+                                key={grupo.provincia}
+                                label={grupo.provincia}
+                            >
+                                {grupo.localidades.map((loc) => (
+                                    <option
+                                        key={`${grupo.provincia}-${loc}`}
+                                        value={loc}
+                                    >
+                                        {loc}
+                                    </option>
+                                ))}
+                            </optgroup>
                         ))}
                     </select>
                 </div>

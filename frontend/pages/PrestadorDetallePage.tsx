@@ -251,6 +251,16 @@ export function PrestadorDetallePage() {
                                     <span>Rubro principal</span>
                                     <strong>{prestador.categoriaId}</strong>
                                 </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Ubicación (Localidad / Provincia)</span>
+                                    <strong>
+                                        {prestador.localidad ?? 'Sin localidad'}
+                                        {prestador.provincia
+                                            ? `, ${prestador.provincia}`
+                                            : ''}
+                                    </strong>
+                                </div>
                             </div>
 
                             <div className="prestador-atributo">
