@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  esAdmin,
+  esPrestador,
+  obtenerUsuarioActual,
+} from '../services/sesion.service';
 
 interface IUsuarioDetalle {
   id: string;
@@ -15,14 +20,29 @@ interface IUsuarioDetalle {
 export const UsuarioDetallePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const usuarioActual = obtenerUsuarioActual();
+  const tienePermisoPerfil =
+    esAdmin(usuarioActual) ||
+    (usuarioActual !== null && String(usuarioActual.id) === String(id));
+  const rutaRegreso = esAdmin(usuarioActual)
+    ? '/usuarios'
+    : esPrestador(usuarioActual)
+      ? `/prestadores/${usuarioActual?.prestadorId ?? 1}`
+      : '/prestadores/catalogo';
+
   const [usuario, setUsuario] = useState<IUsuarioDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   useEffect(() => {
+    if (!tienePermisoPerfil) {
+      setLoading(false);
+      return;
+    }
+
     const fetchUsuario = async () => {
       try {
         const response = await fetch(`${API_URL}/usuarios/${id}`);
@@ -36,7 +56,7 @@ export const UsuarioDetallePage = () => {
       }
     };
     fetchUsuario();
-  }, [id]);
+  }, [id, tienePermisoPerfil]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!usuario) return;
@@ -63,7 +83,7 @@ export const UsuarioDetallePage = () => {
       const result = await response.json();
       if (result.code === 200) {
         setSuccess('Perfil actualizado correctamente');
-        setTimeout(() => navigate('/usuarios'), 1500);
+        setTimeout(() => navigate(rutaRegreso), 1500);
       } else {
         setError(result.msg || 'Error al actualizar');
       }
@@ -72,6 +92,16 @@ export const UsuarioDetallePage = () => {
     }
   };
 
+  if (!tienePermisoPerfil) {
+    return (
+      <div className="usuarios-container" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <h2>Acceso Restringido</h2>
+        <p>Solo podés consultar o editar tu propio perfil de usuario.</p>
+        <Link to={rutaRegreso} className="perfil-back-link">← Volver</Link>
+      </div>
+    );
+  }
+
   if (loading) return <div className="usuarios-container">Cargando perfil...</div>;
   if (!usuario) return <div className="usuarios-container">No se encontró el usuario</div>;
 
@@ -79,7 +109,7 @@ export const UsuarioDetallePage = () => {
     <div className="usuarios-container" style={{ maxWidth: '600px', margin: '0 auto' }}>
       <div className="perfil-header">
         <h2 className="perfil-title">Editar Perfil</h2>
-        <Link to="/usuarios" className="perfil-back-link">← Volver al listado</Link>
+        <Link to={rutaRegreso} className="perfil-back-link">← Volver</Link>
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -109,7 +139,7 @@ export const UsuarioDetallePage = () => {
 
         <div className="perfil-actions">
           <button type="submit" className="btn-save">Guardar Cambios</button>
-          <Link to="/usuarios" className="btn-cancel">Cancelar</Link>
+          <Link to={rutaRegreso} className="btn-cancel">Cancelar</Link>
         </div>
       </form>
     </div>
