@@ -43,6 +43,19 @@ import {
     calcularCategoriasMasBuscadas,
     HomePage,
 } from '../../pages/HomePage';
+import {
+    construirHeadersAutenticacion,
+    esAdmin,
+    esPrestador,
+    esUsuarioFinal,
+    obtenerRutaInicioPorRol,
+    puedeAdministrarUsuarios,
+    puedeAgregarResena,
+    puedeEditarPrestador,
+    puedeEliminarPrestador,
+    puedeGestionarCatalogoPrestadores,
+    type IUsuarioSesion,
+} from '../../services/sesion.service';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -511,6 +524,64 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlHome).toContain('Pintura de interiores');
             expect(htmlHome).toContain('Electricistas matriculados');
             expect(htmlHome).toContain('data-testid="sugerencia-categoria"');
+        });
+
+        it('sesion.service.ts valida permisos diferenciados para los roles ADMIN, PRESTADOR y USUARIO', () => {
+            const admin: IUsuarioSesion = {
+                id: '1',
+                nombre: 'Bruna',
+                email: 'bruna@example.com',
+                rol: 'ADMIN',
+            };
+            const prestador: IUsuarioSesion = {
+                id: '2',
+                nombre: 'Carlos',
+                email: 'carlos@example.com',
+                rol: 'PRESTADOR',
+                prestadorId: 1,
+            };
+            const usuario: IUsuarioSesion = {
+                id: '3',
+                nombre: 'Berta',
+                email: 'berta@example.com',
+                rol: 'USUARIO',
+            };
+
+            // Rol ADMIN: acceso total a módulo de prestadores y usuarios
+            expect(esAdmin(admin)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(admin)).toBe(true);
+            expect(puedeAdministrarUsuarios(admin)).toBe(true);
+            expect(puedeEditarPrestador(admin, 1)).toBe(true);
+            expect(puedeEditarPrestador(admin, 2)).toBe(true);
+            expect(puedeEliminarPrestador(admin)).toBe(true);
+            expect(obtenerRutaInicioPorRol(admin)).toBe('/prestadores');
+
+            // Rol PRESTADOR: solo puede editar su propia ficha (id 1) y navegar como usuario
+            expect(esPrestador(prestador)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(prestador)).toBe(false);
+            expect(puedeAdministrarUsuarios(prestador)).toBe(false);
+            expect(puedeEditarPrestador(prestador, 1)).toBe(true);
+            expect(puedeEditarPrestador(prestador, 2)).toBe(false);
+            expect(puedeEliminarPrestador(prestador)).toBe(false);
+            expect(puedeAgregarResena(prestador, 1)).toBe(false);
+            expect(puedeAgregarResena(prestador, 2)).toBe(true);
+            expect(obtenerRutaInicioPorRol(prestador)).toBe('/prestadores/1');
+            expect(construirHeadersAutenticacion(prestador)).toEqual({
+                'x-usuario-id': '2',
+                'x-usuario-rol': 'PRESTADOR',
+                'x-prestador-id': '1',
+            });
+
+            // Rol USUARIO: solo lectura en prestadores y habilitado para agregar reseñas
+            expect(esUsuarioFinal(usuario)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(usuario)).toBe(false);
+            expect(puedeAdministrarUsuarios(usuario)).toBe(false);
+            expect(puedeEditarPrestador(usuario, 1)).toBe(false);
+            expect(puedeEliminarPrestador(usuario)).toBe(false);
+            expect(puedeAgregarResena(usuario, 1)).toBe(true);
+            expect(obtenerRutaInicioPorRol(usuario)).toBe(
+                '/prestadores/catalogo'
+            );
         });
     });
 });

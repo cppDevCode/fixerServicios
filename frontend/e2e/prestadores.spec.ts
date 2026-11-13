@@ -3,6 +3,27 @@ import { test, expect } from '@playwright/test';
 test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
     test.describe.configure({ mode: 'serial' });
 
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => {
+            if (
+                !window.localStorage.getItem('usuario') &&
+                !window.localStorage.getItem('omitir_admin_default')
+            ) {
+                window.localStorage.setItem('token', 'jwt-admin-e2e');
+                window.localStorage.setItem(
+                    'usuario',
+                    JSON.stringify({
+                        id: '1',
+                        nombre: 'Bruna',
+                        apellido: 'Ramírez',
+                        email: 'bruna@example.com',
+                        rol: 'ADMIN',
+                    })
+                );
+            }
+        });
+    });
+
     test('permite navegar a la sección de Prestadores desde el menú lateral y visualizar el catálogo paginado', async ({
         page,
     }) => {
@@ -237,6 +258,68 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         ).toBeVisible();
         await expect(
             page.getByText(/Mostrando 5 profesionales disponibles/i)
+        ).toBeVisible();
+    });
+
+    test('aplica seguridad por roles: PRESTADOR edita solo su perfil y navega como usuario, y USUARIO visualiza en solo lectura y puede agregar reseña', async ({
+        page,
+    }) => {
+        await page.goto('/login');
+        await page.evaluate(() => {
+            window.localStorage.setItem('omitir_admin_default', 'true');
+            window.localStorage.removeItem('usuario');
+            window.localStorage.removeItem('token');
+        });
+        await page.goto('/login');
+
+        // 1. Login con rol PRESTADOR (carlos@example.com -> prestadorId: 1)
+        await page.locator('input[type="email"]').fill('carlos@example.com');
+        await page.locator('input[type="password"]').fill('123456');
+        await page.getByRole('button', { name: /Ingresar/i }).click();
+
+        // Redirige a su propia ficha (/prestadores/1) y permite editar sus datos pero no eliminar
+        await expect(page).toHaveURL(/\/prestadores\/1$/);
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Eliminar prestador/i })
+        ).toHaveCount(0);
+
+        // Permite navegar como perfil de usuario al catálogo público y ver otro prestador (/prestadores/2) en solo lectura
+        await page.getByTestId('btn-navegar-como-usuario').click();
+        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+        await page.goto('/prestadores/2');
+        await expect(
+            page.getByTestId('aviso-solo-lectura-prestador')
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toHaveCount(0);
+
+        // 2. Cerrar sesión e ingresar con rol USUARIO (berta@example.com)
+        await page.getByTestId('btn-cerrar-sesion').click();
+        await expect(page).toHaveURL(/\/login$/);
+
+        await page.locator('input[type="email"]').fill('berta@example.com');
+        await page.locator('input[type="password"]').fill('123456');
+        await page.getByRole('button', { name: /Ingresar/i }).click();
+
+        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+
+        // En el detalle de prestador, USUARIO solo visualiza los datos y puede agregar una reseña
+        await page.goto('/prestadores/1');
+        await expect(
+            page.getByTestId('aviso-solo-lectura-prestador')
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toHaveCount(0);
+        await expect(
+            page.getByRole('heading', { name: /Dejá tu reseña/i })
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Publicar reseña/i })
         ).toBeVisible();
     });
 });
