@@ -45,7 +45,7 @@ fixerServicios/
 │       ├── service/                           # Lógica de negocio, filtrado normalizado, cálculo de promedios y paginación
 │       ├── controller/                        # Controladores HTTP y validación de payloads
 │       ├── route/                             # Definición de rutas REST (/prestadores, /categorias, /resenas, /usuarios, /auth)
-│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts)
+│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts) y autorización por roles (autorizacion.middleware.ts)
 │       └── __test__/                          # Pruebas Unitarias (*.unit.test.ts), Integración (*.integration.test.ts) y E2E (*.e2e.test.ts)
 │           ├── fixtures/                      # Fábricas de datos de prueba (prestadores y reseñas)
 │           └── helpers/                       # Instanciación de aplicación Express en memoria (crearApp.ts)
@@ -66,7 +66,7 @@ fixerServicios/
 │   ├── styles/
 │   │   └── variables.css                      # Sistema de diseño y tokens CSS globales
 │   ├── interfaces/                            # Contratos de datos en cliente (prestador.interface.ts, resena.interface.ts)
-│   ├── services/                              # Clientes HTTP y motores de exportación (.pdf / .xlsx)
+│   ├── services/                              # Clientes HTTP, control de sesión/roles (sesion.service.ts) y exportación (.pdf / .xlsx)
 │   ├── components/
 │   │   ├── layout/                            # Layout general (Header, Sidebar por módulo, Footer)
 │   │   ├── prestadores/                       # AvatarPrestador, CatalogoPrestadoresUsuario, TarjetaCatalogoPrestador, ListadoPrestadores, FormularioPrestador y estilos
