@@ -40,10 +40,23 @@ export function CatalogoPrestadoresUsuario({
         categoriasIniciales ?? CATEGORIAS_POR_DEFECTO
     );
 
-    const [busquedaInput, setBusquedaInput] = useState('');
-    const [busquedaActiva, setBusquedaActiva] = useState('');
-    const [rubroSeleccionado, setRubroSeleccionado] = useState('');
-    const [localidadSeleccionada, setLocalidadSeleccionada] = useState('');
+    const parametrosUrl =
+        typeof window !== 'undefined'
+            ? new URLSearchParams(window.location.search)
+            : new URLSearchParams();
+
+    const [busquedaInput, setBusquedaInput] = useState(
+        () => parametrosUrl.get('search') ?? ''
+    );
+    const [busquedaActiva, setBusquedaActiva] = useState(
+        () => parametrosUrl.get('search') ?? ''
+    );
+    const [rubroSeleccionado, setRubroSeleccionado] = useState(
+        () => parametrosUrl.get('rubro') ?? ''
+    );
+    const [localidadSeleccionada, setLocalidadSeleccionada] = useState(
+        () => parametrosUrl.get('localidad') ?? ''
+    );
     const [soloMatriculados, setSoloMatriculados] = useState(false);
     const [soloConGarantia, setSoloConGarantia] = useState(false);
     const [soloMejorCalificados, setSoloMejorCalificados] = useState(false);

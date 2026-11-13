@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { LoginPage } from '../pages/LoginPage';
 import { RegistroPage } from './../pages/RegistroPage';
 import { RecuperarPasswordPage } from './../pages/RecuperarPasswordPage'; 
 import { UsuariosPage } from '../pages/UsuariosPage';
 import { UsuarioDetallePage } from '../pages/UsuarioDetallePage';
-import { PrestadoresPlaceholder, ResenasPlaceholder } from '../pages/Placeholders';
+import { HomePage } from '../pages/HomePage';
 import { PrestadoresPage } from '../pages/PrestadoresPage';
 import { PrestadorDetallePage } from '../pages/PrestadorDetallePage';
 
@@ -19,8 +19,8 @@ function App() {
         <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
         
         <Route element={<Layout />}>
-          {/* Redirección de la ruta raíz al módulo de usuarios */}
-          <Route path="/" element={<Navigate to="/usuarios" replace />} />
+          {/* Ruta raíz establecida en la vista Home del sitio */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/prestadores" element={<PrestadoresPage />} />
           <Route path="/prestadores/catalogo" element={<PrestadoresPage vistaInicial="catalogo" />} />
           <Route path="/prestadores/:id" element={<PrestadorDetallePage />} />
