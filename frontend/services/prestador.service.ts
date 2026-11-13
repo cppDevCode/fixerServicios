@@ -6,6 +6,7 @@ import type {
     IPrestador,
     RespuestaApi,
 } from '../interfaces/prestador.interface';
+import { construirHeadersAutenticacion } from './sesion.service';
 
 export const API_BASE_URL = '/api/v1';
 
@@ -99,6 +100,7 @@ export async function crearPrestador(
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            ...construirHeadersAutenticacion(),
         },
         body: JSON.stringify(datos),
     });
@@ -121,6 +123,7 @@ export async function actualizarPrestador(
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            ...construirHeadersAutenticacion(),
         },
         body: JSON.stringify(datos),
     });
@@ -138,9 +141,12 @@ export async function eliminarPrestador(
     id: number,
     baseUrl: string = API_BASE_URL
 ): Promise<RespuestaApi<null>> {
-    const respuesta = await fetch(`${baseUrl}/prestadores/${id}`, {
-        method: 'DELETE',
-    });
+    const headersAuth = construirHeadersAutenticacion();
+    const opciones: RequestInit =
+        Object.keys(headersAuth).length > 0
+            ? { method: 'DELETE', headers: headersAuth }
+            : { method: 'DELETE' };
+    const respuesta = await fetch(`${baseUrl}/prestadores/${id}`, opciones);
 
     const resultado = (await respuesta.json()) as RespuestaApi<null>;
 
