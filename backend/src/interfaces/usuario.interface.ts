@@ -5,6 +5,7 @@ export interface IUsuario {
   email: string;
   passwordHash: string; 
   rol: 'USUARIO' | 'PRESTADOR' | 'ADMIN';
+  prestadorId?: number;
   ubicacionId?: string;
   codigopostal?: string;
   radio?: number;
