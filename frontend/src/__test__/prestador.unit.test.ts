@@ -39,6 +39,10 @@ import {
     PROVINCIAS_ARGENTINA,
     TODAS_LAS_LOCALIDADES_ARGENTINA,
 } from '../../services/ubicacionesArgentina';
+import {
+    calcularCategoriasMasBuscadas,
+    HomePage,
+} from '../../pages/HomePage';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -468,6 +472,45 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlCatalogo).toContain('data-tiene-foto="false"');
             expect(htmlCatalogo).not.toContain('Palermo &amp; Zona Norte');
             expect(htmlCatalogo).not.toContain('Garantía Fixer Care');
+        });
+
+        it('HomePage y calcularCategoriasMasBuscadas renderizan la vista de inicio con buscador y sugerencia de categorías más buscadas', () => {
+            const sugerencias = calcularCategoriasMasBuscadas(
+                [
+                    prestadorMock,
+                    { ...prestadorMock, id: 2, categoriaId: 'Plomería' },
+                    { ...prestadorMock, id: 3, categoriaId: 'Electricidad' },
+                ],
+                CATEGORIAS_POR_DEFECTO,
+                { Gasista: 4 },
+                4
+            );
+
+            expect(sugerencias).toHaveLength(4);
+            expect(sugerencias[0].categoriaId).toBe('Gasista');
+            expect(sugerencias[1].categoriaId).toBe('Plomería');
+            expect(sugerencias[1].etiqueta).toBe('Plomería de urgencia');
+
+            const htmlHome = renderToStaticMarkup(
+                createElement(HomePage, {
+                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
+                    categoriasIniciales: CATEGORIAS_POR_DEFECTO,
+                })
+            );
+
+            expect(htmlHome).toContain(
+                'Encontrá al profesional ideal para tu hogar'
+            );
+            expect(htmlHome).toContain('id="home-busqueda-texto"');
+            expect(htmlHome).toContain('id="home-busqueda-rubro"');
+            expect(htmlHome).toContain('id="home-busqueda-localidad"');
+            expect(htmlHome).toContain('Buscar profesionales');
+            expect(htmlHome).toContain('FRECUENTES:');
+            expect(htmlHome).toContain('Plomería de urgencia');
+            expect(htmlHome).toContain('Instalación de aire acondicionado');
+            expect(htmlHome).toContain('Pintura de interiores');
+            expect(htmlHome).toContain('Electricistas matriculados');
+            expect(htmlHome).toContain('data-testid="sugerencia-categoria"');
         });
     });
 });

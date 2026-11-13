@@ -209,4 +209,34 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
             .click();
         await expect(page).toHaveURL(/\/prestadores\/1$/);
     });
+
+    test('muestra la vista Home en la ruta raíz (/), sugiere las categorías más buscadas y navega al catálogo filtrado', async ({
+        page,
+    }) => {
+        await page.goto('/');
+
+        await expect(page.getByTestId('home-pagina')).toBeVisible();
+        await expect(
+            page.getByRole('heading', {
+                name: /Encontrá al profesional ideal para tu hogar/i,
+            })
+        ).toBeVisible();
+        await expect(page.getByText('FRECUENTES:')).toBeVisible();
+
+        const chipsSugerencias = page.getByTestId('sugerencia-categoria');
+        await expect(chipsSugerencias).toHaveCount(4);
+        await expect(chipsSugerencias.first()).toContainText(
+            'Plomería de urgencia'
+        );
+
+        await chipsSugerencias.first().click();
+
+        await expect(page).toHaveURL(/\/prestadores\/catalogo\?rubro=/);
+        await expect(
+            page.getByTestId('catalogo-prestadores-usuario')
+        ).toBeVisible();
+        await expect(
+            page.getByText(/Mostrando 5 profesionales disponibles/i)
+        ).toBeVisible();
+    });
 });
