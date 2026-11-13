@@ -33,6 +33,12 @@ import {
     obtenerTituloEspecialidad,
     TarjetaCatalogoPrestador,
 } from '../../components/prestadores/TarjetaCatalogoPrestador';
+import {
+    inferirProvinciaDeLocalidad,
+    obtenerLocalidadesPorProvincia,
+    PROVINCIAS_ARGENTINA,
+    TODAS_LAS_LOCALIDADES_ARGENTINA,
+} from '../../services/ubicacionesArgentina';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -374,6 +380,19 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlAlta).toContain('Crear prestador');
             expect(htmlAlta).toContain('data-tiene-foto="false"');
             expect(htmlAlta).not.toContain('Quitar foto');
+            expect(PROVINCIAS_ARGENTINA).toHaveLength(24);
+            expect(TODAS_LAS_LOCALIDADES_ARGENTINA.length).toBeGreaterThan(200);
+            expect(obtenerLocalidadesPorProvincia('Tucumán')).toContain(
+                'San Miguel de Tucumán'
+            );
+            expect(inferirProvinciaDeLocalidad('Ushuaia')).toBe(
+                'Tierra del Fuego'
+            );
+            expect(htmlAlta).toContain('id="prestador-provincia"');
+            expect(htmlAlta).toContain('id="prestador-localidad"');
+            expect(htmlAlta).toContain('Tierra del Fuego');
+            expect(htmlAlta).toContain('Ushuaia');
+            expect(htmlAlta).toContain('San Miguel de Tucumán');
 
             const htmlEdicion = renderToStaticMarkup(
                 createElement(FormularioPrestador, {

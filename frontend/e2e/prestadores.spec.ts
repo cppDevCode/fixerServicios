@@ -96,6 +96,8 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('#prestador-nombre').fill('Ramiro');
         await page.locator('#prestador-apellido').fill('Villalba');
         await page.locator('#prestador-rubro').selectOption('Gasista');
+        await page.locator('#prestador-provincia').selectOption('Mendoza');
+        await page.locator('#prestador-localidad').selectOption('San Rafael');
         await page.locator('#prestador-matricula').fill('MAT-7788');
         await page.locator('#prestador-experiencia').fill('11');
         await page.locator('#prestador-nro-telefono').fill('48889999');
@@ -119,6 +121,7 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('table tbody tr').first().click();
         await expect(page).toHaveURL(/\/prestadores\/\d+$/);
         await expect(page.getByText('MAT-7788')).toBeVisible();
+        await expect(page.getByText('San Rafael, Mendoza')).toBeVisible();
         await expect(
             page.locator('.prestador-ficha').getByTestId('avatar-prestador')
         ).toHaveAttribute('data-tiene-foto', 'true');
