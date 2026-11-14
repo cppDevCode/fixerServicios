@@ -113,6 +113,18 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 msj: 'Los campos nombre, apellido y categoriaId son obligatorios',
                 datos: null,
             });
+
+            const resSinNombre = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ apellido: 'Gómez', categoriaId: 'Gasista' })
+                .expect(400);
+            expect(resSinNombre.body.codigo).toBe(400);
+
+            const resSinCategoria = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ nombre: 'Pedro', apellido: 'Gómez' })
+                .expect(400);
+            expect(resSinCategoria.body.codigo).toBe(400);
         });
 
         it('retorna 201 y crea un nuevo prestador correctamente', async () => {

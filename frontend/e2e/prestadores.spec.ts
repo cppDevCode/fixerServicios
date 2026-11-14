@@ -81,6 +81,11 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await expect(page.locator('table')).toContainText('Carlos Gómez');
         await expect(page.locator('table tbody tr')).toHaveCount(1);
+
+        // Botón Limpiar filtros restablece el listado paginado original
+        await page.getByRole('button', { name: /Limpiar filtros/i }).click();
+        await expect(page.locator('table tbody tr')).toHaveCount(10);
+        await expect(page.getByText('Total: 16 registros')).toBeVisible();
     });
 
     test('permite acceder a la vista de detalle (/prestadores/:id) y visualizar la ficha técnica y formulario', async ({

@@ -189,7 +189,7 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(resultado.datos[2].nombre).toBe('Carlos');
         });
 
-        it('listar devuelve la segunda página correctamente', () => {
+        it('listar devuelve la segunda página correctamente y recorre todas las páginas sin duplicar registros', () => {
             const pagina2 = service.listar({ page: 2, limit: 10 });
 
             expect(pagina2.datos).toHaveLength(6);
@@ -199,6 +199,32 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
                 total: 16,
                 totalPages: 2,
             });
+
+            // Paginación de a 5 registros (4 páginas en total para 16 registros)
+            const p1 = service.listar({ page: 1, limit: 5 });
+            const p2 = service.listar({ page: 2, limit: 5 });
+            const p3 = service.listar({ page: 3, limit: 5 });
+            const p4 = service.listar({ page: 4, limit: 5 });
+            const pFueraDeRango = service.listar({ page: 99, limit: 5 });
+
+            expect(p1.datos).toHaveLength(5);
+            expect(p2.datos).toHaveLength(5);
+            expect(p3.datos).toHaveLength(5);
+            expect(p4.datos).toHaveLength(1);
+            expect(pFueraDeRango.datos).toEqual([]);
+            expect(pFueraDeRango.meta).toEqual({
+                pagina: 99,
+                limit: 5,
+                total: 16,
+                totalPages: 4,
+            });
+
+            const idsUnicos = new Set(
+                [...p1.datos, ...p2.datos, ...p3.datos, ...p4.datos].map(
+                    (p) => p.id
+                )
+            );
+            expect(idsUnicos.size).toBe(16);
         });
 
         it('listar normaliza valores menores a 1 en page y limit', () => {
@@ -209,11 +235,15 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(resultado.datos).toHaveLength(10);
         });
 
-        it('listar filtra por rubro y por localidad ignorando mayúsculas/minúsculas y tildes', () => {
+        it('listar filtra por rubro, provincia y localidad ignorando mayúsculas/minúsculas y tildes', () => {
             const conTilde = service.listar({ rubro: 'Plomería' });
             const sinTildeMinuscula = service.listar({ rubro: 'plomeria' });
             const enMayusculas = service.listar({ rubro: '  PLOMERÍA  ' });
             const porLocalidad = service.listar({ localidad: 'cordoba capital' });
+            const porNueveDeJulio = service.listar({
+                provincia: 'buenos aires',
+                localidad: '9 de julio',
+            });
 
             expect(conTilde.meta.total).toBe(5);
             expect(sinTildeMinuscula.meta.total).toBe(5);
@@ -222,6 +252,9 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(
                 porLocalidad.datos.every((p) => p.localidad === 'Córdoba Capital')
             ).toBe(true);
+            expect(porNueveDeJulio.meta.total).toBe(1);
+            expect(porNueveDeJulio.datos[0].nombre).toBe('Diego');
+            expect(porNueveDeJulio.datos[0].localidad).toBe('9 de Julio');
             expect(conTilde.datos.every((p) => p.categoriaId === 'Plomería')).toBe(true);
             expect(conTilde.datos.map((p) => p.nombre)).toEqual([
                 'Carlos',
