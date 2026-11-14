@@ -33,6 +33,29 @@ import {
     obtenerTituloEspecialidad,
     TarjetaCatalogoPrestador,
 } from '../../components/prestadores/TarjetaCatalogoPrestador';
+import {
+    inferirProvinciaDeLocalidad,
+    obtenerLocalidadesPorProvincia,
+    PROVINCIAS_ARGENTINA,
+    TODAS_LAS_LOCALIDADES_ARGENTINA,
+} from '../../services/ubicacionesArgentina';
+import {
+    calcularCategoriasMasBuscadas,
+    HomePage,
+} from '../../pages/HomePage';
+import {
+    construirHeadersAutenticacion,
+    esAdmin,
+    esPrestador,
+    esUsuarioFinal,
+    obtenerRutaInicioPorRol,
+    puedeAdministrarUsuarios,
+    puedeAgregarResena,
+    puedeEditarPrestador,
+    puedeEliminarPrestador,
+    puedeGestionarCatalogoPrestadores,
+    type IUsuarioSesion,
+} from '../../services/sesion.service';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -47,6 +70,7 @@ const prestadorMock: IPrestador = {
     acercaDe: 'Especialista en cañerías y filtraciones urgentes',
     ofreceGarantia: true,
     categoriaId: 'Plomería',
+    localidad: 'Córdoba Capital',
     telefono: {
         codPais: '+54',
         codArea: '11',
@@ -81,6 +105,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
                 page: 2,
                 limit: 15,
                 rubro: '  Plomería ',
+                localidad: '  Córdoba Capital ',
                 search: '  Carlos ',
                 sortBy: 'aniosExperiencia',
                 order: 'desc',
@@ -90,6 +115,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(params.get('page')).toBe('2');
             expect(params.get('limit')).toBe('15');
             expect(params.get('rubro')).toBe('Plomería');
+            expect(params.get('localidad')).toBe('Córdoba Capital');
             expect(params.get('search')).toBe('Carlos');
             expect(params.get('sortBy')).toBe('aniosExperiencia');
             expect(params.get('order')).toBe('desc');
@@ -371,6 +397,19 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlAlta).toContain('Crear prestador');
             expect(htmlAlta).toContain('data-tiene-foto="false"');
             expect(htmlAlta).not.toContain('Quitar foto');
+            expect(PROVINCIAS_ARGENTINA).toHaveLength(24);
+            expect(TODAS_LAS_LOCALIDADES_ARGENTINA.length).toBeGreaterThan(200);
+            expect(obtenerLocalidadesPorProvincia('Tucumán')).toContain(
+                'San Miguel de Tucumán'
+            );
+            expect(inferirProvinciaDeLocalidad('Ushuaia')).toBe(
+                'Tierra del Fuego'
+            );
+            expect(htmlAlta).toContain('id="prestador-provincia"');
+            expect(htmlAlta).toContain('id="prestador-localidad"');
+            expect(htmlAlta).toContain('Tierra del Fuego');
+            expect(htmlAlta).toContain('Ushuaia');
+            expect(htmlAlta).toContain('San Miguel de Tucumán');
 
             const htmlEdicion = renderToStaticMarkup(
                 createElement(FormularioPrestador, {
@@ -421,6 +460,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
             expect(htmlTarjeta).toContain('Carlos Gómez');
             expect(htmlTarjeta).toContain('Matrícula MAT-1001');
+            expect(htmlTarjeta).toContain('Córdoba Capital');
             expect(htmlTarjeta).toContain('Ofrece garantía');
             expect(htmlTarjeta).toContain('Ver Perfil');
             expect(htmlTarjeta).toContain('Contactar');
@@ -436,6 +476,8 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
             expect(htmlCatalogo).toContain('CRITERIO DE BÚSQUEDA');
             expect(htmlCatalogo).toContain('2 disponibles');
+            expect(htmlCatalogo).toContain('Todas las localidades');
+            expect(htmlCatalogo).toContain('Córdoba Capital');
             expect(htmlCatalogo).toContain('Matriculados');
             expect(htmlCatalogo).toContain('Mejor calificados (4.8+)');
             expect(htmlCatalogo).toContain('Actualizado en tiempo real');
@@ -443,6 +485,103 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(htmlCatalogo).toContain('data-tiene-foto="false"');
             expect(htmlCatalogo).not.toContain('Palermo &amp; Zona Norte');
             expect(htmlCatalogo).not.toContain('Garantía Fixer Care');
+        });
+
+        it('HomePage y calcularCategoriasMasBuscadas renderizan la vista de inicio con buscador y sugerencia de categorías más buscadas', () => {
+            const sugerencias = calcularCategoriasMasBuscadas(
+                [
+                    prestadorMock,
+                    { ...prestadorMock, id: 2, categoriaId: 'Plomería' },
+                    { ...prestadorMock, id: 3, categoriaId: 'Electricidad' },
+                ],
+                CATEGORIAS_POR_DEFECTO,
+                { Gasista: 4 },
+                4
+            );
+
+            expect(sugerencias).toHaveLength(4);
+            expect(sugerencias[0].categoriaId).toBe('Gasista');
+            expect(sugerencias[1].categoriaId).toBe('Plomería');
+            expect(sugerencias[1].etiqueta).toBe('Plomería de urgencia');
+
+            const htmlHome = renderToStaticMarkup(
+                createElement(HomePage, {
+                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
+                    categoriasIniciales: CATEGORIAS_POR_DEFECTO,
+                })
+            );
+
+            expect(htmlHome).toContain(
+                'Encontrá al profesional ideal para tu hogar'
+            );
+            expect(htmlHome).toContain('id="home-busqueda-texto"');
+            expect(htmlHome).toContain('id="home-busqueda-rubro"');
+            expect(htmlHome).toContain('id="home-busqueda-localidad"');
+            expect(htmlHome).toContain('Buscar profesionales');
+            expect(htmlHome).toContain('FRECUENTES:');
+            expect(htmlHome).toContain('Plomería de urgencia');
+            expect(htmlHome).toContain('Instalación de aire acondicionado');
+            expect(htmlHome).toContain('Pintura de interiores');
+            expect(htmlHome).toContain('Electricistas matriculados');
+            expect(htmlHome).toContain('data-testid="sugerencia-categoria"');
+        });
+
+        it('sesion.service.ts valida permisos diferenciados para los roles ADMIN, PRESTADOR y USUARIO', () => {
+            const admin: IUsuarioSesion = {
+                id: '1',
+                nombre: 'Bruna',
+                email: 'bruna@example.com',
+                rol: 'ADMIN',
+            };
+            const prestador: IUsuarioSesion = {
+                id: '2',
+                nombre: 'Carlos',
+                email: 'carlos@example.com',
+                rol: 'PRESTADOR',
+                prestadorId: 1,
+            };
+            const usuario: IUsuarioSesion = {
+                id: '3',
+                nombre: 'Berta',
+                email: 'berta@example.com',
+                rol: 'USUARIO',
+            };
+
+            // Rol ADMIN: acceso total a módulo de prestadores y usuarios
+            expect(esAdmin(admin)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(admin)).toBe(true);
+            expect(puedeAdministrarUsuarios(admin)).toBe(true);
+            expect(puedeEditarPrestador(admin, 1)).toBe(true);
+            expect(puedeEditarPrestador(admin, 2)).toBe(true);
+            expect(puedeEliminarPrestador(admin)).toBe(true);
+            expect(obtenerRutaInicioPorRol(admin)).toBe('/prestadores');
+
+            // Rol PRESTADOR: solo puede editar su propia ficha (id 1) y navegar como usuario
+            expect(esPrestador(prestador)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(prestador)).toBe(false);
+            expect(puedeAdministrarUsuarios(prestador)).toBe(false);
+            expect(puedeEditarPrestador(prestador, 1)).toBe(true);
+            expect(puedeEditarPrestador(prestador, 2)).toBe(false);
+            expect(puedeEliminarPrestador(prestador)).toBe(false);
+            expect(puedeAgregarResena(prestador, 1)).toBe(false);
+            expect(puedeAgregarResena(prestador, 2)).toBe(true);
+            expect(obtenerRutaInicioPorRol(prestador)).toBe('/prestadores/1');
+            expect(construirHeadersAutenticacion(prestador)).toEqual({
+                'x-usuario-id': '2',
+                'x-usuario-rol': 'PRESTADOR',
+                'x-prestador-id': '1',
+            });
+
+            // Rol USUARIO: solo lectura en prestadores y habilitado para agregar reseñas
+            expect(esUsuarioFinal(usuario)).toBe(true);
+            expect(puedeGestionarCatalogoPrestadores(usuario)).toBe(false);
+            expect(puedeAdministrarUsuarios(usuario)).toBe(false);
+            expect(puedeEditarPrestador(usuario, 1)).toBe(false);
+            expect(puedeEliminarPrestador(usuario)).toBe(false);
+            expect(puedeAgregarResena(usuario, 1)).toBe(true);
+            expect(obtenerRutaInicioPorRol(usuario)).toBe(
+                '/prestadores/catalogo'
+            );
         });
     });
 });

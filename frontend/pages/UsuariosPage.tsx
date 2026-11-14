@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import {
+  construirHeadersAutenticacion,
+  EVENTO_CAMBIO_SESION,
+  obtenerUsuarioActual,
+  puedeAdministrarUsuarios,
+  type IUsuarioSesion,
+} from '../services/sesion.service';
 
 interface IUsuario {
   id: string;
@@ -12,6 +19,11 @@ interface IUsuario {
 }
 
 export const UsuariosPage = () => {
+  const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(() =>
+    obtenerUsuarioActual()
+  );
+  const esAdministrador = puedeAdministrarUsuarios(usuarioActual);
+
   const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -20,21 +32,34 @@ export const UsuariosPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   useEffect(() => {
+    const actualizarSesion = () => {
+      setUsuarioActual(obtenerUsuarioActual());
+    };
+    window.addEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+    return () =>
+      window.removeEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+  }, []);
+
+  useEffect(() => {
+    if (!esAdministrador) {
+      setLoading(false);
+      return;
+    }
+
     const fetchUsuarios = async () => {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem('token');
-              const response = await fetch(`${API_URL}/usuarios?page=${page}&limit=5&search=${search}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+        const response = await fetch(`${API_URL}/usuarios?page=${page}&limit=5&search=${search}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...construirHeadersAutenticacion(usuarioActual),
+          },
+        });
         const result = await response.json();
         if (result.code === 200) {
           setUsuarios(result.data);
@@ -51,7 +76,26 @@ export const UsuariosPage = () => {
     };
     const timer = setTimeout(() => { fetchUsuarios(); }, 300);
     return () => clearTimeout(timer);
-  }, [page, search]);
+  }, [page, search, esAdministrador, usuarioActual]);
+
+  if (!esAdministrador) {
+    return (
+      <div className="usuarios-container" data-testid="acceso-denegado-usuarios">
+        <div className="usuarios-header">
+          <h2>Acceso Restringido</h2>
+          <p>
+            Solo los usuarios con rol <strong>ADMIN</strong> pueden administrar
+            el padrón general de usuarios.
+          </p>
+          <p style={{ marginTop: '12px' }}>
+            <Link to="/prestadores/catalogo" className="usuario-link">
+              ← Ir al Catálogo de Profesionales
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);

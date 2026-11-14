@@ -7,7 +7,7 @@ export const RegistroPage = () => {
   const [formData, setFormData] = useState({ nombre: '', apellido: '', email: '', password: '', preguntaSecreta: '¿Nombre de tu primera mascota?', respuestaSecreta: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

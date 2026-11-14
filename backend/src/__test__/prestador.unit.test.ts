@@ -209,14 +209,19 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(resultado.datos).toHaveLength(10);
         });
 
-        it('listar filtra por rubro ignorando mayúsculas/minúsculas y tildes', () => {
+        it('listar filtra por rubro y por localidad ignorando mayúsculas/minúsculas y tildes', () => {
             const conTilde = service.listar({ rubro: 'Plomería' });
             const sinTildeMinuscula = service.listar({ rubro: 'plomeria' });
             const enMayusculas = service.listar({ rubro: '  PLOMERÍA  ' });
+            const porLocalidad = service.listar({ localidad: 'cordoba capital' });
 
             expect(conTilde.meta.total).toBe(5);
             expect(sinTildeMinuscula.meta.total).toBe(5);
             expect(enMayusculas.meta.total).toBe(5);
+            expect(porLocalidad.meta.total).toBe(4);
+            expect(
+                porLocalidad.datos.every((p) => p.localidad === 'Córdoba Capital')
+            ).toBe(true);
             expect(conTilde.datos.every((p) => p.categoriaId === 'Plomería')).toBe(true);
             expect(conTilde.datos.map((p) => p.nombre)).toEqual([
                 'Carlos',

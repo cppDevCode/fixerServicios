@@ -106,8 +106,10 @@ export class UsuarioService {
       usuario: {
         id: user.id,
         nombre: user.nombre,
+        apellido: user.apellido,
         email: user.email,
-        rol: user.rol
+        rol: user.rol,
+        prestadorId: user.prestadorId
       }
     };
   }
