@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, UserRound, Bell } from 'lucide-react';
+import { Menu, X, UserRound } from 'lucide-react';
 import fixerLogo from '../../assets/fixer-logo.png';
 import './Header.css';
 
@@ -12,87 +12,84 @@ export function Header() {
 
     return (
         <header className="fixer-header">
-        <div className="fixer-header__contenedor">
-            <Link
-            to="/"
-            className="fixer-header__logo"
-            onClick={cerrarMenu}
-            aria-label="Fixer - Inicio"
-            >
-            <img src={fixerLogo} alt="Fixer" />
-            </Link>
+            <div className="fixer-header__contenedor">
 
-            <nav
-            className={`fixer-header__nav ${menuAbierto ? 'fixer-header__nav--abierto' : ''}`}
-            aria-label="Navegación principal"
-            id="fixer-navegacion"
-            >
-            <NavLink
-                to="/prestadores/catalogo"
-                onClick={cerrarMenu}
-            >
-                Explorar servicios
-            </NavLink>
-
-            <NavLink
-                to="/prestadores"
-                onClick={cerrarMenu}
-            >
-                Profesionales
-            </NavLink>
-
-            <NavLink to="/como-funciona" onClick={cerrarMenu}>
-                Cómo funciona
-            </NavLink>
-
-            <NavLink to="/garantia" onClick={cerrarMenu}>
-                Garantía
-            </NavLink>
-
-            <NavLink to="/panel-pro" onClick={cerrarMenu}>
-                Panel Pro
-            </NavLink>
-            </nav>
-
-            <div className="fixer-header__acciones">
-            <button
-                type="button"
-                className="fixer-header__icono"
-                aria-label="Notificaciones (próximamente)"
-                title="Notificaciones (próximamente)"
-                disabled
-            >
-                <Bell size={20} />
-            </button>
-
-            <Link
-                to="/login"
-                className="fixer-header__icono"
-                aria-label="Acceder a mi cuenta"
-            >
-                <UserRound size={22} />
-            </Link>
-
-            <Link
-                to="/panel-pro"
-                className="fixer-header__publicar"
-                onClick={cerrarMenu}
+                {/* Logo */}
+                <Link
+                    to="/"
+                    className="fixer-header__logo"
+                    onClick={cerrarMenu}
+                    aria-label="Fixer - Inicio"
                 >
-            Publicar servicio
-            </Link>
+                    <img src={fixerLogo} alt="Fixer" />
+                </Link>
 
-            <button
-                type="button"
-                className="fixer-header__hamburguesa"
-                aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
-                aria-expanded={menuAbierto}
-                aria-controls="fixer-navegacion"
-                onClick={() => setMenuAbierto(!menuAbierto)}
-            >
-                {menuAbierto ? <X size={24} /> : <Menu size={24} />}
-            </button>
+                {/* Navegación principal */}
+                <nav
+                    className={`fixer-header__nav ${menuAbierto ? 'fixer-header__nav--abierto' : ''}`}
+                    aria-label="Navegación principal"
+                    id="fixer-navegacion"
+                >
+                    <NavLink
+                        to="/prestadores/catalogo"
+                        onClick={cerrarMenu}
+                    >
+                        Explorar servicios
+                    </NavLink>
+
+                    <NavLink
+                        to="/prestadores"
+                        onClick={cerrarMenu}
+                    >
+                        Profesionales
+                    </NavLink>
+
+                    <NavLink
+                        to="/como-funciona"
+                        onClick={cerrarMenu}
+                    >
+                        Cómo funciona
+                    </NavLink>
+
+                    <NavLink
+                        to="/garantia"
+                        onClick={cerrarMenu}
+                    >
+                        Garantía
+                    </NavLink>
+
+                    <NavLink
+                        to="/panel-pro"
+                        onClick={cerrarMenu}
+                    >
+                        Panel Pro
+                    </NavLink>
+                </nav>
+
+                {/* Acciones */}
+                <div className="fixer-header__acciones">
+                    <Link
+                        to="/login"
+                        className="fixer-header__icono"
+                        aria-label="Acceder a mi cuenta"
+                        onClick={cerrarMenu}
+                    >
+                        <UserRound size={22} />
+                    </Link>
+
+                    <button
+                        type="button"
+                        className="fixer-header__hamburguesa"
+                        aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+                        aria-expanded={menuAbierto}
+                        aria-controls="fixer-navegacion"
+                        onClick={() => setMenuAbierto(!menuAbierto)}
+                    >
+                        {menuAbierto ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
+
             </div>
-        </div>
         </header>
     );
 }
