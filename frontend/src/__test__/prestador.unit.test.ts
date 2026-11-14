@@ -34,7 +34,9 @@ import {
     TarjetaCatalogoPrestador,
 } from '../../components/prestadores/TarjetaCatalogoPrestador';
 import {
+    formatearLocalidadProvincia,
     inferirProvinciaDeLocalidad,
+    obtenerLocalidadesConProfesionales,
     obtenerLocalidadesPorProvincia,
     PROVINCIAS_ARGENTINA,
     TODAS_LAS_LOCALIDADES_ARGENTINA,
@@ -470,14 +472,32 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
 
             const htmlCatalogo = renderToStaticMarkup(
                 createElement(CatalogoPrestadoresUsuario, {
-                    prestadoresIniciales: [prestadorMock, prestadorSinFotoMock],
+                    prestadoresIniciales: [
+                        prestadorMock,
+                        {
+                            ...prestadorSinFotoMock,
+                            localidad: '9 de Julio',
+                            provincia: 'Buenos Aires',
+                        },
+                    ],
                     categoriasIniciales: CATEGORIAS_POR_DEFECTO,
                 })
             );
+            expect(
+                formatearLocalidadProvincia('9 de Julio', 'Buenos Aires')
+            ).toBe('9 de Julio, Buenos Aires');
+            expect(
+                obtenerLocalidadesConProfesionales([
+                    prestadorMock,
+                    { localidad: '9 de Julio', provincia: 'Buenos Aires' },
+                ]).map((item) => item.etiqueta)
+            ).toEqual(['9 de Julio, Buenos Aires', 'Córdoba Capital, Córdoba']);
             expect(htmlCatalogo).toContain('CRITERIO DE BÚSQUEDA');
             expect(htmlCatalogo).toContain('2 disponibles');
             expect(htmlCatalogo).toContain('Todas las localidades');
-            expect(htmlCatalogo).toContain('Córdoba Capital');
+            expect(htmlCatalogo).toContain('Córdoba Capital, Córdoba');
+            expect(htmlCatalogo).toContain('9 de Julio, Buenos Aires');
+            expect(htmlCatalogo).not.toContain('Ushuaia');
             expect(htmlCatalogo).toContain('Matriculados');
             expect(htmlCatalogo).toContain('Mejor calificados (4.8+)');
             expect(htmlCatalogo).toContain('Actualizado en tiempo real');

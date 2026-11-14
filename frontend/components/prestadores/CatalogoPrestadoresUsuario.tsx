@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import type { ICategoria, IPrestador } from '../../interfaces/prestador.interface';
 import {
     CATEGORIAS_POR_DEFECTO,
-    LOCALIDADES_POR_DEFECTO,
     obtenerCategorias,
     obtenerPrestadores,
 } from '../../services/prestador.service';
+import { obtenerLocalidadesConProfesionales } from '../../services/ubicacionesArgentina';
 import { TarjetaCatalogoPrestador } from './TarjetaCatalogoPrestador';
 import './Prestadores.css';
 
@@ -107,10 +107,7 @@ export function CatalogoPrestadoresUsuario({
             try {
                 const respuesta = await obtenerPrestadores({
                     page: 1,
-                    limit: 50,
-                    rubro: rubroSeleccionado || undefined,
-                    localidad: localidadSeleccionada || undefined,
-                    search: busquedaActiva || undefined,
+                    limit: 100,
                     sortBy: campoOrden,
                     order: direccionOrden,
                 });
@@ -138,26 +135,26 @@ export function CatalogoPrestadoresUsuario({
             activo = false;
         };
     }, [
-        rubroSeleccionado,
-        localidadSeleccionada,
-        busquedaActiva,
         ordenSeleccionado,
         versionCatalogo,
         contadorActualizacion,
         prestadoresIniciales,
     ]);
 
-    const localidadesDisponibles = useMemo(() => {
-        const conjunto = new Set<string>(LOCALIDADES_POR_DEFECTO);
-        for (const p of prestadoresBase) {
-            if (p.localidad && p.localidad.trim() !== '') {
-                conjunto.add(p.localidad.trim());
-            }
-        }
-        return Array.from(conjunto).sort((a, b) =>
-            a.localeCompare(b, 'es', { sensitivity: 'base' })
+    const localidadesDisponibles = useMemo(
+        () => obtenerLocalidadesConProfesionales(prestadoresBase),
+        [prestadoresBase]
+    );
+
+    const etiquetaLocalidadSeleccionada = useMemo(() => {
+        if (!localidadSeleccionada) return '';
+        const encontrada = localidadesDisponibles.find(
+            (item) =>
+                item.localidad.toLowerCase() ===
+                localidadSeleccionada.toLowerCase()
         );
-    }, [prestadoresBase]);
+        return encontrada ? encontrada.etiqueta : localidadSeleccionada;
+    }, [localidadSeleccionada, localidadesDisponibles]);
 
     const prestadoresFiltrados = useMemo(() => {
         const [campoOrden, direccionOrden] = ordenSeleccionado.split(':') as [
@@ -300,8 +297,8 @@ export function CatalogoPrestadoresUsuario({
                                 <span className="catalogo-usuario__criterio-destacado">
                                     &ldquo;{etiquetaCriterio}&rdquo;
                                 </span>
-                                {localidadSeleccionada
-                                    ? ` en ${localidadSeleccionada}`
+                                {etiquetaLocalidadSeleccionada
+                                    ? ` en ${etiquetaLocalidadSeleccionada}`
                                     : ''}
                             </h3>
                         </div>
@@ -375,9 +372,12 @@ export function CatalogoPrestadoresUsuario({
                             }}
                         >
                             <option value="">📍 Todas las localidades</option>
-                            {localidadesDisponibles.map((loc) => (
-                                <option key={loc} value={loc}>
-                                    📍 {loc}
+                            {localidadesDisponibles.map((item) => (
+                                <option
+                                    key={item.localidad}
+                                    value={item.localidad}
+                                >
+                                    📍 {item.etiqueta}
                                 </option>
                             ))}
                         </select>

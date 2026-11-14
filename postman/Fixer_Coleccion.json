@@ -1,0 +1,714 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4789-abcd-111122223333",
+    "name": "Fixer Servicios - API v1",
+    "description": "Colección oficial de Postman para Fixer Servicios (UTN). Incluye la carpeta 'prestadores (alumno 1)' con las operaciones GET (lista paginada/filtrada y detalle por ID), POST, PUT, DELETE y consulta de categorías.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "prestadorId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "prestadores (alumno 1)",
+      "description": "Endpoints del Módulo 1: Prestadores y Categorías (Integrante 1: Alejandro Lucas Baldres). Soporta listado paginado, búsqueda normalizada sin tildes, filtros por rubro/provincia/localidad, ordenamiento dinámico y CRUD completo con control de acceso por rol.",
+      "item": [
+        {
+          "name": "GET Listar Prestadores (Paginado y Filtros)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Estructura RespuestaApi con datos y meta de paginación', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(200);",
+                  "    pm.expect(jsonData.datos).to.be.an('array');",
+                  "    pm.expect(jsonData.meta).to.include.all.keys('pagina', 'limit', 'total', 'totalPages');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores?page=1&limit=10&rubro=Plomería&localidad=Córdoba Capital&search=Carlos&sortBy=nombre&order=asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página (por defecto 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Cantidad de registros por página (por defecto 10)"
+                },
+                {
+                  "key": "rubro",
+                  "value": "Plomería",
+                  "description": "Filtro por rubro/categoría profesional (insensible a mayúsculas y tildes)"
+                },
+                {
+                  "key": "localidad",
+                  "value": "Córdoba Capital",
+                  "description": "Filtro por localidad del profesional"
+                },
+                {
+                  "key": "search",
+                  "value": "Carlos",
+                  "description": "Búsqueda por texto en nombre, apellido, descripción (acercaDe) o rubro"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "nombre",
+                  "description": "Campo de ordenamiento (nombre, apellido, aniosExperiencia, ratingPromedio)"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Dirección de ordenamiento (asc | desc)"
+                }
+              ]
+            },
+            "description": "Obtiene el listado paginado de prestadores aplicando filtros combinables por rubro, localidad, provincia, búsqueda libre y ordenamiento."
+          },
+          "response": [
+            {
+              "name": "200 OK - Listado Paginado de Prestadores",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores?page=1&limit=10&rubro=Plomería&sortBy=nombre&order=asc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "rubro",
+                      "value": "Plomería"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "nombre"
+                    },
+                    {
+                      "key": "order",
+                      "value": "asc"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Prestadores obtenidos correctamente\",\n  \"datos\": [\n    {\n      \"id\": 1,\n      \"nombre\": \"Carlos\",\n      \"apellido\": \"Gómez\",\n      \"fotoUrl\": \"https://randomuser.me/api/portraits/men/32.jpg\",\n      \"matricula\": \"MAT-1001\",\n      \"aniosExperiencia\": 10,\n      \"acercaDe\": \"Especialista en cañerías y filtraciones urgentes\",\n      \"ofreceGarantia\": true,\n      \"categoriaId\": \"Plomería\",\n      \"provincia\": \"Córdoba\",\n      \"localidad\": \"Córdoba Capital\",\n      \"telefono\": {\n        \"codPais\": \"+54\",\n        \"codArea\": \"11\",\n        \"nroTelefono\": \"40001001\"\n      },\n      \"ratingPromedio\": 4.8\n    }\n  ],\n  \"meta\": {\n    \"pagina\": 1,\n    \"limit\": 10,\n    \"total\": 5,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Detalle de Prestador por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Retorna el prestador solicitado en datos', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(200);",
+                  "    pm.expect(jsonData.datos).to.have.property('id');",
+                  "    pm.expect(jsonData.datos).to.have.property('nombre');",
+                  "    pm.expect(jsonData.datos).to.have.property('categoriaId');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            },
+            "description": "Obtiene la ficha técnica completa de un prestador por su identificador numérico. Retorna 200 si existe o 404 si no se encuentra."
+          },
+          "response": [
+            {
+              "name": "200 OK - Prestador Encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Prestador encontrado\",\n  \"datos\": {\n    \"id\": 1,\n    \"nombre\": \"Carlos\",\n    \"apellido\": \"Gómez\",\n    \"fotoUrl\": \"https://randomuser.me/api/portraits/men/32.jpg\",\n    \"matricula\": \"MAT-1001\",\n    \"aniosExperiencia\": 10,\n    \"acercaDe\": \"Especialista en cañerías y filtraciones urgentes\",\n    \"ofreceGarantia\": true,\n    \"categoriaId\": \"Plomería\",\n    \"provincia\": \"Córdoba\",\n    \"localidad\": \"Córdoba Capital\",\n    \"telefono\": {\n      \"codPais\": \"+54\",\n      \"codArea\": \"11\",\n      \"nroTelefono\": \"40001001\"\n    },\n    \"ratingPromedio\": 4.8\n  }\n}"
+            },
+            {
+              "name": "404 Not Found - Prestador Inexistente",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/9999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "9999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Prestador con id 9999 no encontrado\",\n  \"datos\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Crear Prestador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Prestador creado con ID autoincremental', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(201);",
+                  "    pm.expect(jsonData.datos).to.have.property('id');",
+                  "    pm.collectionVariables.set('prestadorId', String(jsonData.datos.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text",
+                "description": "Rol requerido para dar de alta un nuevo prestador"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ramiro\",\n  \"apellido\": \"Villalba\",\n  \"categoriaId\": \"Gasista\",\n  \"provincia\": \"Buenos Aires\",\n  \"localidad\": \"9 de Julio\",\n  \"matricula\": \"MAT-7788\",\n  \"aniosExperiencia\": 11,\n  \"acercaDe\": \"Gasista matriculado especialista en planos y pruebas de hermeticidad\",\n  \"ofreceGarantia\": true,\n  \"telefono\": {\n    \"codPais\": \"+54\",\n    \"codArea\": \"2317\",\n    \"nroTelefono\": \"48889999\"\n  },\n  \"ratingPromedio\": 4.9,\n  \"fotoUrl\": \"https://randomuser.me/api/portraits/men/90.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/prestadores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores"
+              ]
+            },
+            "description": "Registra un nuevo prestador en el catálogo en memoria. Valida que nombre, apellido y categoriaId sean obligatorios (400 Bad Request si faltan)."
+          },
+          "response": [
+            {
+              "name": "201 Created - Prestador Creado Exitosamente",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Ramiro\",\n  \"apellido\": \"Villalba\",\n  \"categoriaId\": \"Gasista\",\n  \"provincia\": \"Buenos Aires\",\n  \"localidad\": \"9 de Julio\",\n  \"matricula\": \"MAT-7788\",\n  \"aniosExperiencia\": 11,\n  \"acercaDe\": \"Gasista matriculado especialista en planos y pruebas de hermeticidad\",\n  \"ofreceGarantia\": true,\n  \"telefono\": {\n    \"codPais\": \"+54\",\n    \"codArea\": \"2317\",\n    \"nroTelefono\": \"48889999\"\n  },\n  \"ratingPromedio\": 4.9,\n  \"fotoUrl\": \"https://randomuser.me/api/portraits/men/90.jpg\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 201,\n  \"msj\": \"Prestador creado exitosamente\",\n  \"datos\": {\n    \"id\": 17,\n    \"nombre\": \"Ramiro\",\n    \"apellido\": \"Villalba\",\n    \"categoriaId\": \"Gasista\",\n    \"provincia\": \"Buenos Aires\",\n    \"localidad\": \"9 de Julio\",\n    \"matricula\": \"MAT-7788\",\n    \"aniosExperiencia\": 11,\n    \"acercaDe\": \"Gasista matriculado especialista en planos y pruebas de hermeticidad\",\n    \"ofreceGarantia\": true,\n    \"telefono\": {\n      \"codPais\": \"+54\",\n      \"codArea\": \"2317\",\n      \"nroTelefono\": \"48889999\"\n    },\n    \"ratingPromedio\": 4.9,\n    \"fotoUrl\": \"https://randomuser.me/api/portraits/men/90.jpg\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request - Faltan Campos Obligatorios",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Pedro\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 400,\n  \"msj\": \"Los campos nombre, apellido y categoriaId son obligatorios\",\n  \"datos\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT Actualizar Prestador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Prestador actualizado correctamente', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(200);",
+                  "    pm.expect(jsonData.msj).to.include('actualizado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text",
+                "description": "ADMIN puede editar cualquier prestador; PRESTADOR solo puede editar su propio prestadorId (sin modificar ratingPromedio)"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aniosExperiencia\": 14,\n  \"provincia\": \"Buenos Aires\",\n  \"localidad\": \"9 de Julio\",\n  \"ofreceGarantia\": true,\n  \"acercaDe\": \"Especialista matriculado en instalaciones sanitarias y redes de gas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            },
+            "description": "Actualiza parcial o totalmente los datos de un prestador existente mediante su ID en ruta (/prestadores/:id) o en el cuerpo de la petición."
+          },
+          "response": [
+            {
+              "name": "200 OK - Prestador Actualizado",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"aniosExperiencia\": 14,\n  \"ofreceGarantia\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Prestador actualizado exitosamente\",\n  \"datos\": {\n    \"id\": 1,\n    \"nombre\": \"Carlos\",\n    \"apellido\": \"Gómez\",\n    \"matricula\": \"MAT-1001\",\n    \"aniosExperiencia\": 14,\n    \"acercaDe\": \"Especialista en cañerías y filtraciones urgentes\",\n    \"ofreceGarantia\": true,\n    \"categoriaId\": \"Plomería\",\n    \"provincia\": \"Córdoba\",\n    \"localidad\": \"Córdoba Capital\",\n    \"telefono\": {\n      \"codPais\": \"+54\",\n      \"codArea\": \"11\",\n      \"nroTelefono\": \"40001001\"\n    },\n    \"ratingPromedio\": 4.8\n  }\n}"
+            },
+            {
+              "name": "404 Not Found - Prestador a Actualizar No Existe",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Inexistente\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/99999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "99999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Prestador con id 99999 no encontrado\",\n  \"datos\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE Eliminar Prestador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Confirma eliminación del prestador', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(200);",
+                  "    pm.expect(jsonData.datos).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text",
+                "description": "Rol ADMIN requerido para eliminar un prestador"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            },
+            "description": "Elimina un prestador del catálogo por su ID. Retorna 200 OK si se eliminó, 400 si falta el ID o 404 si el prestador no existe."
+          },
+          "response": [
+            {
+              "name": "200 OK - Prestador Eliminado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/17",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "17"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Prestador eliminado exitosamente\",\n  \"datos\": null\n}"
+            },
+            {
+              "name": "404 Not Found - Prestador a Eliminar No Existe",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/prestadores/99999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "prestadores",
+                    "99999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Prestador con id 99999 no encontrado\",\n  \"datos\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Listar Categorías Profesionales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Retorna listado de rubros/categorías', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigo).to.eql(200);",
+                  "    pm.expect(jsonData.datos).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "description": "Lista los rubros y categorías profesionales ordenados alfabéticamente. Admite filtro opcional ?search=."
+          },
+          "response": [
+            {
+              "name": "200 OK - Categorías Obtenidas",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categorias",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categorias"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Categorías obtenidas correctamente\",\n  \"datos\": [\n    { \"id\": \"Albañilería\", \"nombre\": \"Albañilería\" },\n    { \"id\": \"Carpintería\", \"nombre\": \"Carpintería\" },\n    { \"id\": \"Cerrajería\", \"nombre\": \"Cerrajería\" },\n    { \"id\": \"Electricidad\", \"nombre\": \"Electricidad\" },\n    { \"id\": \"Gasista\", \"nombre\": \"Gasista\" },\n    { \"id\": \"Jardinería\", \"nombre\": \"Jardinería\" },\n    { \"id\": \"Pintura\", \"nombre\": \"Pintura\" },\n    { \"id\": \"Plomería\", \"nombre\": \"Plomería\" },\n    { \"id\": \"Refrigeración\", \"nombre\": \"Refrigeración\" }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

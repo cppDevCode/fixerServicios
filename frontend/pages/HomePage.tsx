@@ -5,11 +5,10 @@ import '../components/prestadores/Prestadores.css';
 import type { ICategoria, IPrestador } from '../interfaces/prestador.interface';
 import {
     CATEGORIAS_POR_DEFECTO,
-    LOCALIDADES_POR_DEFECTO,
     obtenerCategorias,
     obtenerPrestadores,
 } from '../services/prestador.service';
-import { TODAS_LAS_LOCALIDADES_ARGENTINA } from '../services/ubicacionesArgentina';
+import { obtenerLocalidadesConProfesionales } from '../services/ubicacionesArgentina';
 
 const CLAVE_HISTORIAL_BUSQUEDAS = 'fixer_busquedas_categorias';
 
@@ -163,7 +162,7 @@ export function HomePage({
             return;
         }
         let activo = true;
-        obtenerPrestadores({ page: 1, limit: 50 })
+        obtenerPrestadores({ page: 1, limit: 100 })
             .then((res) => {
                 if (activo && Array.isArray(res.datos)) {
                     setPrestadores(res.datos);
@@ -188,18 +187,10 @@ export function HomePage({
         [prestadores, categorias]
     );
 
-    const localidadesOpciones = useMemo(() => {
-        const principales = new Set<string>(LOCALIDADES_POR_DEFECTO);
-        for (const p of prestadores) {
-            if (p.localidad && p.localidad.trim() !== '') {
-                principales.add(p.localidad.trim());
-            }
-        }
-        for (const loc of TODAS_LAS_LOCALIDADES_ARGENTINA) {
-            principales.add(loc);
-        }
-        return Array.from(principales);
-    }, [prestadores]);
+    const localidadesOpciones = useMemo(
+        () => obtenerLocalidadesConProfesionales(prestadores),
+        [prestadores]
+    );
 
     const navegarAlCatalogo = (parametros: {
         search?: string;
@@ -330,9 +321,12 @@ export function HomePage({
                             }
                         >
                             <option value="">Tu zona o barrio</option>
-                            {localidadesOpciones.map((loc) => (
-                                <option key={loc} value={loc}>
-                                    {loc}
+                            {localidadesOpciones.map((item) => (
+                                <option
+                                    key={item.localidad}
+                                    value={item.localidad}
+                                >
+                                    {item.etiqueta}
                                 </option>
                             ))}
                         </select>

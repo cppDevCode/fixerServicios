@@ -78,12 +78,20 @@ fixerServicios/
 │   │   └── __test__/                          # Pruebas unitarias y de integración del Frontend
 │   └── e2e/                                   # Especificaciones End-to-End con Playwright (layout.spec.ts, prestadores.spec.ts)
 │
+├── postman/                                   # Colecciones Postman v2.1 para pruebas manuales y automatizadas de API
+│   ├── Fixer_Coleccion.json                   # Colección unificada de Postman del proyecto Fixer Servicios
+│   └── prestadores (alumno 1)/                # Carpeta Postman del Integrante 1 (GET lista/detalle, POST, PUT, DELETE)
+│       └── prestadores_alumno1.postman_collection.json
+│
 └── docs/                                      # Documentación Técnica de Ingeniería por Fase e Integrante
     ├── fase1-baldres-infraestructura.md
     ├── fase1-belardinelli-testing.md
+    ├── fase1-dabus-frontend-playwright.md
     ├── fase2-baldres-prestadores.md
     ├── fase2-belardinelli-resenas.md
-    └── fase3-baldres-prestadores.md
+    ├── fase2-dabus-usuarios-auth.md
+    ├── fase3-baldres-prestadores.md
+    └── fase4-baldres-testing-postman.md
 ```
 
 ---
@@ -294,12 +302,24 @@ pnpm run build
 
 ---
 
+## 📬 Colección Postman (`postman/`)
+
+El repositorio incluye en el directorio [`postman/`](./postman) la colección lista para importar en **Postman**:
+
+- [`postman/Fixer_Coleccion.json`](./postman/Fixer_Coleccion.json): Colección principal con variable `{{baseUrl}}` preconfigurada en `http://localhost:3000/api/v1`.
+- [`postman/prestadores (alumno 1)/prestadores_alumno1.postman_collection.json`](./postman/prestadores%20(alumno%201)/prestadores_alumno1.postman_collection.json): Carpeta **`prestadores (alumno 1)`** con las peticiones `GET` (listado paginado/filtrado y detalle por ID), `POST` (alta de prestador), `PUT` (actualización) y `DELETE` (baja), incluyendo aserciones automáticas de estado (`200`, `201`, `400`, `404`) y ejemplos de respuestas JSON.
+
+---
+
 ## 📚 Documentación Técnica Adicional (`/docs`)
 
 En el directorio [`docs/`](./docs) se encuentran los informes técnicos detallados de cada fase de ingeniería:
 
 - [Fase 1 — Infraestructura, Docker y Base de Código (Alejandro L. Baldres)](./docs/fase1-baldres-infraestructura.md)
 - [Fase 1 — Infraestructura de Testing con Vitest y Supertest (Marianela Belardinelli Beker)](./docs/fase1-belardinelli-testing.md)
+- [Fase 1 — Infraestructura Frontend, Enrutador y Playwright (Julieta Dabús)](./docs/fase1-dabus-frontend-playwright.md)
 - [Fase 2 — Desarrollo Backend: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase2-baldres-prestadores.md)
 - [Fase 2 — Desarrollo Backend: Módulo Reseñas (Marianela Belardinelli Beker)](./docs/fase2-belardinelli-resenas.md)
-- [Fase 3 — Desarrollo Frontend, Catálogo, Exportación y Testing E2E: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase3-baldres-prestadores.md)
+- [Fase 2 — Desarrollo Backend: Módulo Usuarios, Auth y Middleware Global (Julieta Dabús)](./docs/fase2-dabus-usuarios-auth.md)
+- [Fase 3 — Desarrollo Frontend, Catálogo, Exportación y Seguridad por Roles: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase3-baldres-prestadores.md)
+- [Fase 4 — Estrategia Integral de Testing (Unit, Integration, E2E) y Colección Postman: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase4-baldres-testing-postman.md)

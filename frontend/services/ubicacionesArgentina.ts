@@ -10,6 +10,7 @@ export const PROVINCIAS_LOCALIDADES_ARGENTINA: IProvinciaLocalidades[] = [
             'La Plata',
             'Mar del Plata',
             'Bahía Blanca',
+            '9 de Julio',
             'Tandil',
             'San Nicolás de los Arroyos',
             'Pergamino',
@@ -31,6 +32,11 @@ export const PROVINCIAS_LOCALIDADES_ARGENTINA: IProvinciaLocalidades[] = [
             'Zárate',
             'Chivilcoy',
             'Necochea',
+            'Trenque Lauquen',
+            'Pehuajó',
+            'Azul',
+            'Mercedes',
+            'Tres Arroyos',
         ],
     },
     {
@@ -391,4 +397,49 @@ export function inferirProvinciaDeLocalidad(localidad?: string): string {
         item.localidades.some((loc) => loc.toLowerCase() === buscada)
     );
     return encontrada ? encontrada.provincia : 'Córdoba';
+}
+
+export interface IOpcionLocalidad {
+    localidad: string;
+    provincia: string;
+    etiqueta: string;
+}
+
+export function formatearLocalidadProvincia(
+    localidad?: string,
+    provincia?: string
+): string {
+    const locLimpia = localidad?.trim() ?? '';
+    if (!locLimpia) return '';
+    const provLimpia =
+        provincia?.trim() || inferirProvinciaDeLocalidad(locLimpia);
+    return provLimpia ? `${locLimpia}, ${provLimpia}` : locLimpia;
+}
+
+export function obtenerLocalidadesConProfesionales(
+    prestadores: ReadonlyArray<{ localidad?: string; provincia?: string }>
+): IOpcionLocalidad[] {
+    const mapa = new Map<string, IOpcionLocalidad>();
+
+    for (const p of prestadores) {
+        const locLimpia = p.localidad?.trim();
+        if (!locLimpia) continue;
+
+        const clave = locLimpia.toLowerCase();
+        if (!mapa.has(clave)) {
+            const provLimpia =
+                p.provincia?.trim() || inferirProvinciaDeLocalidad(locLimpia);
+            mapa.set(clave, {
+                localidad: locLimpia,
+                provincia: provLimpia,
+                etiqueta: provLimpia
+                    ? `${locLimpia}, ${provLimpia}`
+                    : locLimpia,
+            });
+        }
+    }
+
+    return Array.from(mapa.values()).sort((a, b) =>
+        a.etiqueta.localeCompare(b.etiqueta, 'es', { sensitivity: 'base' })
+    );
 }

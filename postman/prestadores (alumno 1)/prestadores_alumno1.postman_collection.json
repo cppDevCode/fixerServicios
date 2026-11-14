@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4789-abcd-111122223333",
+    "name": "prestadores (alumno 1) - Fixer Servicios",
+    "description": "Carpeta Postman 'prestadores (alumno 1)' (Alejandro Lucas Baldres) con requests GET (lista paginada con query params y detalle por ID), POST, PUT, DELETE y categorías.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "prestadorId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "prestadores (alumno 1)",
+      "description": "Endpoints del Módulo 1: Prestadores y Categorías (Integrante 1: Alejandro Lucas Baldres).",
+      "item": [
+        {
+          "name": "GET Listar Prestadores (Paginado y Filtros)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores?page=1&limit=10&rubro=Plomería&localidad=Córdoba Capital&search=Carlos&sortBy=nombre&order=asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "rubro",
+                  "value": "Plomería"
+                },
+                {
+                  "key": "localidad",
+                  "value": "Córdoba Capital"
+                },
+                {
+                  "key": "search",
+                  "value": "Carlos"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "nombre"
+                },
+                {
+                  "key": "order",
+                  "value": "asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Detalle de Prestador por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Prestador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ramiro\",\n  \"apellido\": \"Villalba\",\n  \"categoriaId\": \"Gasista\",\n  \"provincia\": \"Buenos Aires\",\n  \"localidad\": \"9 de Julio\",\n  \"matricula\": \"MAT-7788\",\n  \"aniosExperiencia\": 11,\n  \"acercaDe\": \"Gasista matriculado especialista en planos y pruebas de hermeticidad\",\n  \"ofreceGarantia\": true,\n  \"telefono\": {\n    \"codPais\": \"+54\",\n    \"codArea\": \"2317\",\n    \"nroTelefono\": \"48889999\"\n  },\n  \"ratingPromedio\": 4.9,\n  \"fotoUrl\": \"https://randomuser.me/api/portraits/men/90.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/prestadores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT Actualizar Prestador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aniosExperiencia\": 14,\n  \"provincia\": \"Buenos Aires\",\n  \"localidad\": \"9 de Julio\",\n  \"ofreceGarantia\": true,\n  \"acercaDe\": \"Especialista matriculado en instalaciones sanitarias y redes de gas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE Eliminar Prestador",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-usuario-rol",
+                "value": "ADMIN",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prestadores/{{prestadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prestadores",
+                "{{prestadorId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Listar Categorías Profesionales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
