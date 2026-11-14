@@ -101,6 +101,11 @@
     font-weight: 700;
     white-space: nowrap;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .fixer-header__publicar:disabled {

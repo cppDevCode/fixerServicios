@@ -5,6 +5,8 @@
     color: var(--color-text);
 }
 
+/* Hero */
+
 .info-page__hero {
     padding: 72px 32px;
     background: var(--color-surface-alt);
@@ -37,6 +39,8 @@
     line-height: 1.7;
 }
 
+/* Botones */
+
 .info-page__boton {
     display: inline-flex;
     align-items: center;
@@ -49,12 +53,14 @@
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .info-page__boton:hover {
     background: var(--color-primary-hover);
 }
+
+/* Contenido */
 
 .info-page__contenido {
     max-width: 1200px;
@@ -72,6 +78,8 @@
     margin: 0 0 40px;
     color: var(--color-text-secondary);
 }
+
+/* Tarjetas */
 
 .info-page__pasos {
     display: grid;
@@ -117,8 +125,7 @@
     line-height: 1.7;
 }
 
-
-/* AVISO INFORMATIVO */
+/* Garantía Fixer */
 
 .info-page__aviso {
     display: flex;
@@ -150,12 +157,72 @@
     line-height: 1.7;
 }
 
-@media (max-width: 600px) {
-    .info-page__aviso {
-        padding: 20px;
-    }
+/* Panel Pro */
+
+.info-page__contenido--alternativo {
+    max-width: none;
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
 }
 
+.info-page__contenido--alternativo .info-page__pasos {
+    max-width: 1152px;
+    margin: 0 auto;
+}
+
+.info-page__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    max-width: 950px;
+    margin: 64px auto 0;
+    padding: 48px 32px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.info-page__cta > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.info-page__cta h2 {
+    margin: 0;
+    color: white;
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.info-page__cta p {
+    max-width: 550px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.info-page__cta .info-page__boton {
+    background: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.info-page__cta .info-page__boton:hover {
+    background: var(--color-surface-alt);
+}
+
+.info-page__nota {
+    margin: 32px auto 0;
+    max-width: 650px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Responsive */
 
 @media (max-width: 768px) {
     .info-page__hero {
@@ -168,5 +235,28 @@
 
     .info-page__pasos {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .info-page__aviso {
+        padding: 20px;
+    }
+
+    .info-page__cta {
+        margin-top: 40px;
+        padding: 36px 20px;
+    }
+
+    .info-page__contenido h2 {
+        font-size: 25px;
+    }
+
+    .info-page__hero p {
+        font-size: 15px;
+    }
+
+    .info-page__tarjeta {
+        padding: 24px 20px;
     }
 }

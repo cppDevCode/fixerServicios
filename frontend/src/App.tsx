@@ -10,6 +10,7 @@ import { PrestadoresPage } from '../pages/PrestadoresPage';
 import { PrestadorDetallePage } from '../pages/PrestadorDetallePage';
 import { ComoFuncionaPage } from '../pages/ComoFuncionaPage';
 import { GarantiaPage } from '../pages/GarantiaPage';
+import { PanelProPage } from '../pages/PanelProPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/usuarios/:id" element={<UsuarioDetallePage />} />
           <Route path="/como-funciona" element={<ComoFuncionaPage />} />
           <Route path="/garantia" element={<GarantiaPage />} />
+          <Route path="/panel-pro" element={<PanelProPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

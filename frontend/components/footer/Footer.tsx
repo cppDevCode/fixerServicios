@@ -62,8 +62,8 @@ export function Footer() {
                 Ver profesionales
                 </Link>
 
-                <span>Panel Pro</span>
-                <span>Publicar servicio</span>
+                <Link to="/panel-pro">Panel Pro</Link>
+                <Link to="/panel-pro">Publicar servicio</Link>
             </div>
 
             {/* ATENCIÓN */}

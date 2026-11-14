@@ -49,9 +49,9 @@ export function Header() {
                 Garantía
             </NavLink>
 
-            <span className="fixer-header__pendiente">
+            <NavLink to="/panel-pro" onClick={cerrarMenu}>
                 Panel Pro
-            </span>
+            </NavLink>
             </nav>
 
             <div className="fixer-header__acciones">
@@ -73,14 +73,13 @@ export function Header() {
                 <UserRound size={22} />
             </Link>
 
-            <button
-                type="button"
+            <Link
+                to="/panel-pro"
                 className="fixer-header__publicar"
-                disabled
-                title="Próximamente"
-            >
-                Publicar servicio
-            </button>
+                onClick={cerrarMenu}
+                >
+            Publicar servicio
+            </Link>
 
             <button
                 type="button"
