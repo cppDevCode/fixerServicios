@@ -381,6 +381,10 @@
     align-items: start;
 }
 
+.prestador-detalle-grid--solo-lectura {
+    grid-template-columns: 1fr;
+}
+
 .prestador-ficha {
     background: var(--color-surface);
     border: 1px solid var(--color-border);

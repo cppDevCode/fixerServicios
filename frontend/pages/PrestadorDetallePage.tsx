@@ -311,7 +311,7 @@ export function PrestadorDetallePage() {
                             </div>
                         </article>
 
-                        {puedeEditar ? (
+                        {puedeEditar && (
                             <FormularioPrestador
                                 key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
                                 categorias={categorias}
@@ -322,30 +322,6 @@ export function PrestadorDetallePage() {
                                     setPrestador(actualizado)
                                 }
                             />
-                        ) : (
-                            <aside
-                                className="prestador-ficha"
-                                data-testid="aviso-solo-lectura-prestador"
-                                aria-label="Información de permisos de visualización"
-                            >
-                                <h3 style={{ marginTop: 0 }}>
-                                    Vista de consulta para usuarios
-                                </h3>
-                                <p style={{ lineHeight: 1.6 }}>
-                                    Estás visualizando la ficha profesional de{' '}
-                                    <strong>
-                                        {prestador.nombre} {prestador.apellido}
-                                    </strong>{' '}
-                                    en modo de solo lectura. Los datos del
-                                    prestador solo pueden ser editados por el
-                                    propio profesional o por un administrador.
-                                </p>
-                                <p style={{ lineHeight: 1.6, marginBottom: 0 }}>
-                                    {puedeDejarResena
-                                        ? 'Como usuario registrado, podés calificar y agregar una reseña sobre este profesional en la sección inferior.'
-                                        : 'Iniciá sesión con tu cuenta de usuario para registrar una reseña sobre este profesional.'}
-                                </p>
-                            </aside>
                         )}
                     </div>
 
@@ -364,8 +340,14 @@ export function PrestadorDetallePage() {
                         <ListadoResenas
                             key={`${prestador.id}-${versionResenas}`}
                             prestadorId={prestador.id}
-                            usuarioId={usuarioId ?? undefined}
-                            onEditarResena={setResenaEditar}
+                            usuarioId={
+                                puedeDejarResena && usuarioId !== null
+                                    ? usuarioId
+                                    : undefined
+                            }
+                            onEditarResena={
+                                puedeDejarResena ? setResenaEditar : undefined
+                            }
                         />
                     </section>
                 </>

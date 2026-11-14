@@ -76,7 +76,7 @@ export function Header() {
                     {esAdmin(usuarioActual) && (
                         <>
                             <NavLink to="/prestadores" end onClick={cerrarMenu}>
-                                1. Prestadores
+                                Prestadores
                             </NavLink>
                             <NavLink to="/usuarios" onClick={cerrarMenu}>
                                 Usuarios

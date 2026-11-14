@@ -62,6 +62,13 @@ export function verificarPermisoEditarPrestador(
             prestadorIdSesion > 0 &&
             prestadorIdSesion === prestadorIdObjetivo
         ) {
+            if (
+                req.body &&
+                typeof req.body === 'object' &&
+                'ratingPromedio' in req.body
+            ) {
+                delete (req.body as Record<string, unknown>).ratingPromedio;
+            }
             next();
             return;
         }
