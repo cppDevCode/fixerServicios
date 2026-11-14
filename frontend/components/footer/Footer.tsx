@@ -27,19 +27,36 @@ export function Footer() {
                 simple y confiable.
                 </p>
 
-                <div className="fixer-footer__redes">
-                <span aria-label="Facebook" title="Facebook">
-                    <FaFacebookF size={20} />
-                </span>
+                
+<div className="fixer-footer__redes">
+    <a
+        href="https://www.facebook.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Facebook"
+    >
+        <FaFacebookF />
+    </a>
 
-                <span aria-label="Instagram" title="Instagram">
-                    <FaInstagram size={20} />
-                </span>
+    <a
+        href="https://www.instagram.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+    >
+        <FaInstagram />
+    </a>
 
-                <span aria-label="LinkedIn" title="LinkedIn">
-                    <FaLinkedinIn size={20} />
-                </span>
-                </div>
+    <a
+        href="https://www.linkedin.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="LinkedIn"
+    >
+        <FaLinkedinIn />
+    </a>
+    </div>
+
             </div>
 
             {/* PLATAFORMA */}
