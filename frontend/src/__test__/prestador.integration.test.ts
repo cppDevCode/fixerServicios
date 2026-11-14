@@ -86,6 +86,12 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
         ).toBeGreaterThanOrEqual(
             porMayorPuntuacion.datos[5].ratingPromedio ?? 0
         );
+
+        const porLocalidad = await obtenerPrestadores(
+            { localidad: 'Córdoba Capital' },
+            apiBaseUrl
+        );
+        expect(porLocalidad.meta?.total).toBe(4);
     });
 
     it('integra el ciclo completo de alta, detalle, actualización, baja y manejo de errores (400/404)', async () => {

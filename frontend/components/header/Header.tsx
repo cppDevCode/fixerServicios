@@ -1,14 +1,59 @@
 
-import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, UserRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+    Link,
+    NavLink,
+    useLocation,
+    useNavigate
+} from 'react-router-dom';
+import { Menu, X, UserRound, LogOut } from 'lucide-react';
 import fixerLogo from '../../assets/fixer-logo.png';
+import {
+    cerrarSesionUsuario,
+    esAdmin,
+    esPrestador,
+    esUsuarioFinal,
+    EVENTO_CAMBIO_SESION,
+    obtenerUsuarioActual,
+    type IUsuarioSesion,
+} from '../../services/sesion.service';
 import './Header.css';
 
 export function Header() {
     const [menuAbierto, setMenuAbierto] = useState(false);
+    const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(
+        () => obtenerUsuarioActual()
+    );
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        setUsuarioActual(obtenerUsuarioActual());
+    }, [location.pathname, location.search]);
+
+    useEffect(() => {
+        const actualizarSesion = () => {
+            setUsuarioActual(obtenerUsuarioActual());
+        };
+
+        window.addEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+        window.addEventListener('storage', actualizarSesion);
+
+        return () => {
+            window.removeEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+            window.removeEventListener('storage', actualizarSesion);
+        };
+    }, []);
 
     const cerrarMenu = () => setMenuAbierto(false);
+
+    const manejarCerrarSesion = () => {
+        cerrarSesionUsuario();
+        setUsuarioActual(null);
+        cerrarMenu();
+        navigate('/login');
+    };
 
     return (
         <header className="fixer-header">
@@ -26,10 +71,16 @@ export function Header() {
 
                 {/* Navegación principal */}
                 <nav
-                    className={`fixer-header__nav ${menuAbierto ? 'fixer-header__nav--abierto' : ''}`}
+                    className={`fixer-header__nav ${
+                        menuAbierto ? 'fixer-header__nav--abierto' : ''
+                    }`}
                     aria-label="Navegación principal"
                     id="fixer-navegacion"
                 >
+                    <NavLink to="/" end onClick={cerrarMenu}>
+                        Inicio
+                    </NavLink>
+
                     <NavLink
                         to="/prestadores/catalogo"
                         onClick={cerrarMenu}
@@ -37,12 +88,51 @@ export function Header() {
                         Explorar servicios
                     </NavLink>
 
-                    <NavLink
-                        to="/prestadores"
-                        onClick={cerrarMenu}
-                    >
-                        Profesionales
-                    </NavLink>
+                    {esAdmin(usuarioActual) && (
+                        <>
+                            <NavLink
+                                to="/prestadores"
+                                end
+                                onClick={cerrarMenu}
+                            >
+                                Prestadores
+                            </NavLink>
+
+                            <NavLink
+                                to="/usuarios"
+                                onClick={cerrarMenu}
+                            >
+                                Usuarios
+                            </NavLink>
+                        </>
+                    )}
+
+                    {esPrestador(usuarioActual) && (
+                        <>
+                            <NavLink
+                                to={`/prestadores/${usuarioActual?.prestadorId ?? 1}`}
+                                onClick={cerrarMenu}
+                            >
+                                Mi Ficha Profesional
+                            </NavLink>
+
+                            <NavLink
+                                to={`/usuarios/${usuarioActual?.id}`}
+                                onClick={cerrarMenu}
+                            >
+                                Mi Perfil de Usuario
+                            </NavLink>
+                        </>
+                    )}
+
+                    {esUsuarioFinal(usuarioActual) && (
+                        <NavLink
+                            to={`/usuarios/${usuarioActual?.id}`}
+                            onClick={cerrarMenu}
+                        >
+                            Mi Perfil
+                        </NavLink>
+                    )}
 
                     <NavLink
                         to="/como-funciona"
@@ -58,34 +148,70 @@ export function Header() {
                         Garantía
                     </NavLink>
 
-                    <NavLink
-                        to="/panel-pro"
-                        onClick={cerrarMenu}
-                    >
-                        Panel Pro
-                    </NavLink>
+                    {!usuarioActual && (
+                        <NavLink
+                            to="/panel-pro"
+                            onClick={cerrarMenu}
+                        >
+                            Panel Pro
+                        </NavLink>
+                    )}
                 </nav>
 
-                {/* Acciones */}
+                {/* Acciones de sesión */}
                 <div className="fixer-header__acciones">
-                    <Link
-                        to="/login"
-                        className="fixer-header__icono"
-                        aria-label="Acceder a mi cuenta"
-                        onClick={cerrarMenu}
-                    >
-                        <UserRound size={22} />
-                    </Link>
+                    {usuarioActual ? (
+                        <>
+                            <Link
+                                to={`/usuarios/${usuarioActual.id}`}
+                                data-testid="usuario-sesion-badge"
+                                className="fixer-header__usuario-badge"
+                                title="Ver mi perfil de usuario"
+                                onClick={cerrarMenu}
+                            >
+                                <UserRound size={16} />
+                                <span>
+                                    {usuarioActual.nombre} ({usuarioActual.rol})
+                                </span>
+                            </Link>
+
+                            <button
+                                type="button"
+                                data-testid="btn-cerrar-sesion"
+                                onClick={manejarCerrarSesion}
+                                className="fixer-header__btn-salir"
+                            >
+                                <LogOut size={16} />
+                                <span>Cerrar sesión</span>
+                            </button>
+                        </>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="fixer-header__login-btn"
+                            aria-label="Acceder a mi cuenta"
+                            onClick={cerrarMenu}
+                        >
+                            <UserRound size={18} />
+                            <span>Iniciar sesión</span>
+                        </Link>
+                    )}
 
                     <button
                         type="button"
                         className="fixer-header__hamburguesa"
-                        aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+                        aria-label={
+                            menuAbierto ? 'Cerrar menú' : 'Abrir menú'
+                        }
                         aria-expanded={menuAbierto}
                         aria-controls="fixer-navegacion"
                         onClick={() => setMenuAbierto(!menuAbierto)}
                     >
-                        {menuAbierto ? <X size={24} /> : <Menu size={24} />}
+                        {menuAbierto ? (
+                            <X size={24} />
+                        ) : (
+                            <Menu size={24} />
+                        )}
                     </button>
                 </div>
 

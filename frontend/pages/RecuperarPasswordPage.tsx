@@ -13,7 +13,7 @@ export const RecuperarPasswordPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   const handleBuscarPregunta = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setError(null);

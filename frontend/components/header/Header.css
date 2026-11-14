@@ -115,6 +115,64 @@
     cursor: not-allowed;
 }
 
+.fixer-header__usuario-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: rgba(36, 52, 71, 0.08);
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.fixer-header__usuario-badge:hover {
+    background-color: rgba(36, 52, 71, 0.14);
+}
+
+.fixer-header__btn-salir {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.fixer-header__btn-salir:hover {
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+.fixer-header__login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.fixer-header__login-btn:hover {
+    border-color: var(--color-primary);
+}
+
 /* MENÚ HAMBURGUESA */
 
 .fixer-header__hamburguesa {
