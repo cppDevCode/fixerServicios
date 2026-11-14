@@ -85,11 +85,7 @@ export function Footer() {
 
             {/* ATENCIÓN */}
             <div className="fixer-footer__columna">
-                <h3>Atención</h3>
-
-                <span>Centro de ayuda</span>
-                <span>Contacto</span>
-
+                
                 <div className="fixer-footer__estado">
                 <ShieldCheck size={18} />
                 <span>Tu confianza es importante</span>
