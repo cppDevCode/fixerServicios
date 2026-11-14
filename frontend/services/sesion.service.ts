@@ -17,8 +17,9 @@ export function obtenerUsuarioActual(): IUsuarioSesion | null {
     }
 
     try {
+        const token = window.localStorage.getItem('token');
         const guardado = window.localStorage.getItem('usuario');
-        if (!guardado) {
+        if (!token || !guardado) {
             return null;
         }
         const usuario = JSON.parse(guardado) as Partial<IUsuarioSesion>;

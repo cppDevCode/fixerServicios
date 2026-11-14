@@ -6,7 +6,6 @@ import { RecuperarPasswordPage } from './../pages/RecuperarPasswordPage';
 import { UsuariosPage } from '../pages/UsuariosPage';
 import { UsuarioDetallePage } from '../pages/UsuarioDetallePage';
 import { HomePage } from '../pages/HomePage';
-import { PrestadoresPlaceholder } from '../pages/Placeholders';
 import { PrestadoresPage } from '../pages/PrestadoresPage';
 import { PrestadorDetallePage } from '../pages/PrestadorDetallePage';
 import { ComoFuncionaPage } from '../pages/ComoFuncionaPage';

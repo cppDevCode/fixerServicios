@@ -9,7 +9,6 @@ import {
     EVENTO_CAMBIO_SESION,
     obtenerUsuarioActual,
     puedeGestionarCatalogoPrestadores,
-    type IUsuarioSesion,
 } from '../services/sesion.service';
 
 export interface PrestadoresPageProps {
@@ -19,9 +18,8 @@ export interface PrestadoresPageProps {
 export function PrestadoresPage({
     vistaInicial = 'tabla',
 }: PrestadoresPageProps) {
-    const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(
-        () => obtenerUsuarioActual()
-    );
+    const [, setVersionSesion] = useState(0);
+    const usuarioActual = obtenerUsuarioActual();
     const esAdministrador = puedeGestionarCatalogoPrestadores(usuarioActual);
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -32,16 +30,19 @@ export function PrestadoresPage({
 
     useEffect(() => {
         const actualizarSesion = () => {
+            setVersionSesion((v) => v + 1);
             const usuario = obtenerUsuarioActual();
-            setUsuarioActual(usuario);
             if (!puedeGestionarCatalogoPrestadores(usuario)) {
                 setModoVista('catalogo');
                 setMostrarFormulario(false);
             }
         };
         window.addEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
-        return () =>
+        window.addEventListener('storage', actualizarSesion);
+        return () => {
             window.removeEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+            window.removeEventListener('storage', actualizarSesion);
+        };
     }, []);
 
     useEffect(() => {

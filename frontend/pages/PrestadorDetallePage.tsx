@@ -19,24 +19,25 @@ import {
     puedeAgregarResena,
     puedeEditarPrestador,
     puedeEliminarPrestador,
-    type IUsuarioSesion,
 } from '../services/sesion.service';
 import { ListadoResenas } from '../components/resenas/ListadoResenas';
 import { FormularioResena } from '../components/resenas/FormularioResena';
 import type { IResena } from '../interfaces/resena.interface';
 
 export function PrestadorDetallePage() {
-    const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(
-        () => obtenerUsuarioActual()
-    );
+    const [, setVersionSesion] = useState(0);
+    const usuarioActual = obtenerUsuarioActual();
 
     useEffect(() => {
         const actualizarSesion = () => {
-            setUsuarioActual(obtenerUsuarioActual());
+            setVersionSesion((v) => v + 1);
         };
         window.addEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
-        return () =>
+        window.addEventListener('storage', actualizarSesion);
+        return () => {
             window.removeEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+            window.removeEventListener('storage', actualizarSesion);
+        };
     }, []);
 
     const idNumericoUsuario = usuarioActual ? Number(usuarioActual.id) : NaN;
