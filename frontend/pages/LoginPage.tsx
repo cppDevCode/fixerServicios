@@ -19,16 +19,35 @@ export const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const result = await response.json();
+
       if (result.code === 200) {
-        guardarSesionUsuario(result.data.token, result.data.usuario);
-        navigate(obtenerRutaInicioPorRol(result.data.usuario));
+        localStorage.setItem('token', result.data.token);
+        localStorage.setItem('usuario', JSON.stringify(result.data.usuario));
+        
+        if (result.data.usuario.rol === 'PRESTADOR') {
+          let prestadorId = result.data.usuario.prestadorId;
+  
+          if (!prestadorId) {
+            prestadorId = localStorage.getItem('prestadorId');
+          }
+          
+          if (prestadorId) {
+            navigate(`/prestadores/${prestadorId}`);
+          } else {
+            navigate('/prestadores');
+          }
+        } else {
+          navigate('/usuarios');
+        }
       } else {
         setError(result.msg || 'Credenciales inválidas');
       }
