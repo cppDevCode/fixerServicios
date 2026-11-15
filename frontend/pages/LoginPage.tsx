@@ -11,21 +11,30 @@ export const LoginPage = () => {
 
   const API_URL = 'http://localhost:3000/api/v1';
 
-  const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const result = await response.json();
+
       if (result.code === 200) {
         localStorage.setItem('token', result.data.token);
         localStorage.setItem('usuario', JSON.stringify(result.data.usuario));
-        navigate('/usuarios');
+        
+      
+        if (result.data.usuario.rol === 'PRESTADOR') {
+          navigate(`/prestadores/${result.data.usuario.id}`);
+        } else {
+          navigate('/usuarios');
+        }
       } else {
         setError(result.msg || 'Credenciales inválidas');
       }
