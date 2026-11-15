@@ -14,6 +14,7 @@ import {
     obtenerCategorias,
     obtenerPrestadores,
 } from '../../services/prestador.service';
+import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
 export interface ListadoPrestadoresProps {
@@ -381,12 +382,22 @@ export function ListadoPrestadores({
                                     >
                                         <td>#{p.id}</td>
                                         <td>
-                                            <span className="prestador-nombre-celda">
-                                                {p.nombre} {p.apellido}
-                                            </span>
-                                            <span className="prestador-subtexto">
-                                                {p.acercaDe}
-                                            </span>
+                                            <div className="prestador-celda-profesional">
+                                                <AvatarPrestador
+                                                    nombre={p.nombre}
+                                                    apellido={p.apellido}
+                                                    fotoUrl={p.fotoUrl}
+                                                    tamano="md"
+                                                />
+                                                <div>
+                                                    <span className="prestador-nombre-celda">
+                                                        {p.nombre} {p.apellido}
+                                                    </span>
+                                                    <span className="prestador-subtexto">
+                                                        {p.acercaDe}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <span className="badge-prestador badge-prestador--rubro">

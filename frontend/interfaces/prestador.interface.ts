@@ -13,8 +13,11 @@ export interface IPrestador {
     acercaDe: string;
     ofreceGarantia: boolean;
     categoriaId: string;
+    provincia?: string;
+    localidad?: string;
     telefono: ITelefonoPrestador;
     ratingPromedio?: number;
+    fotoUrl?: string;
 }
 
 export interface ICategoria {
@@ -26,6 +29,8 @@ export interface IFiltrosPrestador {
     page?: number;
     limit?: number;
     rubro?: string;
+    provincia?: string;
+    localidad?: string;
     search?: string;
     sortBy?: keyof IPrestador;
     order?: 'asc' | 'desc';

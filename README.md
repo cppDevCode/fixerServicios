@@ -12,7 +12,7 @@ El desarrollo se estructuró verticalmente en **3 módulos autónomos**, donde c
 
 | Integrante | Módulo Asignado | Alcance Técnico Principal |Rama de Desarrollo |
 | :--- | :--- | :--- | :--- |
-| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores y Categorías** (`Prestador`, `Categoria`, `Rubro`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, API REST CRUD con filtros combinados y paginación (`/api/v1/prestadores`, `/api/v1/categorias`), UI de catálogo paginado, ficha técnica y formulario reactivo (`/prestadores`, `/prestadores/:id`), exportación en `.pdf` y `.xlsx` (`ExcelJS`) y suite de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
+| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores y Categorías** (`Prestador`, `Categoria`, `Rubro`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, API REST CRUD con soporte de foto de perfil (`fotoUrl`), provincia (`provincia`), localidad (`localidad`), filtros combinados y paginación (`/api/v1/prestadores`, `/api/v1/categorias`), vista Home (`/`) con buscador principal y sugerencia de categorías más buscadas, UI de catálogo público con tarjetas, filtro por localidad y filtros rápidos (`/prestadores/catalogo`), tabla de gestión paginada con avatar de foto o silueta de persona por defecto, ficha técnica y formulario reactivo con todas las provincias y localidades de Argentina (`/prestadores`, `/prestadores/:id`), exportación en `.pdf` y `.xlsx` (`ExcelJS`) y suite de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
 | **Marianela Belardinelli Beker** | **Módulo 2: Reseñas y Calificaciones** (`Reseña`, `Puntuación`, `Comentario`) | Configuración de Vitest, Supertest y fixtures, API REST CRUD de reseñas (`/api/v1/resenas`) con cálculo automático de promedio de estrellas, UI de feed de opiniones y formulario de alta/edición, exportación de métricas en `.pdf` (`jsPDF`) y `.xlsx` (`ExcelJS`), y suite de pruebas (Unit, Integration, E2E). | `feat/belardinelli-resena` |
 | **Julieta Dabús** | **Módulo 3: Usuarios, Acceso y Ubicación** (`Usuario`, `Ubicacion`, `CodigoPostal`) | Configuración de Playwright, middleware global de manejo de errores HTTP, API REST de autenticación y usuarios (`/api/v1/auth/*`, `/api/v1/usuarios`) con filtro universal y radio de cobertura, layout global (Header, Sidebar, Footer, Router), vistas de Login, Registro, Recuperación de clave, padrón de usuarios y exportación en `.xlsx`. | `feat/dabus-usuarios-auth` |
 
@@ -45,7 +45,7 @@ fixerServicios/
 │       ├── service/                           # Lógica de negocio, filtrado normalizado, cálculo de promedios y paginación
 │       ├── controller/                        # Controladores HTTP y validación de payloads
 │       ├── route/                             # Definición de rutas REST (/prestadores, /categorias, /resenas, /usuarios, /auth)
-│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts)
+│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts) y autorización por roles (autorizacion.middleware.ts)
 │       └── __test__/                          # Pruebas Unitarias (*.unit.test.ts), Integración (*.integration.test.ts) y E2E (*.e2e.test.ts)
 │           ├── fixtures/                      # Fábricas de datos de prueba (prestadores y reseñas)
 │           └── helpers/                       # Instanciación de aplicación Express en memoria (crearApp.ts)
@@ -61,27 +61,37 @@ fixerServicios/
 │   ├── tsconfig.json                          # Configuración estricta de TypeScript (Bundler/DOM/JSX)
 │   ├── vite.config.ts                         # Configuración de Vite y proxy reverso automático (/api -> Backend)
 │   ├── vitest.config.ts                       # Configuración de Vitest para pruebas unitarias y de integración en cliente
+│   ├── assets/
+│   │   └── silueta-persona.svg                # Recurso vectorial de silueta por defecto para prestadores sin foto
 │   ├── styles/
 │   │   └── variables.css                      # Sistema de diseño y tokens CSS globales
 │   ├── interfaces/                            # Contratos de datos en cliente (prestador.interface.ts, resena.interface.ts)
-│   ├── services/                              # Clientes HTTP y motores de exportación (.pdf / .xlsx)
+│   ├── services/                              # Clientes HTTP, control de sesión/roles (sesion.service.ts) y exportación (.pdf / .xlsx)
 │   ├── components/
 │   │   ├── layout/                            # Layout general (Header, Sidebar por módulo, Footer)
-│   │   ├── prestadores/                       # ListadoPrestadores, FormularioPrestador y estilos
+│   │   ├── prestadores/                       # AvatarPrestador, CatalogoPrestadoresUsuario, TarjetaCatalogoPrestador, ListadoPrestadores, FormularioPrestador y estilos
 │   │   └── resenas/                           # ListadoResenas, FormularioResena, TarjetaResena, Estrellas y estilos
-│   ├── pages/                                 # Vistas de página (PrestadoresPage, PrestadorDetallePage, ResenaPage, UsuariosPage, UsuarioDetallePage, LoginPage, RegistroPage, RecuperarPasswordPage)
+│   ├── pages/                                 # Vistas de página (HomePage, PrestadoresPage, PrestadorDetallePage, ResenaPage, UsuariosPage, UsuarioDetallePage, LoginPage, RegistroPage, RecuperarPasswordPage)
 │   ├── src/
 │   │   ├── main.tsx                           # Punto de montaje React DOM
 │   │   ├── App.tsx                            # Definición de rutas con React Router v6
 │   │   └── __test__/                          # Pruebas unitarias y de integración del Frontend
 │   └── e2e/                                   # Especificaciones End-to-End con Playwright (layout.spec.ts, prestadores.spec.ts)
 │
+├── postman/                                   # Colecciones Postman v2.1 para pruebas manuales y automatizadas de API
+│   ├── Fixer_Coleccion.json                   # Colección unificada de Postman del proyecto Fixer Servicios
+│   └── prestadores (alumno 1)/                # Carpeta Postman del Integrante 1 (GET lista/detalle, POST, PUT, DELETE)
+│       └── prestadores_alumno1.postman_collection.json
+│
 └── docs/                                      # Documentación Técnica de Ingeniería por Fase e Integrante
     ├── fase1-baldres-infraestructura.md
     ├── fase1-belardinelli-testing.md
+    ├── fase1-dabus-frontend-playwright.md
     ├── fase2-baldres-prestadores.md
     ├── fase2-belardinelli-resenas.md
-    └── fase3-baldres-prestadores.md
+    ├── fase2-dabus-usuarios-auth.md
+    ├── fase3-baldres-prestadores.md
+    └── fase4-baldres-testing-postman.md
 ```
 
 ---
@@ -276,10 +286,10 @@ pnpm run build
 | Módulo | Método | Endpoint | Descripción |
 | :--- | :---: | :--- | :--- |
 | **Sistema** | `GET` | `/api/v1/health` | Verificación de estado del servidor (`{ code: 200, msg: 'Ok', data: { status: 'up' } }`). |
-| **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores` | Listado paginado con soporte para `?page=1&limit=10&rubro=Plomería&search=...&sortBy=nombre&order=asc`. |
+| **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores` | Listado paginado con soporte para `?page=1&limit=10&rubro=Plomería&localidad=Córdoba%20Capital&search=...&sortBy=nombre&order=asc`. |
 | **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores/:id` | Obtiene la ficha técnica detallada de un prestador por su ID. |
-| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador en el catálogo. |
-| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos de un prestador. |
+| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador en el catálogo (incluyendo soporte opcional de fotografía `fotoUrl`). |
+| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos y/o foto de perfil de un prestador (enviar `fotoUrl: ""` restaura la silueta por defecto). |
 | **Módulo 1: Prestadores** | `DELETE` | `/api/v1/prestadores/:id` | Elimina un prestador del catálogo. |
 | **Módulo 1: Categorías** | `GET` | `/api/v1/categorias` | Lista los rubros profesionales ordenados alfabéticamente (soporta `?search=`). |
 | **Módulo 1: Categorías** | `POST` / `PUT` / `DELETE` | `/api/v1/categorias` | Alta, modificación y baja de categorías profesionales. |
@@ -292,12 +302,24 @@ pnpm run build
 
 ---
 
+## 📬 Colección Postman (`postman/`)
+
+El repositorio incluye en el directorio [`postman/`](./postman) la colección lista para importar en **Postman**:
+
+- [`postman/Fixer_Coleccion.json`](./postman/Fixer_Coleccion.json): Colección principal con variable `{{baseUrl}}` preconfigurada en `http://localhost:3000/api/v1`.
+- [`postman/prestadores (alumno 1)/prestadores_alumno1.postman_collection.json`](./postman/prestadores%20(alumno%201)/prestadores_alumno1.postman_collection.json): Carpeta **`prestadores (alumno 1)`** con las peticiones `GET` (listado paginado/filtrado y detalle por ID), `POST` (alta de prestador), `PUT` (actualización) y `DELETE` (baja), incluyendo aserciones automáticas de estado (`200`, `201`, `400`, `404`) y ejemplos de respuestas JSON.
+
+---
+
 ## 📚 Documentación Técnica Adicional (`/docs`)
 
 En el directorio [`docs/`](./docs) se encuentran los informes técnicos detallados de cada fase de ingeniería:
 
 - [Fase 1 — Infraestructura, Docker y Base de Código (Alejandro L. Baldres)](./docs/fase1-baldres-infraestructura.md)
 - [Fase 1 — Infraestructura de Testing con Vitest y Supertest (Marianela Belardinelli Beker)](./docs/fase1-belardinelli-testing.md)
+- [Fase 1 — Infraestructura Frontend, Enrutador y Playwright (Julieta Dabús)](./docs/fase1-dabus-frontend-playwright.md)
 - [Fase 2 — Desarrollo Backend: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase2-baldres-prestadores.md)
 - [Fase 2 — Desarrollo Backend: Módulo Reseñas (Marianela Belardinelli Beker)](./docs/fase2-belardinelli-resenas.md)
-- [Fase 3 — Desarrollo Frontend, Catálogo, Exportación y Testing E2E: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase3-baldres-prestadores.md)
+- [Fase 2 — Desarrollo Backend: Módulo Usuarios, Auth y Middleware Global (Julieta Dabús)](./docs/fase2-dabus-usuarios-auth.md)
+- [Fase 3 — Desarrollo Frontend, Catálogo, Exportación y Seguridad por Roles: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase3-baldres-prestadores.md)
+- [Fase 4 — Estrategia Integral de Testing (Unit, Integration, E2E) y Colección Postman: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase4-baldres-testing-postman.md)

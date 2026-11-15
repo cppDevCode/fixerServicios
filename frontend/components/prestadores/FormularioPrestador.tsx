@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type {
     ICategoria,
     ICrearPrestador,
@@ -9,6 +9,14 @@ import {
     CATEGORIAS_POR_DEFECTO,
     crearPrestador,
 } from '../../services/prestador.service';
+import {
+    inferirProvinciaDeLocalidad,
+    obtenerLocalidadesPorProvincia,
+    PROVINCIAS_ARGENTINA,
+    PROVINCIAS_LOCALIDADES_ARGENTINA,
+} from '../../services/ubicacionesArgentina';
+import { esPrestador, obtenerUsuarioActual } from '../../services/sesion.service';
+import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
 export interface FormularioPrestadorProps {
@@ -36,6 +44,16 @@ export function FormularioPrestador({
     const [categoriaId, setCategoriaId] = useState(
         prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 'Plomería'
     );
+    const provinciaInicial =
+        prestadorInicial?.provincia ??
+        inferirProvinciaDeLocalidad(prestadorInicial?.localidad);
+
+    const [provincia, setProvincia] = useState(provinciaInicial);
+    const [localidad, setLocalidad] = useState(
+        prestadorInicial?.localidad ??
+            obtenerLocalidadesPorProvincia(provinciaInicial)[0] ??
+            'Córdoba Capital'
+    );
     const [matricula, setMatricula] = useState(prestadorInicial?.matricula ?? '');
     const [aniosExperiencia, setAniosExperiencia] = useState(
         String(prestadorInicial?.aniosExperiencia ?? 1)
@@ -58,12 +76,27 @@ export function FormularioPrestador({
             ? String(prestadorInicial.ratingPromedio)
             : '4.5'
     );
+    const [fotoUrl, setFotoUrl] = useState(prestadorInicial?.fotoUrl ?? '');
 
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esEdicion = Boolean(prestadorInicial?.id);
+    const ocultarCalificacion = esPrestador(obtenerUsuarioActual());
+
+    const manejarArchivoFoto = (evento: ChangeEvent<HTMLInputElement>) => {
+        const archivo = evento.target.files?.[0];
+        if (!archivo) return;
+
+        const lector = new FileReader();
+        lector.onload = () => {
+            if (typeof lector.result === 'string') {
+                setFotoUrl(lector.result);
+            }
+        };
+        lector.readAsDataURL(archivo);
+    };
 
     const manejarSubmit = async (evento: FormEvent<HTMLFormElement>) => {
         evento.preventDefault();
@@ -93,6 +126,8 @@ export function FormularioPrestador({
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
             categoriaId: rubroLimpio,
+            provincia: provincia.trim() || undefined,
+            localidad: localidad.trim() || undefined,
             matricula: matricula.trim() ? matricula.trim() : undefined,
             aniosExperiencia: experienciaNumero,
             acercaDe: acercaDe.trim(),
@@ -102,10 +137,16 @@ export function FormularioPrestador({
                 codArea: codArea.trim() || '11',
                 nroTelefono: nroTelefono.trim(),
             },
-            ratingPromedio:
-                ratingNumero !== undefined && !Number.isNaN(ratingNumero)
-                    ? ratingNumero
-                    : undefined,
+            ratingPromedio: ocultarCalificacion
+                ? prestadorInicial?.ratingPromedio
+                : ratingNumero !== undefined && !Number.isNaN(ratingNumero)
+                  ? ratingNumero
+                  : undefined,
+            fotoUrl: fotoUrl.trim()
+                ? fotoUrl.trim()
+                : esEdicion
+                  ? ''
+                  : undefined,
         };
 
         setEnviando(true);
@@ -127,6 +168,7 @@ export function FormularioPrestador({
                 setMatricula('');
                 setAcercaDe('');
                 setNroTelefono('');
+                setFotoUrl('');
             }
 
             onGuardado?.(respuesta.datos);
@@ -199,6 +241,77 @@ export function FormularioPrestador({
                 </div>
 
                 <div className="prestadores-campo">
+                    <label htmlFor="prestador-provincia">Provincia</label>
+                    <select
+                        id="prestador-provincia"
+                        name="provincia"
+                        value={provincia}
+                        onChange={(e) => {
+                            const nuevaProvincia = e.target.value;
+                            setProvincia(nuevaProvincia);
+                            const localidadesDeProvincia =
+                                obtenerLocalidadesPorProvincia(nuevaProvincia);
+                            if (localidadesDeProvincia.length > 0) {
+                                setLocalidad(localidadesDeProvincia[0]);
+                            }
+                        }}
+                        disabled={enviando}
+                    >
+                        {PROVINCIAS_ARGENTINA.map((prov) => (
+                            <option key={prov} value={prov}>
+                                {prov}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="prestadores-campo">
+                    <label htmlFor="prestador-localidad">Localidad</label>
+                    <select
+                        id="prestador-localidad"
+                        name="localidad"
+                        value={localidad}
+                        onChange={(e) => {
+                            const nuevaLocalidad = e.target.value;
+                            setLocalidad(nuevaLocalidad);
+                            const provInferida =
+                                inferirProvinciaDeLocalidad(nuevaLocalidad);
+                            if (provInferida) {
+                                setProvincia(provInferida);
+                            }
+                        }}
+                        disabled={enviando}
+                    >
+                        <optgroup label={`Localidades de ${provincia}`}>
+                            {obtenerLocalidadesPorProvincia(provincia).map(
+                                (loc) => (
+                                    <option key={`${provincia}-${loc}`} value={loc}>
+                                        {loc}
+                                    </option>
+                                )
+                            )}
+                        </optgroup>
+                        {PROVINCIAS_LOCALIDADES_ARGENTINA.filter(
+                            (grupo) => grupo.provincia !== provincia
+                        ).map((grupo) => (
+                            <optgroup
+                                key={grupo.provincia}
+                                label={grupo.provincia}
+                            >
+                                {grupo.localidades.map((loc) => (
+                                    <option
+                                        key={`${grupo.provincia}-${loc}`}
+                                        value={loc}
+                                    >
+                                        {loc}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="prestadores-campo">
                     <label htmlFor="prestador-matricula">Matrícula profesional</label>
                     <input
                         id="prestador-matricula"
@@ -225,19 +338,68 @@ export function FormularioPrestador({
                     />
                 </div>
 
-                <div className="prestadores-campo">
-                    <label htmlFor="prestador-rating">Calificación inicial (1 a 5)</label>
-                    <input
-                        id="prestador-rating"
-                        name="ratingPromedio"
-                        type="number"
-                        step="0.1"
-                        min="1"
-                        max="5"
-                        value={ratingPromedio}
-                        onChange={(e) => setRatingPromedio(e.target.value)}
-                        disabled={enviando}
+                {!ocultarCalificacion && (
+                    <div className="prestadores-campo">
+                        <label htmlFor="prestador-rating">
+                            Calificación inicial (1 a 5)
+                        </label>
+                        <input
+                            id="prestador-rating"
+                            name="ratingPromedio"
+                            type="number"
+                            step="0.1"
+                            min="1"
+                            max="5"
+                            value={ratingPromedio}
+                            onChange={(e) => setRatingPromedio(e.target.value)}
+                            disabled={enviando}
+                        />
+                    </div>
+                )}
+            </div>
+
+            <div className="prestadores-campo">
+                <label htmlFor="prestador-foto-url">
+                    Foto del prestador (opcional — si no se carga se muestra silueta por defecto)
+                </label>
+                <div className="formulario-prestador__foto">
+                    <AvatarPrestador
+                        nombre={nombre || 'Nuevo'}
+                        apellido={apellido || 'Prestador'}
+                        fotoUrl={fotoUrl}
+                        tamano="lg"
                     />
+                    <div className="formulario-prestador__foto-controles">
+                        <input
+                            id="prestador-foto-url"
+                            name="fotoUrl"
+                            type="text"
+                            value={fotoUrl}
+                            onChange={(e) => setFotoUrl(e.target.value)}
+                            placeholder="URL de foto (ej: https://.../foto.jpg) o dejar vacío para silueta"
+                            disabled={enviando}
+                        />
+                        <div className="formulario-prestador__foto-acciones">
+                            <input
+                                id="prestador-foto-archivo"
+                                type="file"
+                                accept="image/*"
+                                aria-label="Subir archivo de foto"
+                                onChange={manejarArchivoFoto}
+                                disabled={enviando}
+                            />
+                            {fotoUrl.trim() && (
+                                <button
+                                    type="button"
+                                    className="btn-prestador btn-prestador--secundario"
+                                    onClick={() => setFotoUrl('')}
+                                    disabled={enviando}
+                                >
+                                    Quitar foto
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

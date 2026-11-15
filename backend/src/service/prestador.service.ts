@@ -22,6 +22,22 @@ export class PrestadorService {
             );
         }
 
+        // Filtro por provincia (no casesensitive ni tildes)
+        if (filtros.provincia) {
+            const provinciaBuscada: string = this.normalizarTexto(filtros.provincia);
+            resultado = resultado.filter(
+                (p) => this.normalizarTexto(p.provincia || '') === provinciaBuscada
+            );
+        }
+
+        // Filtro por localidad (no casesensitive ni tildes)
+        if (filtros.localidad) {
+            const localidadBuscada: string = this.normalizarTexto(filtros.localidad);
+            resultado = resultado.filter(
+                (p) => this.normalizarTexto(p.localidad || '') === localidadBuscada
+            );
+        }
+
         if (filtros.search) {
             const termino = this.normalizarTexto(filtros.search);
             resultado = resultado.filter(

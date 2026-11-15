@@ -1,0 +1,262 @@
+
+.info-page {
+    width: 100%;
+    font-family: var(--font-family);
+    color: var(--color-text);
+}
+
+/* Hero */
+
+.info-page__hero {
+    padding: 72px 32px;
+    background: var(--color-surface-alt);
+    text-align: center;
+    border-radius: var(--radius-lg);
+}
+
+.info-page__etiqueta {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.info-page__hero h1 {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    color: var(--color-primary);
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.2;
+}
+
+.info-page__hero p {
+    max-width: 580px;
+    margin: 0 auto 32px;
+    color: var(--color-text-secondary);
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+/* Botones */
+
+.info-page__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.info-page__boton:hover {
+    background: var(--color-primary-hover);
+}
+
+/* Contenido */
+
+.info-page__contenido {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 72px 24px;
+    text-align: center;
+}
+
+.info-page__contenido h2 {
+    margin: 0 0 12px;
+    font-size: 30px;
+}
+
+.info-page__subtitulo {
+    margin: 0 0 40px;
+    color: var(--color-text-secondary);
+}
+
+/* Tarjetas */
+
+.info-page__pasos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.info-page__tarjeta {
+    padding: 32px 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    text-align: left;
+}
+
+.info-page__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 24px;
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+}
+
+.info-page__numero {
+    color: var(--color-secondary);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.info-page__tarjeta h3 {
+    margin: 12px 0;
+    font-size: 19px;
+}
+
+.info-page__tarjeta p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* Garantía Fixer */
+
+.info-page__aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    max-width: 850px;
+    margin: 48px auto 0;
+    padding: 24px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-primary);
+    text-align: left;
+}
+
+.info-page__aviso > svg {
+    flex-shrink: 0;
+}
+
+.info-page__aviso h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+}
+
+.info-page__aviso p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* Panel Pro */
+
+.info-page__contenido--alternativo {
+    max-width: none;
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+}
+
+.info-page__contenido--alternativo .info-page__pasos {
+    max-width: 1152px;
+    margin: 0 auto;
+}
+
+.info-page__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    max-width: 950px;
+    margin: 64px auto 0;
+    padding: 48px 32px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.info-page__cta > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.info-page__cta h2 {
+    margin: 0;
+    color: white;
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.info-page__cta p {
+    max-width: 550px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.info-page__cta .info-page__boton {
+    background: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.info-page__cta .info-page__boton:hover {
+    background: var(--color-surface-alt);
+}
+
+.info-page__nota {
+    margin: 32px auto 0;
+    max-width: 650px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .info-page__hero {
+        padding: 48px 20px;
+    }
+
+    .info-page__contenido {
+        padding: 48px 16px;
+    }
+
+    .info-page__pasos {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .info-page__aviso {
+        padding: 20px;
+    }
+
+    .info-page__cta {
+        margin-top: 40px;
+        padding: 36px 20px;
+    }
+
+    .info-page__contenido h2 {
+        font-size: 25px;
+    }
+
+    .info-page__hero p {
+        font-size: 15px;
+    }
+
+    .info-page__tarjeta {
+        padding: 24px 20px;
+    }
+}

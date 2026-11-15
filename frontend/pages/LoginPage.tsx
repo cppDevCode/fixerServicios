@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import {
+  guardarSesionUsuario,
+  obtenerRutaInicioPorRol,
+} from '../services/sesion.service';
 import './Auth.css';
 
 export const LoginPage = () => {
@@ -9,7 +13,7 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

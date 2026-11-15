@@ -49,6 +49,12 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
             expect(
                 res.body.datos.every((p: { categoriaId: string }) => p.categoriaId === 'Plomería')
             ).toBe(true);
+
+            const resLocalidad = await request(app)
+                .get('/api/v1/prestadores')
+                .query({ localidad: 'Córdoba Capital' })
+                .expect(200);
+            expect(resLocalidad.body.meta.total).toBe(4);
         });
 
         it('permite búsqueda por texto (search) y ordenamiento descendente por años de experiencia', async () => {
@@ -107,6 +113,18 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 msj: 'Los campos nombre, apellido y categoriaId son obligatorios',
                 datos: null,
             });
+
+            const resSinNombre = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ apellido: 'Gómez', categoriaId: 'Gasista' })
+                .expect(400);
+            expect(resSinNombre.body.codigo).toBe(400);
+
+            const resSinCategoria = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ nombre: 'Pedro', apellido: 'Gómez' })
+                .expect(400);
+            expect(resSinCategoria.body.codigo).toBe(400);
         });
 
         it('retorna 201 y crea un nuevo prestador correctamente', async () => {
@@ -132,6 +150,35 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
 
             // Limpieza para mantener el estado en memoria consistente
             await request(app).delete(`/api/v1/prestadores/${res.body.datos.id}`).expect(200);
+        });
+
+        it('soporta el ciclo CRUD de fotoUrl (alta con foto, alta sin foto y remoción de foto)', async () => {
+            const resConFoto = await request(app)
+                .post('/api/v1/prestadores')
+                .send(
+                    crearDatosPrestador({
+                        nombre: 'Ramiro',
+                        apellido: 'Foto',
+                        fotoUrl: 'https://randomuser.me/api/portraits/men/77.jpg',
+                    })
+                )
+                .expect(201);
+
+            expect(resConFoto.body.datos.fotoUrl).toBe(
+                'https://randomuser.me/api/portraits/men/77.jpg'
+            );
+
+            // Actualizar quitando la foto (cadena vacía -> undefined)
+            const resQuitarFoto = await request(app)
+                .put(`/api/v1/prestadores/${resConFoto.body.datos.id}`)
+                .send({ fotoUrl: '' })
+                .expect(200);
+
+            expect(resQuitarFoto.body.datos.fotoUrl).toBeUndefined();
+
+            await request(app)
+                .delete(`/api/v1/prestadores/${resConFoto.body.datos.id}`)
+                .expect(200);
         });
     });
 
@@ -247,6 +294,71 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 msj: 'Prestador con id 99999 no encontrado',
                 datos: null,
             });
+        });
+    });
+
+    describe('Control de acceso por rol (ADMIN, PRESTADOR y USUARIO)', () => {
+        it('retorna prestadorId en login de rol PRESTADOR y permite editar únicamente sus propios datos', async () => {
+            const loginRes = await request(app)
+                .post('/api/v1/auth/login')
+                .send({ email: 'carlos@example.com', password: '123456' })
+                .expect(200);
+
+            expect(loginRes.body.data.usuario).toMatchObject({
+                email: 'carlos@example.com',
+                rol: 'PRESTADOR',
+                prestadorId: 1,
+            });
+
+            // PRESTADOR puede editar su propio perfil (id 1), pero no su ratingPromedio
+            const resPropio = await request(app)
+                .put('/api/v1/prestadores/1')
+                .set('x-usuario-rol', 'PRESTADOR')
+                .set('x-prestador-id', '1')
+                .send({ aniosExperiencia: 10, ratingPromedio: 1.5 })
+                .expect(200);
+
+            expect(resPropio.body.datos.ratingPromedio).toBe(4.8);
+
+            // PRESTADOR no puede editar otro prestador (id 2) -> 403
+            const resAjeno = await request(app)
+                .put('/api/v1/prestadores/2')
+                .set('x-usuario-rol', 'PRESTADOR')
+                .set('x-prestador-id', '1')
+                .send({ aniosExperiencia: 15 })
+                .expect(403);
+
+            expect(resAjeno.body.codigo).toBe(403);
+
+            // PRESTADOR no puede crear ni eliminar prestadores -> 403
+            await request(app)
+                .post('/api/v1/prestadores')
+                .set('x-usuario-rol', 'PRESTADOR')
+                .send(crearDatosPrestador())
+                .expect(403);
+
+            await request(app)
+                .delete('/api/v1/prestadores/1')
+                .set('x-usuario-rol', 'PRESTADOR')
+                .expect(403);
+        });
+
+        it('impide que el rol USUARIO modifique prestadores o administre el padrón de usuarios, habilitando todo al rol ADMIN', async () => {
+            await request(app)
+                .put('/api/v1/prestadores/1')
+                .set('x-usuario-rol', 'USUARIO')
+                .send({ nombre: 'Intento Usuario' })
+                .expect(403);
+
+            await request(app)
+                .get('/api/v1/usuarios')
+                .set('x-usuario-rol', 'USUARIO')
+                .expect(403);
+
+            await request(app)
+                .get('/api/v1/usuarios')
+                .set('x-usuario-rol', 'ADMIN')
+                .expect(200);
         });
     });
 });

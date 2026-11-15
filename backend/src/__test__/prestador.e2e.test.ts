@@ -50,6 +50,7 @@ describe('Módulo Prestadores - Tests End-to-End (E2E)', () => {
                 nroTelefono: '49998888',
             },
             ratingPromedio: 4.95,
+            fotoUrl: 'https://randomuser.me/api/portraits/men/85.jpg',
         };
 
         const resCrear = await fetch(baseUrl, {
@@ -92,18 +93,20 @@ describe('Módulo Prestadores - Tests End-to-End (E2E)', () => {
         const bodyDetalle = (await resDetalle.json()) as RespuestaApi<IPrestador>;
         expect(bodyDetalle.datos).toMatchObject(nuevoPrestadorPayload);
 
-        // 6. Actualizar el prestador (PUT /api/v1/prestadores/:id)
+        // 6. Actualizar el prestador (PUT /api/v1/prestadores/:id) incluyendo cambio y limpieza de fotoUrl
         const resActualizar = await fetch(`${baseUrl}/${idCreado}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 aniosExperiencia: 22,
                 acercaDe: 'Especialista senior en termofusión y bombas presurizadoras',
+                fotoUrl: '',
             }),
         });
         expect(resActualizar.status).toBe(200);
         const bodyActualizar = (await resActualizar.json()) as RespuestaApi<IPrestador>;
         expect(bodyActualizar.datos.aniosExperiencia).toBe(22);
+        expect(bodyActualizar.datos.fotoUrl).toBeUndefined();
 
         // Confirmar que la actualización persiste en memoria al volver a consultar por ID
         const resDetalleActualizado = await fetch(`${baseUrl}/${idCreado}`);

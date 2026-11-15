@@ -3,13 +3,34 @@ import { test, expect } from '@playwright/test';
 test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
     test.describe.configure({ mode: 'serial' });
 
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => {
+            if (
+                !window.localStorage.getItem('usuario') &&
+                !window.localStorage.getItem('omitir_admin_default')
+            ) {
+                window.localStorage.setItem('token', 'jwt-admin-e2e');
+                window.localStorage.setItem(
+                    'usuario',
+                    JSON.stringify({
+                        id: '1',
+                        nombre: 'Bruna',
+                        apellido: 'Ramírez',
+                        email: 'bruna@example.com',
+                        rol: 'ADMIN',
+                    })
+                );
+            }
+        });
+    });
+
     test('permite navegar a la sección de Prestadores desde el menú lateral y visualizar el catálogo paginado', async ({
         page,
     }) => {
         await page.goto('/');
 
         const linkPrestadores = page.getByRole('link', {
-            name: /1\. Prestadores/i,
+            name: /^Prestadores$/i,
         });
         await expect(linkPrestadores).toBeVisible();
 
@@ -22,6 +43,20 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await expect(page.locator('table tbody tr')).toHaveCount(10);
         await expect(page.getByText('Total: 16 registros')).toBeVisible();
+
+        // Verifica que prestadores sin foto (ej. Ana López, primera en orden alfabético) muestran la silueta
+        const primeraFilaAvatar = page
+            .locator('table tbody tr')
+            .first()
+            .getByTestId('avatar-prestador');
+        await expect(primeraFilaAvatar).toHaveAttribute(
+            'data-tiene-foto',
+            'false'
+        );
+        await expect(primeraFilaAvatar.locator('img')).toHaveAttribute(
+            'src',
+            /^data:image\/svg\+xml/
+        );
     });
 
     test('permite filtrar en tiempo real con el buscador, por rubro y cambiar la cantidad de filas por página', async ({
@@ -46,6 +81,11 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await expect(page.locator('table')).toContainText('Carlos Gómez');
         await expect(page.locator('table tbody tr')).toHaveCount(1);
+
+        // Botón Limpiar filtros restablece el listado paginado original
+        await page.getByRole('button', { name: /Limpiar filtros/i }).click();
+        await expect(page.locator('table tbody tr')).toHaveCount(10);
+        await expect(page.getByText('Total: 16 registros')).toBeVisible();
     });
 
     test('permite acceder a la vista de detalle (/prestadores/:id) y visualizar la ficha técnica y formulario', async ({
@@ -82,9 +122,14 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('#prestador-nombre').fill('Ramiro');
         await page.locator('#prestador-apellido').fill('Villalba');
         await page.locator('#prestador-rubro').selectOption('Gasista');
+        await page.locator('#prestador-provincia').selectOption('Mendoza');
+        await page.locator('#prestador-localidad').selectOption('San Rafael');
         await page.locator('#prestador-matricula').fill('MAT-7788');
         await page.locator('#prestador-experiencia').fill('11');
         await page.locator('#prestador-nro-telefono').fill('48889999');
+        await page
+            .locator('#prestador-foto-url')
+            .fill('https://randomuser.me/api/portraits/men/90.jpg');
         await page
             .locator('#prestador-acerca')
             .fill('Especialista en planos y pruebas de hermeticidad');
@@ -95,14 +140,26 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await page.locator('#busqueda-prestadores').fill('Villalba');
         await expect(page.locator('table')).toContainText('Ramiro Villalba');
+        await expect(
+            page.locator('table tbody tr').first().getByTestId('avatar-prestador')
+        ).toHaveAttribute('data-tiene-foto', 'true');
 
         await page.locator('table tbody tr').first().click();
         await expect(page).toHaveURL(/\/prestadores\/\d+$/);
         await expect(page.getByText('MAT-7788')).toBeVisible();
+        await expect(page.getByText('San Rafael, Mendoza')).toBeVisible();
+        await expect(
+            page.locator('.prestador-ficha').getByTestId('avatar-prestador')
+        ).toHaveAttribute('data-tiene-foto', 'true');
 
+        // Quitar foto desde el formulario de edición y verificar que muestra la silueta de persona
+        await page.getByRole('button', { name: /Quitar foto/i }).click();
         await page.locator('#prestador-experiencia').fill('14');
         await page.getByRole('button', { name: /Guardar cambios/i }).click();
         await expect(page.getByText('14 años')).toBeVisible();
+        await expect(
+            page.locator('.prestador-ficha').getByTestId('avatar-prestador')
+        ).toHaveAttribute('data-tiene-foto', 'false');
 
         await page.getByRole('button', { name: /Eliminar prestador/i }).click();
         await expect(page).toHaveURL(/\/prestadores$/);
@@ -128,5 +185,160 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         expect(descargaXlsx.suggestedFilename()).toBe(
             'catalogo-prestadores.xlsx'
         );
+    });
+
+    test('permite visualizar el catálogo de prestadores para el usuario con tarjetas, filtros rápidos y navegación al perfil', async ({
+        page,
+    }) => {
+        await page.goto('/prestadores');
+
+        await page.getByTestId('btn-alternar-vista-prestadores').click();
+
+        await expect(
+            page.getByTestId('catalogo-prestadores-usuario')
+        ).toBeVisible();
+        await expect(page.getByText('CRITERIO DE BÚSQUEDA')).toBeVisible();
+        await expect(
+            page.getByText(/Mostrando 16 profesionales disponibles/i)
+        ).toBeVisible();
+
+        // Verifica que se muestran 6 tarjetas por página (Página 1 de 3)
+        const tarjetas = page.getByTestId('tarjeta-catalogo-prestador');
+        await expect(tarjetas).toHaveCount(6);
+
+        // Filtro por localidad en el catálogo público con formato Localidad, Provincia
+        const selectLocalidad = page.getByTestId('filtro-localidad');
+        await expect(selectLocalidad).toContainText('9 de Julio, Buenos Aires');
+        await expect(selectLocalidad).toContainText('Rosario, Santa Fe');
+        await expect(selectLocalidad).toContainText(
+            'CABA, Ciudad Autónoma de Buenos Aires'
+        );
+        await expect(selectLocalidad).toContainText('Córdoba Capital, Córdoba');
+        await selectLocalidad.selectOption('Córdoba Capital');
+        await expect(tarjetas).toHaveCount(4);
+
+        // Filtro rápido de Mejor calificados (4.8+) y Matriculados
+        await page.getByTestId('filtro-mejor-calificados').click();
+        await page.getByTestId('filtro-matriculados').click();
+
+        // Búsqueda en el catálogo de usuario
+        await page.locator('#catalogo-busqueda-input').fill('Carlos');
+        await expect(tarjetas).toHaveCount(1);
+        await expect(tarjetas.first()).toContainText('Carlos Gómez');
+
+        // Botón Contactar despliega el teléfono del profesional
+        await tarjetas
+            .first()
+            .getByRole('button', { name: /Contactar/i })
+            .click();
+        await expect(tarjetas.first()).toContainText('+54 11 40001001');
+
+        // Botón Ver Perfil navega al detalle del prestador
+        await tarjetas
+            .first()
+            .getByRole('button', { name: /Ver Perfil/i })
+            .click();
+        await expect(page).toHaveURL(/\/prestadores\/1$/);
+    });
+
+    test('muestra la vista Home en la ruta raíz (/), sugiere las categorías más buscadas y navega al catálogo filtrado', async ({
+        page,
+    }) => {
+        await page.goto('/');
+
+        await expect(page.getByTestId('home-pagina')).toBeVisible();
+        await expect(
+            page.getByRole('heading', {
+                name: /Encontrá al profesional ideal para tu hogar/i,
+            })
+        ).toBeVisible();
+        await expect(page.getByText('FRECUENTES:')).toBeVisible();
+
+        const chipsSugerencias = page.getByTestId('sugerencia-categoria');
+        await expect(chipsSugerencias).toHaveCount(4);
+        await expect(chipsSugerencias.first()).toContainText(
+            'Plomería de urgencia'
+        );
+
+        await chipsSugerencias.first().click();
+
+        await expect(page).toHaveURL(/\/prestadores\/catalogo\?rubro=/);
+        await expect(
+            page.getByTestId('catalogo-prestadores-usuario')
+        ).toBeVisible();
+        await expect(
+            page.getByText(/Mostrando 5 profesionales disponibles/i)
+        ).toBeVisible();
+    });
+
+    test('aplica seguridad por roles: PRESTADOR edita solo su perfil y navega como usuario, y USUARIO visualiza en solo lectura y puede agregar reseña', async ({
+        page,
+    }) => {
+        await page.goto('/login');
+        await page.evaluate(() => {
+            window.localStorage.setItem('omitir_admin_default', 'true');
+            window.localStorage.removeItem('usuario');
+            window.localStorage.removeItem('token');
+        });
+        await page.goto('/login');
+
+        // 1. Login con rol PRESTADOR (carlos@example.com -> prestadorId: 1)
+        await page.locator('input[type="email"]').fill('carlos@example.com');
+        await page.locator('input[type="password"]').fill('123456');
+        await page.getByRole('button', { name: /Ingresar/i }).click();
+
+        // Redirige a su propia ficha (/prestadores/1) y permite editar sus datos pero no su calificación ni reseñas de usuarios ni eliminar
+        await expect(page).toHaveURL(/\/prestadores\/1$/);
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toBeVisible();
+        await expect(page.locator('#prestador-rating')).toHaveCount(0);
+        await expect(
+            page.getByRole('button', { name: /Editar reseña/i })
+        ).toHaveCount(0);
+        await expect(
+            page.getByRole('button', { name: /Eliminar prestador/i })
+        ).toHaveCount(0);
+
+        // Permite navegar como perfil de usuario al catálogo público y ver otro prestador (/prestadores/2) sin el cartel de aviso, mostrando la ficha y reseñas
+        await page.getByTestId('btn-navegar-como-usuario').click();
+        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+        await page.goto('/prestadores/2');
+        await expect(
+            page.getByTestId('aviso-solo-lectura-prestador')
+        ).toHaveCount(0);
+        await expect(page.getByText('MAT-1002')).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toHaveCount(0);
+
+        // 2. Cerrar sesión e ingresar con rol USUARIO (berta@example.com, id: 3)
+        await page.getByTestId('btn-cerrar-sesion').click();
+        await expect(page).toHaveURL(/\/login$/);
+
+        await page.locator('input[type="email"]').fill('berta@example.com');
+        await page.locator('input[type="password"]').fill('123456');
+        await page.getByRole('button', { name: /Ingresar/i }).click();
+
+        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+
+        // En el detalle de prestador, USUARIO visualiza los datos (sin el cartel de aviso), deja y ve reseñas y puede editar sus propias reseñas
+        await page.goto('/prestadores/1');
+        await expect(
+            page.getByTestId('aviso-solo-lectura-prestador')
+        ).toHaveCount(0);
+        await expect(page.getByText('MAT-1001')).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Guardar cambios/i })
+        ).toHaveCount(0);
+        await expect(
+            page.getByRole('heading', { name: /Dejá tu reseña/i })
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Publicar reseña/i })
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Editar reseña/i }).first()
+        ).toBeVisible();
     });
 });

@@ -18,7 +18,7 @@ export class Servidor {
 
     private middlewares() {
         this.app.use(cors({ origin: process.env.CORS_ORIGIN }));
-        this.app.use(express.json());
+        this.app.use(express.json({ limit: '5mb' }));
     }
 
     private rutas() {

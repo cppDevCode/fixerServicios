@@ -1,10 +1,9 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import "./Layout.css";
-import fixerLogo from '../../assets/fixer-logo.png'; 
+import { Outlet } from 'react-router-dom';
+import { Header } from '../header/Header';
+import { Footer } from '../footer/Footer';
+import './Layout.css';
 
 export const Layout = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="layout-container">
       {/* HEADER GLOBAL */}
@@ -35,17 +34,13 @@ export const Layout = () => {
             <li><Link to="/usuarios">Usuarios</Link></li>
           </ul>
         </aside>
+      <Header />
 
-        {/* CONTENIDO DINÁMICO */}
-        <main className="content-area">
-          <Outlet />
-        </main>
-      </div>
+      <main className="content-area">
+        <Outlet />
+      </main>
 
-      {/* FOOTER GLOBAL */}
-      <footer className="global-footer">
-        <p>© 2026 Fixer - Soluciones para tu hogar. UTN</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

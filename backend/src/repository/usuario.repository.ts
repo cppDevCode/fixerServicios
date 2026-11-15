@@ -25,10 +25,11 @@ export const usuariosMock: IUsuario[] = [
   {
     id: '2',
     nombre: 'Carlos',
-    apellido: 'González',
+    apellido: 'Gómez',
     email: 'carlos@example.com',
     passwordHash: '123456',
     rol: 'PRESTADOR',
+    prestadorId: 1,
     ubicacionId: '2',
     preguntaSecreta: '¿Ciudad de nacimiento?',
     respuestaSecretaHash: 'Cordoba',

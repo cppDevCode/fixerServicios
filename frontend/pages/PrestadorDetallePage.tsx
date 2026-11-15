@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AvatarPrestador } from '../components/prestadores/AvatarPrestador';
 import { FormularioPrestador } from '../components/prestadores/FormularioPrestador';
 import '../components/prestadores/Prestadores.css';
 import type { ICategoria, IPrestador } from '../interfaces/prestador.interface';
@@ -10,29 +11,40 @@ import {
     obtenerCategorias,
     obtenerPrestadorPorId,
 } from '../services/prestador.service';
+import {
+    esAdmin,
+    esPrestador,
+    EVENTO_CAMBIO_SESION,
+    obtenerUsuarioActual,
+    puedeAgregarResena,
+    puedeEditarPrestador,
+    puedeEliminarPrestador,
+} from '../services/sesion.service';
 import { ListadoResenas } from '../components/resenas/ListadoResenas';
 import { FormularioResena } from '../components/resenas/FormularioResena';
 import type { IResena } from '../interfaces/resena.interface';
 
 export function PrestadorDetallePage() {
-    const obtenerUsuarioId = (): number | null => {
-        try {
-            const usuarioGuardado = localStorage.getItem('usuario');
+    const [, setVersionSesion] = useState(0);
+    const usuarioActual = obtenerUsuarioActual();
 
-            if (!usuarioGuardado) return null;
-
-            const usuario = JSON.parse(usuarioGuardado);
-            const id = Number(usuario?.id);
-
-            return Number.isInteger(id) && id > 0
-            ? id
-            : null;
-        } catch {
-            return null;
-        }
+    useEffect(() => {
+        const actualizarSesion = () => {
+            setVersionSesion((v) => v + 1);
         };
+        window.addEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+        window.addEventListener('storage', actualizarSesion);
+        return () => {
+            window.removeEventListener(EVENTO_CAMBIO_SESION, actualizarSesion);
+            window.removeEventListener('storage', actualizarSesion);
+        };
+    }, []);
 
-    const usuarioId = obtenerUsuarioId();
+    const idNumericoUsuario = usuarioActual ? Number(usuarioActual.id) : NaN;
+    const usuarioId =
+        Number.isInteger(idNumericoUsuario) && idNumericoUsuario > 0
+            ? idNumericoUsuario
+            : null;
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -123,26 +135,48 @@ export function PrestadorDetallePage() {
         setResenaEditar(null);
     };
 
+    const puedeEditar = prestador
+        ? puedeEditarPrestador(usuarioActual, prestador.id)
+        : false;
+    const puedeEliminar = puedeEliminarPrestador(usuarioActual);
+    const puedeDejarResena = prestador
+        ? puedeAgregarResena(usuarioActual, prestador.id) && usuarioId !== null
+        : false;
+    const rutaVolver = esAdmin(usuarioActual)
+        ? '/prestadores'
+        : '/prestadores/catalogo';
+
     return (
         <div className="prestadores-pagina">
             <header className="prestadores-encabezado">
                 <div>
                     <h1>Detalle del prestador</h1>
                     <p>
-                        Ficha técnica completa, datos de contacto, matrícula y
-                        edición de perfil profesional.
+                        {puedeEditar
+                            ? 'Ficha técnica completa, datos de contacto, matrícula y edición de perfil profesional.'
+                            : 'Ficha técnica del profesional, datos de contacto y reseñas de clientes.'}
                     </p>
                 </div>
 
                 <div className="prestadores-encabezado__acciones">
+                    {esPrestador(usuarioActual) && (
+                        <Link
+                            to="/prestadores/catalogo"
+                            data-testid="btn-navegar-como-usuario"
+                            className="btn-prestador btn-prestador--secundario"
+                        >
+                            Explorar Catálogo como Usuario
+                        </Link>
+                    )}
+
                     <Link
-                        to="/prestadores"
+                        to={rutaVolver}
                         className="btn-prestador btn-prestador--secundario"
                     >
                         ← Volver al catálogo
                     </Link>
 
-                    {prestador && (
+                    {prestador && puedeEliminar && (
                         <button
                             type="button"
                             className="btn-prestador btn-prestador--peligro"
@@ -167,27 +201,41 @@ export function PrestadorDetallePage() {
                         {error ?? 'No se encontró el prestador solicitado.'}
                     </p>
                     <Link
-                        to="/prestadores"
+                        to={rutaVolver}
                         className="btn-prestador btn-prestador--primario"
                     >
                         Regresar al listado
                     </Link>
                 </div>
             ) : (
-                    <>
-                        <div className="prestador-detalle-grid">
+                <>
+                    <div
+                        className={
+                            puedeEditar
+                                ? 'prestador-detalle-grid'
+                                : 'prestador-detalle-grid prestador-detalle-grid--solo-lectura'
+                        }
+                    >
                         <article
                             className="prestador-ficha"
                             aria-label="Ficha técnica del prestador"
                         >
                             <div className="prestador-ficha__cabecera">
-                                <div>
-                                    <h2>
-                                        {prestador.nombre} {prestador.apellido}
-                                    </h2>
-                                    <span className="prestador-subtexto">
-                                        ID Profesional #{prestador.id}
-                                    </span>
+                                <div className="prestador-ficha__identidad">
+                                    <AvatarPrestador
+                                        nombre={prestador.nombre}
+                                        apellido={prestador.apellido}
+                                        fotoUrl={prestador.fotoUrl}
+                                        tamano="lg"
+                                    />
+                                    <div>
+                                        <h2>
+                                            {prestador.nombre} {prestador.apellido}
+                                        </h2>
+                                        <span className="prestador-subtexto">
+                                            ID Profesional #{prestador.id}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <span className="badge-prestador badge-prestador--rubro">
@@ -242,6 +290,16 @@ export function PrestadorDetallePage() {
                                     <span>Rubro principal</span>
                                     <strong>{prestador.categoriaId}</strong>
                                 </div>
+
+                                <div className="prestador-atributo">
+                                    <span>Ubicación (Localidad / Provincia)</span>
+                                    <strong>
+                                        {prestador.localidad ?? 'Sin localidad'}
+                                        {prestador.provincia
+                                            ? `, ${prestador.provincia}`
+                                            : ''}
+                                    </strong>
+                                </div>
                             </div>
 
                             <div className="prestador-atributo">
@@ -253,37 +311,47 @@ export function PrestadorDetallePage() {
                             </div>
                         </article>
 
-                        <FormularioPrestador
-                            key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}`}
-                            categorias={categorias}
-                            prestadorInicial={prestador}
-                            titulo="Editar datos del prestador"
-                            textoBoton="Guardar cambios"
-                            onGuardado={(actualizado) => setPrestador(actualizado)}
-                        />
+                        {puedeEditar && (
+                            <FormularioPrestador
+                                key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
+                                categorias={categorias}
+                                prestadorInicial={prestador}
+                                titulo="Editar datos del prestador"
+                                textoBoton="Guardar cambios"
+                                onGuardado={(actualizado) =>
+                                    setPrestador(actualizado)
+                                }
+                            />
+                        )}
                     </div>
 
                     <section aria-label="Reseñas y calificaciones del profesional">
-                        {usuarioId !== null && (
-                        <FormularioResena
-                            key={`formulario-${prestador.id}-${resenaEditar?.id ?? 'nuevo'}`}
-                            prestadorId={prestador.id}
-                            usuarioId={usuarioId}
-                            resenaEditar={resenaEditar}
-                            onResenaGuardada={actualizarResenas}
-                            onCancelarEdicion={() => setResenaEditar(null)}
-                        />
+                        {puedeDejarResena && usuarioId !== null && (
+                            <FormularioResena
+                                key={`formulario-${prestador.id}-${resenaEditar?.id ?? 'nuevo'}`}
+                                prestadorId={prestador.id}
+                                usuarioId={usuarioId}
+                                resenaEditar={resenaEditar}
+                                onResenaGuardada={actualizarResenas}
+                                onCancelarEdicion={() => setResenaEditar(null)}
+                            />
                         )}
 
                         <ListadoResenas
                             key={`${prestador.id}-${versionResenas}`}
                             prestadorId={prestador.id}
-                            usuarioId={usuarioId ?? undefined}
-                            onEditarResena={setResenaEditar}
+                            usuarioId={
+                                puedeDejarResena && usuarioId !== null
+                                    ? usuarioId
+                                    : undefined
+                            }
+                            onEditarResena={
+                                puedeDejarResena ? setResenaEditar : undefined
+                            }
                         />
                     </section>
                 </>
-                )}
-            </div>
-        );
+            )}
+        </div>
+    );
 }

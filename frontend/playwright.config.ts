@@ -27,7 +27,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: `pnpm run dev -- --port ${FRONTEND_PORT} --strictPort`,
+      command: `pnpm exec vite --host --port ${FRONTEND_PORT} --strictPort`,
       url: FRONTEND_URL,
       reuseExistingServer: !process.env.CI,
     },
