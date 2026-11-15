@@ -1,6 +1,6 @@
 import { UsuarioRepository } from '../repository/usuario.repository';
 import { IUsuario } from '../interfaces/usuario.interface';
-
+import { PrestadorService } from './prestador.service';
 const normalizarTexto = (texto: string): string => {
   return texto
     .toLowerCase()
@@ -14,7 +14,8 @@ export class UsuarioService {
     this.repo = new UsuarioRepository();
   }
 
-    async listarUsuarios(page: number = 1, limit: number = 10, search: string = '') {
+  
+  async listarUsuarios(page: number = 1, limit: number = 10, search: string = '') {
     let usuarios = await this.repo.findAll();
 
     if (search) {
@@ -95,19 +96,31 @@ export class UsuarioService {
   async login(email: string, passwordPlana: string) {
     const user = await this.repo.findByEmail(email);
     
-    
     if (!user || user.passwordHash !== passwordPlana) {
       throw new Error('Credenciales inválidas');
     }
 
-    // Simulamos el JWT
+    let prestadorId: number | null = null;
+    if (user.rol === 'PRESTADOR') {
+      const prestadorService = new PrestadorService();
+      const prestadores = prestadorService.listar({ search: `${user.nombre} ${user.apellido}` });
+      const prestadorEncontrado = prestadores.datos.find(
+        p => p.nombre.toLowerCase() === user.nombre.toLowerCase() && 
+             p.apellido.toLowerCase() === user.apellido.toLowerCase()
+      );
+      if (prestadorEncontrado) {
+        prestadorId = prestadorEncontrado.id;
+      }
+    }
+
     return {
       token: 'jwt-falso-simulado-12345',
       usuario: {
         id: user.id,
         nombre: user.nombre,
         email: user.email,
-        rol: user.rol
+        rol: user.rol,
+        prestadorId: prestadorId
       }
     };
   }

@@ -73,25 +73,32 @@ export class UsuarioController {
       });
 
       // 2. Si es prestador, se crea su perfil profesional en la entidad Prestador
+      let prestadorCreado: any = null;
       if (esPrestador && especialidad) {
         try {
-          this.prestadorService.crear({
+          prestadorCreado = this.prestadorService.crear({
             nombre: nombre,
             apellido: apellido,
             matricula: `MAT-${Date.now()}`,
-            aniosExperiencia: 0, 
+            aniosExperiencia: 0,
             acercaDe: 'Profesional registrado en Fixer',
             ofreceGarantia: false,
             categoriaId: especialidad,
             telefono: { codPais: '+54', codArea: '11', nroTelefono: '' },
-            usuarioId: nuevoUsuario.id 
-          } as any); 
+          } as any);
         } catch (errorPrestador) {
           console.error('Error al crear el prestador vinculado:', errorPrestador);
         }
       }
 
-      res.status(201).json({ code: 201, msg: 'Usuario registrado exitosamente', data: nuevoUsuario });
+      res.status(201).json({ 
+        code: 201, 
+        msg: 'Usuario registrado exitosamente', 
+        data: { 
+          usuario: nuevoUsuario, 
+          prestador: prestadorCreado 
+        } 
+      });
     } catch (error: any) {
       if (error.message === 'El email ya está registrado') {
         return res.status(400).json({ code: 400, msg: error.message, data: null });
@@ -99,7 +106,7 @@ export class UsuarioController {
       next(error);
     }
   };
-  
+
   //Metodos de autenticación y recuperación de contraseña
 
   login = async (req: Request, res: Response, next: NextFunction) => {

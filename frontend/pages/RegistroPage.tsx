@@ -27,7 +27,8 @@ export const RegistroPage = () => {
 
   const handleRegistro = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`${API_URL}/usuarios`, {
         method: 'POST',
@@ -35,8 +36,11 @@ export const RegistroPage = () => {
         body: JSON.stringify(formData),
       });
       const result = await response.json();
+      
       if (result.code === 201) {
-        alert('¡Registro exitoso! Ahora podés iniciar sesión.');
+        if (result.data.prestador) {
+          localStorage.setItem('prestadorId', result.data.prestador.id.toString());
+        }
         navigate('/login');
       } else {
         setError(result.msg || 'Error al registrar');
@@ -51,8 +55,6 @@ export const RegistroPage = () => {
   return (
     <div className="auth-container-registro">
       <div className="registro-wrapper">
-        
-        {/* Formulario */}
         <div className="registro-formulario">
           <div className="auth-header" style={{ textAlign: 'left' }}>
             <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>🔧 Fixer</h1>
@@ -63,7 +65,6 @@ export const RegistroPage = () => {
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleRegistro} className="auth-form">
-            {/* Checkbox Prestador */}
             <div className="checkbox-prestador">
               <input type="checkbox" id="esPrestador" name="esPrestador" checked={formData.esPrestador} onChange={handleChange} />
               <label htmlFor="esPrestador">
@@ -72,7 +73,6 @@ export const RegistroPage = () => {
               </label>
             </div>
 
-            {/* Campo de Especialidad para prestador */}
             {formData.esPrestador && (
               <div className="form-group">
                 <label className="form-label">Especialidad</label>
@@ -144,14 +144,12 @@ export const RegistroPage = () => {
           </div>
         </div>
 
-        
         <div className="registro-imagen">
           <div className="registro-imagen-contenido">
             <h2>Tu casa en manos de personas de confianza.</h2>
             <p>Despedite de la incertidumbre al buscar presupuestos y especialistas para tu hogar.</p>
           </div>
         </div>
-
       </div>
     </div>
   );

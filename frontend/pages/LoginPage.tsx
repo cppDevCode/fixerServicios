@@ -11,7 +11,7 @@ export const LoginPage = () => {
 
   const API_URL = 'http://localhost:3000/api/v1';
 
-    const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -29,9 +29,18 @@ export const LoginPage = () => {
         localStorage.setItem('token', result.data.token);
         localStorage.setItem('usuario', JSON.stringify(result.data.usuario));
         
-      
         if (result.data.usuario.rol === 'PRESTADOR') {
-          navigate(`/prestadores/${result.data.usuario.id}`);
+          let prestadorId = result.data.usuario.prestadorId;
+  
+          if (!prestadorId) {
+            prestadorId = localStorage.getItem('prestadorId');
+          }
+          
+          if (prestadorId) {
+            navigate(`/prestadores/${prestadorId}`);
+          } else {
+            navigate('/prestadores');
+          }
         } else {
           navigate('/usuarios');
         }

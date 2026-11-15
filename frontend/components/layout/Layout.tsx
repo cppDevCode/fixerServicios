@@ -17,7 +17,11 @@ export const Layout = () => {
           />
         </div>
         <nav className="user-nav">
-          <Link to="/login" className="btn-header-login">Cerrar Sesión / Login</Link>
+          <Link to="/login" className="btn-header-login" onClick={()=>{
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+          }}
+          >Cerrar Sesión / Login</Link>
         </nav>
       </header>
 
