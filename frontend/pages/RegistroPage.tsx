@@ -4,13 +4,25 @@ import './Auth.css';
 
 export const RegistroPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ nombre: '', apellido: '', email: '', password: '', preguntaSecreta: '¿Nombre de tu primera mascota?', respuestaSecreta: '' });
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    password: '',
+    preguntaSecreta: '¿Nombre de tu primera mascota?',
+    respuestaSecreta: '',
+    esPrestador: false,
+    especialidad: '',
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const API_URL = 'http://localhost:3000/api/v1';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const target = e.target as HTMLInputElement;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    setFormData({ ...formData, [target.name]: value });
   };
 
   const handleRegistro = async (e: React.FormEvent) => {
@@ -37,52 +49,109 @@ export const RegistroPage = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card auth-card-wide">
-        <div className="auth-header">
-          <h1 className="auth-logo">Crear Cuenta</h1>
-          <p className="auth-subtitle">Completá tus datos para registrarte en Fixer</p>
-        </div>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleRegistro} className="auth-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Nombre</label>
-              <input type="text" name="nombre" required onChange={handleChange} className="form-input" />
+    <div className="auth-container-registro">
+      <div className="registro-wrapper">
+        
+        {/* Formulario */}
+        <div className="registro-formulario">
+          <div className="auth-header" style={{ textAlign: 'left' }}>
+            <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>🔧 Fixer</h1>
+            <h2 className="registro-titulo">Creá tu cuenta en Fixer</h2>
+            <p className="auth-subtitle">Unite a la comunidad que más resuelve problemas del hogar.</p>
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <form onSubmit={handleRegistro} className="auth-form">
+            {/* Checkbox Prestador */}
+            <div className="checkbox-prestador">
+              <input type="checkbox" id="esPrestador" name="esPrestador" checked={formData.esPrestador} onChange={handleChange} />
+              <label htmlFor="esPrestador">
+                <strong>Quiero ofrecer servicios profesionales</strong>
+                <span>Soy un profesional de oficios (plomería, electricidad, gas, etc.) y quiero captar nuevos clientes.</span>
+              </label>
             </div>
-            <div className="form-group">
-              <label className="form-label">Apellido</label>
-              <input type="text" name="apellido" required onChange={handleChange} className="form-input" />
+
+            {/* Campo de Especialidad para prestador */}
+            {formData.esPrestador && (
+              <div className="form-group">
+                <label className="form-label">Especialidad</label>
+                <select name="especialidad" onChange={handleChange} className="form-select" required>
+                  <option value="">Seleccioná tu especialidad...</option>
+                  <option value="Plomería">Plomería</option>
+                  <option value="Electricidad">Electricidad</option>
+                  <option value="Gas">Gas</option>
+                  <option value="Climatización">Climatización</option>
+                  <option value="Carpintería">Carpintería</option>
+                </select>
+              </div>
+            )}
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Nombre completo</label>
+                <input type="text" name="nombre" required onChange={handleChange} className="form-input" placeholder="Ej: Martina Gómez" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Apellido</label>
+                <input type="text" name="apellido" required onChange={handleChange} className="form-input" />
+              </div>
             </div>
+
+            <div className="form-group">
+              <label className="form-label">Correo Electrónico</label>
+              <input type="email" name="email" required onChange={handleChange} className="form-input" placeholder="martina@ejemplo.com" />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Contraseña segura</label>
+              <div className="password-input-wrapper">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  name="password" 
+                  required 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="Mínimo 8 caracteres" 
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="password-toggle">
+                  {showPassword ? "Ocultar" : "Mostrar"}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Pregunta secreta de recuperación</label>
+              <select name="preguntaSecreta" onChange={handleChange} className="form-select">
+                <option value="¿Nombre de tu primera mascota?">¿Nombre de tu primera mascota?</option>
+                <option value="¿Ciudad de nacimiento?">¿Ciudad de nacimiento?</option>
+                <option value="¿Nombre de tu mejor amigo de la infancia?">¿Nombre de tu mejor amigo de la infancia?</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Respuesta secreta</label>
+              <input type="text" name="respuestaSecreta" required onChange={handleChange} className="form-input" placeholder="Tu respuesta secreta (sensible a mayúsculas)" />
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary">
+              {loading ? 'Registrando...' : formData.esPrestador ? 'Crear Cuenta de Prestador' : 'Crear Cuenta de Cliente'}
+            </button>
+          </form>
+
+          <div className="auth-links" style={{ textAlign: 'center' }}>
+            <Link to="/login" className="auth-link-gray">¿Ya tenés una cuenta? <span>Iniciar sesión</span></Link>
           </div>
-          <div className="form-group">
-            <label className="form-label">Correo Electrónico</label>
-            <input type="email" name="email" required onChange={handleChange} className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Contraseña</label>
-            <input type="password" name="password" required onChange={handleChange} className="form-input" />
-          </div>
-          <hr className="form-divider" />
-          <p className="form-section-title">Pregunta Secreta</p>
-          <div className="form-group">
-            <select name="preguntaSecreta" onChange={handleChange} className="form-select">
-              <option value="¿Nombre de tu primera mascota?">¿Nombre de tu primera mascota?</option>
-              <option value="¿Ciudad de nacimiento?">¿Ciudad de nacimiento?</option>
-              <option value="¿Nombre de tu mejor amigo de la infancia?">¿Nombre de tu mejor amigo de la infancia?</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Tu Respuesta Secreta</label>
-            <input type="text" name="respuestaSecreta" required onChange={handleChange} className="form-input" />
-          </div>
-          <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Registrando...' : 'Registrarse'}
-          </button>
-        </form>
-        <div className="auth-links">
-          <Link to="/login" className="auth-link-gray">¿Ya tenés cuenta? <span>Iniciá sesión</span></Link>
         </div>
+
+        
+        <div className="registro-imagen">
+          <div className="registro-imagen-contenido">
+            <h2>Tu casa en manos de personas de confianza.</h2>
+            <p>Despedite de la incertidumbre al buscar presupuestos y especialistas para tu hogar.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   );
