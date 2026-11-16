@@ -149,10 +149,10 @@ export function obtenerRutaInicioPorRol(usuario: IUsuarioSesion): string {
         return '/prestadores';
     }
     if (usuario.rol === 'PRESTADOR') {
-        const idPrestador = Number(usuario.prestadorId ?? 1);
-        return `/prestadores/${Number.isInteger(idPrestador) && idPrestador > 0 ? idPrestador : 1}`;
+        const idPrestador = Number(usuario.prestadorId ?? 2);
+        return `/prestadores/${Number.isInteger(idPrestador) && idPrestador > 0 ? idPrestador : 2}`;
     }
-    return '/prestadores/catalogo';
+    return '/';
 }
 
 export function construirHeadersAutenticacion(
