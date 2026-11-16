@@ -93,7 +93,7 @@ export class UsuarioService {
   }
   
   // Lógica de Autenticación
-  async login(email: string, passwordPlana: string) {
+    async login(email: string, passwordPlana: string) {
     const user = await this.repo.findByEmail(email);
     
     if (!user || user.passwordHash !== passwordPlana) {
@@ -101,15 +101,25 @@ export class UsuarioService {
     }
 
     let prestadorId: number | null = null;
+    
+    // Si es prestador, buscamos su ID en la tabla de prestadores
     if (user.rol === 'PRESTADOR') {
-      const prestadorService = new PrestadorService();
-      const prestadores = prestadorService.listar({ search: `${user.nombre} ${user.apellido}` });
-      const prestadorEncontrado = prestadores.datos.find(
-        p => p.nombre.toLowerCase() === user.nombre.toLowerCase() && 
-             p.apellido.toLowerCase() === user.apellido.toLowerCase()
-      );
-      if (prestadorEncontrado) {
-        prestadorId = prestadorEncontrado.id;
+      try {
+        const prestadorService = new PrestadorService();
+        // Buscamos solo con el nombre (sin apellido) para evitar problemas con tildes/espacios
+        const prestadores = prestadorService.listar({ search: user.nombre });
+        
+        // Buscamos la coincidencia exacta por nombre (y apellido si se puede)
+        const prestadorEncontrado = prestadores.datos.find(
+          p => p.nombre.toLowerCase().trim() === user.nombre.toLowerCase().trim() && 
+               p.apellido.toLowerCase().trim() === user.apellido.toLowerCase().trim()
+        );
+        
+        if (prestadorEncontrado) {
+          prestadorId = prestadorEncontrado.id;
+        }
+      } catch (error) {
+        console.error('Error al buscar prestador:', error);
       }
     }
 
@@ -121,7 +131,7 @@ export class UsuarioService {
         apellido: user.apellido,
         email: user.email,
         rol: user.rol,
-        prestadorId: user.prestadorId
+        prestadorId: prestadorId
       }
     };
   }

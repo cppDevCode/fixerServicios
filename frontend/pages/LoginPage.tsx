@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  guardarSesionUsuario,
-  obtenerRutaInicioPorRol,
-} from '../services/sesion.service';
+import { guardarSesionUsuario } from '../services/sesion.service';
+import { obtenerPrestadores } from '../services/prestador.service'; // <-- IMPORTAMOS EL SERVICIO DE PRESTADORES
 import './Auth.css';
 
 export const LoginPage = () => {
@@ -13,7 +11,7 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = '/api/v1';
+  const API_URL = 'http://localhost:3000/api/v1';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,23 +28,40 @@ export const LoginPage = () => {
       const result = await response.json();
 
       if (result.code === 200) {
-        localStorage.setItem('token', result.data.token);
-        localStorage.setItem('usuario', JSON.stringify(result.data.usuario));
+        const usuario = result.data.usuario;
         
-        if (result.data.usuario.rol === 'PRESTADOR') {
-          let prestadorId = result.data.usuario.prestadorId;
-  
-          if (!prestadorId) {
-            prestadorId = localStorage.getItem('prestadorId');
-          }
-          
-          if (prestadorId) {
-            navigate(`/prestadores/${prestadorId}`);
-          } else {
+        // 1. Guardamos la sesión
+        guardarSesionUsuario(result.data.token, usuario);
+        
+        // 2. Si es PRESTADOR, buscamos su perfil profesional en el catálogo
+        if (usuario.rol === 'PRESTADOR') {
+          try {
+            // Usamos el servicio de Alejandro para buscar por nombre y apellido
+            const respuestaPrestadores = await obtenerPrestadores({ 
+              search: `${usuario.nombre} ${usuario.apellido}` 
+            });
+            
+            // La respuesta tiene la estructura: { codigo, msj, datos, meta }
+            const prestadorEncontrado = respuestaPrestadores.datos.find(
+              (p) => p.nombre.toLowerCase().trim() === usuario.nombre.toLowerCase().trim() &&
+                     p.apellido.toLowerCase().trim() === usuario.apellido.toLowerCase().trim()
+            );
+            
+            if (prestadorEncontrado) {
+              // ¡Encontrado! Vamos a su perfil
+              navigate(`/prestadores/${prestadorEncontrado.id}`);
+            } else {
+              // Si no se encuentra, va al listado general
+              navigate('/prestadores');
+            }
+          } catch {
             navigate('/prestadores');
           }
+        } else if (usuario.rol === 'ADMIN') {
+          navigate('/prestadores');
         } else {
-          navigate('/usuarios');
+          // USUARIO -> Home
+          navigate('/');
         }
       } else {
         setError(result.msg || 'Credenciales inválidas');

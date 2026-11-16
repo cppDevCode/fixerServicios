@@ -78,11 +78,15 @@ export const RegistroPage = () => {
                 <label className="form-label">Especialidad</label>
                 <select name="especialidad" onChange={handleChange} className="form-select" required>
                   <option value="">Seleccioná tu especialidad...</option>
-                  <option value="Plomería">Plomería</option>
-                  <option value="Electricidad">Electricidad</option>
-                  <option value="Gas">Gas</option>
-                  <option value="Climatización">Climatización</option>
+                  <option value="Albañilería">Albañilería</option>
                   <option value="Carpintería">Carpintería</option>
+                  <option value="Cerrajería">Cerrajería</option>
+                  <option value="Electricidad">Electricidad</option>
+                  <option value="Gasista">Gasista</option>
+                  <option value="Jardinería">Jardinería</option>
+                  <option value="Pintura">Pintura</option>
+                  <option value="Plomería">Plomería</option>
+                  <option value="Refrigeración">Refrigeración</option>
                 </select>
               </div>
             )}
