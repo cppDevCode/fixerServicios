@@ -1,10 +1,15 @@
 import { IFiltrosPrestador } from "../interfaces/filtro.prestador.interface";
 import { IPrestador } from "../interfaces/prestador.interface";
-import { PrestadorRepository } from "../repository/prestador.repository";
+import {
+    PrestadorRepository,
+    prestadorRepositorySingleton,
+} from "../repository/prestador.repository";
 
 export class PrestadorService {
     
-    constructor (private readonly repository = new PrestadorRepository()) {}
+    constructor (
+        private readonly repository: PrestadorRepository = prestadorRepositorySingleton
+    ) {}
 
     public listar(filtros: IFiltrosPrestador) {
         const page = Math.max(1, filtros.page || 1);
@@ -44,6 +49,7 @@ export class PrestadorService {
                 (p) => 
                     this.normalizarTexto(p.nombre).includes(termino) ||
                     this.normalizarTexto(p.apellido).includes(termino) ||
+                    this.normalizarTexto(`${p.nombre} ${p.apellido}`).includes(termino) ||
                     this.normalizarTexto(p.acercaDe).includes(termino) ||
                     this.normalizarTexto(p.categoriaId).includes(termino)
             );

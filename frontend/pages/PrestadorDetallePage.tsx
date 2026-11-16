@@ -150,7 +150,11 @@ export function PrestadorDetallePage() {
         <div className="prestadores-pagina">
             <header className="prestadores-encabezado">
                 <div>
-                    <h1>Detalle del prestador</h1>
+                    <h1>
+                        {esPrestador(usuarioActual) && puedeEditar
+                            ? 'Mi Ficha Profesional'
+                            : 'Detalle del prestador'}
+                    </h1>
                     <p>
                         {puedeEditar
                             ? 'Ficha técnica completa, datos de contacto, matrícula y edición de perfil profesional.'

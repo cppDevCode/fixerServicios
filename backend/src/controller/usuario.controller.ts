@@ -60,21 +60,9 @@ export class UsuarioController {
 
       const rol = esPrestador ? 'PRESTADOR' : 'USUARIO';
 
-      // 1. Creación del usuario base
-      const nuevoUsuario = await this.service.crearUsuario({
-        nombre,
-        apellido,
-        email,
-        passwordHash: password,
-        rol: rol,
-        preguntaSecreta,
-        respuestaSecretaHash: respuestaSecreta,
-        ubicacionId: undefined,
-      });
-
-      // 2. Si es prestador, se crea su perfil profesional en la entidad Prestador
+      // 1. Si es prestador, se crea su perfil profesional en la entidad Prestador
       let prestadorCreado: any = null;
-      if (esPrestador && especialidad) {
+      if (esPrestador) {
         try {
           prestadorCreado = this.prestadorService.crear({
             nombre: nombre,
@@ -83,13 +71,26 @@ export class UsuarioController {
             aniosExperiencia: 0,
             acercaDe: 'Profesional registrado en Fixer',
             ofreceGarantia: false,
-            categoriaId: especialidad,
+            categoriaId: especialidad || 'Plomería',
             telefono: { codPais: '+54', codArea: '11', nroTelefono: '' },
           } as any);
         } catch (errorPrestador) {
           console.error('Error al crear el prestador vinculado:', errorPrestador);
         }
       }
+
+      // 2. Creación del usuario base vinculado a su prestadorId
+      const nuevoUsuario = await this.service.crearUsuario({
+        nombre,
+        apellido,
+        email,
+        passwordHash: password,
+        rol: rol,
+        prestadorId: prestadorCreado?.id,
+        preguntaSecreta,
+        respuestaSecretaHash: respuestaSecreta,
+        ubicacionId: undefined,
+      });
 
       res.status(201).json({ 
         code: 201, 

@@ -78,3 +78,5 @@ export class PrestadorRepository {
          return true;
      }
 }
+
+export const prestadorRepositorySingleton = new PrestadorRepository();
