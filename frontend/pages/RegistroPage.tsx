@@ -17,7 +17,7 @@ export const RegistroPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
