@@ -17,7 +17,7 @@ export class Servidor {
     }
 
     private middlewares() {
-        this.app.use(cors({ origin: process.env.CORS_ORIGIN }));
+        this.app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:5174']}));
         this.app.use(express.json({ limit: '5mb' }));
     }
 
