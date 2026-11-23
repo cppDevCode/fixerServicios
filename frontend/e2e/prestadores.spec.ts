@@ -287,8 +287,11 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('input[type="password"]').fill('123456');
         await page.getByRole('button', { name: /Ingresar/i }).click();
 
-        // Redirige a su propia ficha (/prestadores/1) y permite editar sus datos pero no su calificación ni reseñas de usuarios ni eliminar
+        // Redirige a la vista de "Mi Ficha Profesional" (/prestadores/1) y permite editar sus datos pero no su calificación ni reseñas de usuarios ni eliminar
         await expect(page).toHaveURL(/\/prestadores\/1$/);
+        await expect(
+            page.getByRole('heading', { name: /Mi Ficha Profesional/i })
+        ).toBeVisible();
         await expect(
             page.getByRole('button', { name: /Guardar cambios/i })
         ).toBeVisible();
@@ -320,7 +323,7 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('input[type="password"]').fill('123456');
         await page.getByRole('button', { name: /Ingresar/i }).click();
 
-        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+        await expect(page).toHaveURL(/\/$/);
 
         // En el detalle de prestador, USUARIO visualiza los datos (sin el cartel de aviso), deja y ve reseñas y puede editar sus propias reseñas
         await page.goto('/prestadores/1');

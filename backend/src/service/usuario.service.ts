@@ -115,17 +115,17 @@ export class UsuarioService {
       throw new Error('Credenciales inválidas');
     }
 
-    let prestadorId: number | null = null;
-
-    if (user.rol === 'PRESTADOR') {
+    let prestadorId: number | null = user.prestadorId ?? null;
+    
+    // Si es prestador y no tiene prestadorId asignado aún, buscamos su ID en la tabla de prestadores
+    if (user.rol === 'PRESTADOR' && !prestadorId) {
       try {
         const prestadorService = new PrestadorService();
-        const prestadores = prestadorService.listar({ search: user.nombre });
-
+        const prestadores = prestadorService.listar({ limit: 100, search: user.nombre });
+        
         const prestadorEncontrado = prestadores.datos.find(
-          (p) =>
-            p.nombre.toLowerCase().trim() === user.nombre.toLowerCase().trim() &&
-            p.apellido.toLowerCase().trim() === user.apellido.toLowerCase().trim()
+          p => normalizarTexto(p.nombre.trim()) === normalizarTexto(user.nombre.trim()) && 
+               normalizarTexto(p.apellido.trim()) === normalizarTexto(user.apellido.trim())
         );
 
         if (prestadorEncontrado) {

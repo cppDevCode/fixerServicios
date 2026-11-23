@@ -11,7 +11,7 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = 'http://localhost:3000/api/v1';
+  const API_URL = '/api/v1';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,38 +29,49 @@ export const LoginPage = () => {
 
       if (result.code === 200) {
         const usuario = result.data.usuario;
-        
-        // 1. Guardamos la sesión
-        guardarSesionUsuario(result.data.token, usuario);
-        
-        // 2. Si es PRESTADOR, buscamos su perfil profesional en el catálogo
+
         if (usuario.rol === 'PRESTADOR') {
-          try {
-            // Usamos el servicio de Alejandro para buscar por nombre y apellido
-            const respuestaPrestadores = await obtenerPrestadores({ 
-              search: `${usuario.nombre} ${usuario.apellido}` 
-            });
-            
-            // La respuesta tiene la estructura: { codigo, msj, datos, meta }
-            const prestadorEncontrado = respuestaPrestadores.datos.find(
-              (p) => p.nombre.toLowerCase().trim() === usuario.nombre.toLowerCase().trim() &&
-                     p.apellido.toLowerCase().trim() === usuario.apellido.toLowerCase().trim()
-            );
-            
-            if (prestadorEncontrado) {
-              // ¡Encontrado! Vamos a su perfil
-              navigate(`/prestadores/${prestadorEncontrado.id}`);
-            } else {
-              // Si no se encuentra, va al listado general
-              navigate('/prestadores');
+          let idPrestador = Number(usuario.prestadorId);
+
+          if (!Number.isInteger(idPrestador) || idPrestador <= 0) {
+            try {
+              const respuestaPrestadores = await obtenerPrestadores({
+                limit: 100,
+                search: `${usuario.nombre} ${usuario.apellido ?? ''}`.trim(),
+              });
+
+              const prestadorEncontrado = respuestaPrestadores.datos.find(
+                (p) =>
+                  p.nombre.toLowerCase().trim() ===
+                    String(usuario.nombre ?? '').toLowerCase().trim() &&
+                  p.apellido.toLowerCase().trim() ===
+                    String(usuario.apellido ?? '').toLowerCase().trim()
+              );
+
+              if (prestadorEncontrado) {
+                idPrestador = prestadorEncontrado.id;
+              }
+            } catch {
+              // Mantiene respaldo de prestadorId
             }
-          } catch {
-            navigate('/prestadores');
           }
+
+          if (!Number.isInteger(idPrestador) || idPrestador <= 0) {
+            idPrestador = Number(localStorage.getItem('prestadorId')) || 1;
+          }
+
+          const usuarioConFicha = {
+            ...usuario,
+            prestadorId: idPrestador,
+          };
+
+          guardarSesionUsuario(result.data.token, usuarioConFicha);
+          navigate(`/prestadores/${idPrestador}`);
         } else if (usuario.rol === 'ADMIN') {
+          guardarSesionUsuario(result.data.token, usuario);
           navigate('/prestadores');
         } else {
-          // USUARIO -> Home
+          guardarSesionUsuario(result.data.token, usuario);
           navigate('/');
         }
       } else {

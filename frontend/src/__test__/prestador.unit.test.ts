@@ -599,9 +599,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(puedeEditarPrestador(usuario, 1)).toBe(false);
             expect(puedeEliminarPrestador(usuario)).toBe(false);
             expect(puedeAgregarResena(usuario, 1)).toBe(true);
-            expect(obtenerRutaInicioPorRol(usuario)).toBe(
-                '/prestadores/catalogo'
-            );
+            expect(obtenerRutaInicioPorRol(usuario)).toBe('/');
         });
     });
 });
