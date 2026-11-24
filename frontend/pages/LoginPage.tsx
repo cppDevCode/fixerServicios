@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { guardarSesionUsuario } from '../services/sesion.service';
-import { obtenerPrestadores } from '../services/prestador.service'; // <-- IMPORTAMOS EL SERVICIO DE PRESTADORES
+import { obtenerPrestadores } from '../services/prestador.service';
 import './Auth.css';
 
 export const LoginPage = () => {
@@ -10,6 +11,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarPassword, setMostrarPassword] = useState(false);
 
   const API_URL = '/api/v1';
 
@@ -91,24 +93,70 @@ export const LoginPage = () => {
           <h1 className="auth-logo">🔧 Fixer</h1>
           <p className="auth-subtitle">Soluciones para tu hogar</p>
         </div>
+
         <h2 className="auth-title">Iniciar Sesión</h2>
+
         {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleLogin} className="auth-form">
           <div className="form-group">
             <label className="form-label">Correo Electrónico</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="nombre@mail.com" className="form-input" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="nombre@mail.com"
+              className="form-input"
+              autoComplete="email"
+            />
           </div>
+
           <div className="form-group">
             <label className="form-label">Contraseña</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className="form-input" />
+
+            <div className="password-input-wrapper">
+              <input
+                type={mostrarPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="form-input"
+                autoComplete="current-password"
+              />
+
+              <button
+                type="button"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+                className="password-toggle"
+                aria-label={
+                  mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                }
+                aria-pressed={mostrarPassword}
+              >
+                {mostrarPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
           </div>
+
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
+
         <div className="auth-links">
-          <Link to="/recuperar-password" className="auth-link">¿Olvidaste tu contraseña?</Link>
-          <Link to="/registro" className="auth-link-gray">¿No tenés cuenta? <span>Registrate</span></Link>
+          <Link to="/recuperar-password" className="auth-link">
+            ¿Olvidaste tu contraseña?
+          </Link>
+
+          <Link to="/registro" className="auth-link-gray">
+            ¿No tenés cuenta? <span>Registrate</span>
+          </Link>
         </div>
       </div>
     </div>

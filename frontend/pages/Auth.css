@@ -294,6 +294,44 @@
   font-size: 1.1rem;
 }
 
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-wrapper .form-input {
+    width: 100%;
+    padding-right: 45px;
+    box-sizing: border-box;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: #64748B;
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: #2563EB;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .registro-wrapper {
