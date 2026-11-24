@@ -1,14 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { UsuarioService } from '../service/usuario.service';
+import { PrestadorService } from '../service/prestador.service';
 
 export class UsuarioController {
   private service: UsuarioService;
+  private prestadorService: PrestadorService;
 
   constructor() {
     this.service = new UsuarioService();
+    this.prestadorService = new PrestadorService();
   }
 
-  // --- MÉTODOS DE USUARIO ---
+  // Métodos usuarios
 
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -32,12 +35,7 @@ export class UsuarioController {
   getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await this.service.obtenerUsuarioPorId(req.params.id);
-
-      res.status(200).json({
-        code: 200,
-        msg: 'Ok',
-        data: user
-      });
+      res.status(200).json({ code: 200, msg: 'Ok', data: user });
     } catch (error: unknown) {
       next(error);
     }
@@ -46,12 +44,7 @@ export class UsuarioController {
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await this.service.actualizarUsuario(req.params.id, req.body);
-
-      res.status(200).json({
-        code: 200,
-        msg: 'Usuario actualizado',
-        data: user
-      });
+      res.status(200).json({ code: 200, msg: 'Usuario actualizado', data: user });
     } catch (error: unknown) {
       next(error);
     }
@@ -59,24 +52,54 @@ export class UsuarioController {
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { nombre, apellido, email, password, preguntaSecreta, respuestaSecreta } = req.body;
+      const { nombre, apellido, email, password, preguntaSecreta, respuestaSecreta, esPrestador, especialidad } = req.body;
       
       if (!nombre || !apellido || !email || !password) {
         return res.status(400).json({ code: 400, msg: 'Faltan datos obligatorios', data: null });
       }
 
+      const rol = esPrestador ? 'PRESTADOR' : 'USUARIO';
+
+      // 1. Si es prestador, se crea su perfil profesional en la entidad Prestador
+      let prestadorCreado: any = null;
+      if (esPrestador) {
+        try {
+          prestadorCreado = this.prestadorService.crear({
+            nombre: nombre,
+            apellido: apellido,
+            matricula: `MAT-${Date.now()}`,
+            aniosExperiencia: 0,
+            acercaDe: 'Profesional registrado en Fixer',
+            ofreceGarantia: false,
+            categoriaId: especialidad || 'Plomería',
+            telefono: { codPais: '+54', codArea: '11', nroTelefono: '' },
+          } as any);
+        } catch (errorPrestador) {
+          console.error('Error al crear el prestador vinculado:', errorPrestador);
+        }
+      }
+
+      // 2. Creación del usuario base vinculado a su prestadorId
       const nuevoUsuario = await this.service.crearUsuario({
         nombre,
         apellido,
         email,
         passwordHash: password,
-        rol: 'USUARIO',
+        rol: rol,
+        prestadorId: prestadorCreado?.id,
         preguntaSecreta,
         respuestaSecretaHash: respuestaSecreta,
         ubicacionId: undefined,
       });
 
-      res.status(201).json({ code: 201, msg: 'Usuario registrado exitosamente', data: nuevoUsuario });
+      res.status(201).json({ 
+        code: 201, 
+        msg: 'Usuario registrado exitosamente', 
+        data: { 
+          usuario: nuevoUsuario, 
+          prestador: prestadorCreado 
+        } 
+      });
     } catch (error: any) {
       if (error.message === 'El email ya está registrado') {
         return res.status(400).json({ code: 400, msg: error.message, data: null });
@@ -84,43 +107,29 @@ export class UsuarioController {
       next(error);
     }
   };
-  
-  // --- MÉTODOS DE AUTH ---
+
+  //Metodos de autenticación y recuperación de contraseña
 
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({
-          code: 400,
-          msg: 'Email y contraseña son requeridos',
-          data: null
-        });
+        return res.status(400).json({ code: 400, msg: 'Email y contraseña son requeridos', data: null });
       }
 
       const result = await this.service.login(email, password);
 
-      res.status(200).json({
-        code: 200,
-        msg: 'Login exitoso',
-        data: result
-      });
+      res.status(200).json({ code: 200, msg: 'Login exitoso', data: result });
     } catch (error: unknown) {
-      
       if (error instanceof Error && error.message === 'Credenciales inválidas') {
-        return res.status(401).json({
-          code: 401,
-          msg: error.message,
-          data: null
-        });
+        return res.status(401).json({ code: 401, msg: error.message, data: null });
       }
-
       next(error);
     }
   };
 
-    getPreguntaSecreta = async (req: Request, res: Response, next: NextFunction) => {
+  getPreguntaSecreta = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
       const result = await this.service.obtenerPreguntaSecreta(email);
@@ -131,20 +140,13 @@ export class UsuarioController {
       }
       next(error);
     }
-
   };
 
   recuperarPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, respuesta } = req.body;
-
       const result = await this.service.recuperarPassword(email, respuesta);
-
-      res.status(200).json({
-        code: 200,
-        msg: 'Ok',
-        data: result
-      });
+      res.status(200).json({ code: 200, msg: 'Ok', data: result });
     } catch (error: unknown) {
       next(error);
     }
@@ -158,7 +160,6 @@ export class UsuarioController {
       }
       
       const user = await this.service.obtenerPreguntaSecreta(email); 
-    
       await this.service.actualizarUsuario(user.id, { passwordHash: nuevaPassword });
       
       res.status(200).json({ code: 200, msg: 'Contraseña actualizada exitosamente', data: null });

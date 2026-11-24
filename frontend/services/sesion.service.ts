@@ -152,7 +152,7 @@ export function obtenerRutaInicioPorRol(usuario: IUsuarioSesion): string {
         const idPrestador = Number(usuario.prestadorId ?? 1);
         return `/prestadores/${Number.isInteger(idPrestador) && idPrestador > 0 ? idPrestador : 1}`;
     }
-    return '/prestadores/catalogo';
+    return '/';
 }
 
 export function construirHeadersAutenticacion(

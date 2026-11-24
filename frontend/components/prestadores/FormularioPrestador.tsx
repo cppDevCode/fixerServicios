@@ -15,6 +15,7 @@ import {
     PROVINCIAS_ARGENTINA,
     PROVINCIAS_LOCALIDADES_ARGENTINA,
 } from '../../services/ubicacionesArgentina';
+import { esPrestador, obtenerUsuarioActual } from '../../services/sesion.service';
 import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
@@ -82,6 +83,7 @@ export function FormularioPrestador({
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esEdicion = Boolean(prestadorInicial?.id);
+    const ocultarCalificacion = esPrestador(obtenerUsuarioActual());
 
     const manejarArchivoFoto = (evento: ChangeEvent<HTMLInputElement>) => {
         const archivo = evento.target.files?.[0];
@@ -135,10 +137,11 @@ export function FormularioPrestador({
                 codArea: codArea.trim() || '11',
                 nroTelefono: nroTelefono.trim(),
             },
-            ratingPromedio:
-                ratingNumero !== undefined && !Number.isNaN(ratingNumero)
-                    ? ratingNumero
-                    : undefined,
+            ratingPromedio: ocultarCalificacion
+                ? prestadorInicial?.ratingPromedio
+                : ratingNumero !== undefined && !Number.isNaN(ratingNumero)
+                  ? ratingNumero
+                  : undefined,
             fotoUrl: fotoUrl.trim()
                 ? fotoUrl.trim()
                 : esEdicion
@@ -335,20 +338,24 @@ export function FormularioPrestador({
                     />
                 </div>
 
-                <div className="prestadores-campo">
-                    <label htmlFor="prestador-rating">Calificación inicial (1 a 5)</label>
-                    <input
-                        id="prestador-rating"
-                        name="ratingPromedio"
-                        type="number"
-                        step="0.1"
-                        min="1"
-                        max="5"
-                        value={ratingPromedio}
-                        onChange={(e) => setRatingPromedio(e.target.value)}
-                        disabled={enviando}
-                    />
-                </div>
+                {!ocultarCalificacion && (
+                    <div className="prestadores-campo">
+                        <label htmlFor="prestador-rating">
+                            Calificación inicial (1 a 5)
+                        </label>
+                        <input
+                            id="prestador-rating"
+                            name="ratingPromedio"
+                            type="number"
+                            step="0.1"
+                            min="1"
+                            max="5"
+                            value={ratingPromedio}
+                            onChange={(e) => setRatingPromedio(e.target.value)}
+                            disabled={enviando}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="prestadores-campo">

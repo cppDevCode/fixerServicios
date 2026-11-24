@@ -113,6 +113,18 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 msj: 'Los campos nombre, apellido y categoriaId son obligatorios',
                 datos: null,
             });
+
+            const resSinNombre = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ apellido: 'Gómez', categoriaId: 'Gasista' })
+                .expect(400);
+            expect(resSinNombre.body.codigo).toBe(400);
+
+            const resSinCategoria = await request(app)
+                .post('/api/v1/prestadores')
+                .send({ nombre: 'Pedro', apellido: 'Gómez' })
+                .expect(400);
+            expect(resSinCategoria.body.codigo).toBe(400);
         });
 
         it('retorna 201 y crea un nuevo prestador correctamente', async () => {
@@ -298,13 +310,15 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 prestadorId: 1,
             });
 
-            // PRESTADOR puede editar su propio perfil (id 1)
-            await request(app)
+            // PRESTADOR puede editar su propio perfil (id 1), pero no su ratingPromedio
+            const resPropio = await request(app)
                 .put('/api/v1/prestadores/1')
                 .set('x-usuario-rol', 'PRESTADOR')
                 .set('x-prestador-id', '1')
-                .send({ aniosExperiencia: 10 })
+                .send({ aniosExperiencia: 10, ratingPromedio: 1.5 })
                 .expect(200);
+
+            expect(resPropio.body.datos.ratingPromedio).toBe(4.8);
 
             // PRESTADOR no puede editar otro prestador (id 2) -> 403
             const resAjeno = await request(app)

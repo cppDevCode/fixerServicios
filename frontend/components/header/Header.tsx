@@ -90,11 +90,15 @@ export function Header() {
 
                     {esAdmin(usuarioActual) && (
                         <>
+<<<<<<< HEAD
                             <NavLink
                                 to="/prestadores"
                                 end
                                 onClick={cerrarMenu}
                             >
+=======
+                            <NavLink to="/prestadores" end onClick={cerrarMenu}>
+>>>>>>> origin/develop
                                 Prestadores
                             </NavLink>
 

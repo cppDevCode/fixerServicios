@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  guardarSesionUsuario,
-  obtenerRutaInicioPorRol,
-} from '../services/sesion.service';
+import { guardarSesionUsuario } from '../services/sesion.service';
+import { obtenerPrestadores } from '../services/prestador.service'; // <-- IMPORTAMOS EL SERVICIO DE PRESTADORES
 import './Auth.css';
 
 export const LoginPage = () => {
@@ -19,16 +17,63 @@ export const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const result = await response.json();
+
       if (result.code === 200) {
-        guardarSesionUsuario(result.data.token, result.data.usuario);
-        navigate(obtenerRutaInicioPorRol(result.data.usuario));
+        const usuario = result.data.usuario;
+
+        if (usuario.rol === 'PRESTADOR') {
+          let idPrestador = Number(usuario.prestadorId);
+
+          if (!Number.isInteger(idPrestador) || idPrestador <= 0) {
+            try {
+              const respuestaPrestadores = await obtenerPrestadores({
+                limit: 100,
+                search: `${usuario.nombre} ${usuario.apellido ?? ''}`.trim(),
+              });
+
+              const prestadorEncontrado = respuestaPrestadores.datos.find(
+                (p) =>
+                  p.nombre.toLowerCase().trim() ===
+                    String(usuario.nombre ?? '').toLowerCase().trim() &&
+                  p.apellido.toLowerCase().trim() ===
+                    String(usuario.apellido ?? '').toLowerCase().trim()
+              );
+
+              if (prestadorEncontrado) {
+                idPrestador = prestadorEncontrado.id;
+              }
+            } catch {
+              // Mantiene respaldo de prestadorId
+            }
+          }
+
+          if (!Number.isInteger(idPrestador) || idPrestador <= 0) {
+            idPrestador = Number(localStorage.getItem('prestadorId')) || 1;
+          }
+
+          const usuarioConFicha = {
+            ...usuario,
+            prestadorId: idPrestador,
+          };
+
+          guardarSesionUsuario(result.data.token, usuarioConFicha);
+          navigate(`/prestadores/${idPrestador}`);
+        } else if (usuario.rol === 'ADMIN') {
+          guardarSesionUsuario(result.data.token, usuario);
+          navigate('/prestadores');
+        } else {
+          guardarSesionUsuario(result.data.token, usuario);
+          navigate('/');
+        }
       } else {
         setError(result.msg || 'Credenciales inválidas');
       }

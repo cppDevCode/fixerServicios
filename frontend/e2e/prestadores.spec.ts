@@ -30,7 +30,7 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.goto('/');
 
         const linkPrestadores = page.getByRole('link', {
-            name: /1\. Prestadores/i,
+            name: /^Prestadores$/i,
         });
         await expect(linkPrestadores).toBeVisible();
 
@@ -81,6 +81,11 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await expect(page.locator('table')).toContainText('Carlos Gómez');
         await expect(page.locator('table tbody tr')).toHaveCount(1);
+
+        // Botón Limpiar filtros restablece el listado paginado original
+        await page.getByRole('button', { name: /Limpiar filtros/i }).click();
+        await expect(page.locator('table tbody tr')).toHaveCount(10);
+        await expect(page.getByText('Total: 16 registros')).toBeVisible();
     });
 
     test('permite acceder a la vista de detalle (/prestadores/:id) y visualizar la ficha técnica y formulario', async ({
@@ -201,10 +206,15 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         const tarjetas = page.getByTestId('tarjeta-catalogo-prestador');
         await expect(tarjetas).toHaveCount(6);
 
-        // Filtro por localidad en el catálogo público
-        await page
-            .getByTestId('filtro-localidad')
-            .selectOption('Córdoba Capital');
+        // Filtro por localidad en el catálogo público con formato Localidad, Provincia
+        const selectLocalidad = page.getByTestId('filtro-localidad');
+        await expect(selectLocalidad).toContainText('9 de Julio, Buenos Aires');
+        await expect(selectLocalidad).toContainText('Rosario, Santa Fe');
+        await expect(selectLocalidad).toContainText(
+            'CABA, Ciudad Autónoma de Buenos Aires'
+        );
+        await expect(selectLocalidad).toContainText('Córdoba Capital, Córdoba');
+        await selectLocalidad.selectOption('Córdoba Capital');
         await expect(tarjetas).toHaveCount(4);
 
         // Filtro rápido de Mejor calificados (4.8+) y Matriculados
@@ -277,27 +287,35 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('input[type="password"]').fill('123456');
         await page.getByRole('button', { name: /Ingresar/i }).click();
 
-        // Redirige a su propia ficha (/prestadores/1) y permite editar sus datos pero no eliminar
+        // Redirige a la vista de "Mi Ficha Profesional" (/prestadores/1) y permite editar sus datos pero no su calificación ni reseñas de usuarios ni eliminar
         await expect(page).toHaveURL(/\/prestadores\/1$/);
+        await expect(
+            page.getByRole('heading', { name: /Mi Ficha Profesional/i })
+        ).toBeVisible();
         await expect(
             page.getByRole('button', { name: /Guardar cambios/i })
         ).toBeVisible();
+        await expect(page.locator('#prestador-rating')).toHaveCount(0);
+        await expect(
+            page.getByRole('button', { name: /Editar reseña/i })
+        ).toHaveCount(0);
         await expect(
             page.getByRole('button', { name: /Eliminar prestador/i })
         ).toHaveCount(0);
 
-        // Permite navegar como perfil de usuario al catálogo público y ver otro prestador (/prestadores/2) en solo lectura
+        // Permite navegar como perfil de usuario al catálogo público y ver otro prestador (/prestadores/2) sin el cartel de aviso, mostrando la ficha y reseñas
         await page.getByTestId('btn-navegar-como-usuario').click();
         await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
         await page.goto('/prestadores/2');
         await expect(
             page.getByTestId('aviso-solo-lectura-prestador')
-        ).toBeVisible();
+        ).toHaveCount(0);
+        await expect(page.getByText('MAT-1002')).toBeVisible();
         await expect(
             page.getByRole('button', { name: /Guardar cambios/i })
         ).toHaveCount(0);
 
-        // 2. Cerrar sesión e ingresar con rol USUARIO (berta@example.com)
+        // 2. Cerrar sesión e ingresar con rol USUARIO (berta@example.com, id: 3)
         await page.getByTestId('btn-cerrar-sesion').click();
         await expect(page).toHaveURL(/\/login$/);
 
@@ -305,13 +323,14 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         await page.locator('input[type="password"]').fill('123456');
         await page.getByRole('button', { name: /Ingresar/i }).click();
 
-        await expect(page).toHaveURL(/\/prestadores\/catalogo$/);
+        await expect(page).toHaveURL(/\/$/);
 
-        // En el detalle de prestador, USUARIO solo visualiza los datos y puede agregar una reseña
+        // En el detalle de prestador, USUARIO visualiza los datos (sin el cartel de aviso), deja y ve reseñas y puede editar sus propias reseñas
         await page.goto('/prestadores/1');
         await expect(
             page.getByTestId('aviso-solo-lectura-prestador')
-        ).toBeVisible();
+        ).toHaveCount(0);
+        await expect(page.getByText('MAT-1001')).toBeVisible();
         await expect(
             page.getByRole('button', { name: /Guardar cambios/i })
         ).toHaveCount(0);
@@ -320,6 +339,9 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
         ).toBeVisible();
         await expect(
             page.getByRole('button', { name: /Publicar reseña/i })
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /Editar reseña/i }).first()
         ).toBeVisible();
     });
 });

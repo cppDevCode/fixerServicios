@@ -190,3 +190,119 @@
   font-size: 0.9rem;
   text-align: center;
 }
+/* Diseño de registro */
+.auth-container-registro {
+  min-height: 100vh;
+  background-color: #F8FAFC;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.registro-wrapper {
+  display: flex;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.registro-formulario {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.registro-titulo {
+  color: #1E293B;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.checkbox-prestador {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #F97316;
+  border-radius: 10px;
+  background-color: #FFF7ED;
+  align-items: flex-start;
+}
+
+.checkbox-prestador input {
+  margin-top: 0.25rem;
+  accent-color: #F97316;
+  width: 18px;
+  height: 18px;
+}
+
+.checkbox-prestador label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.checkbox-prestador label span {
+  color: #64748B;
+  font-size: 0.8rem;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.registro-imagen {
+  flex: 1;
+  background-color: #EFF6FF; 
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registro-imagen-contenido h2 {
+  color: #1E293B;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.registro-imagen-contenido p {
+  color: #64748B;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .registro-wrapper {
+    flex-direction: column;
+  }
+  .registro-imagen {
+    display: none; 
+  }
+  .registro-formulario {
+    padding: 2rem;
+  }
+}
