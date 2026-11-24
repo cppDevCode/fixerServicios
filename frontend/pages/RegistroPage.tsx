@@ -256,12 +256,23 @@ export const RegistroPage = () => {
 
         <div className="registro-imagen">
           <div className="registro-imagen-contenido">
-            <h2>Tu casa en manos de personas de confianza.</h2>
-
-            <p>
-              Despedite de la incertidumbre al buscar presupuestos y
-              especialistas para tu hogar.
-            </p>
+            {formData.esPrestador ? (
+              <>
+                <h2>Hacé crecer tu negocio con Fixer</h2>
+                <p>
+                  Sumate a la red de profesionales más grande del país. Conseguí nuevos
+                  clientes, gestioná tu agenda y hacé que tu trabajo hable por vos.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Tu casa en manos de personas de confianza.</h2>
+                <p>
+                  Despedite de la incertidumbre al buscar presupuestos y especialistas
+                  para tu hogar.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
