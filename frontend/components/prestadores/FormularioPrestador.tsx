@@ -54,6 +54,9 @@ export function FormularioPrestador({
             obtenerLocalidadesPorProvincia(provinciaInicial)[0] ??
             'Córdoba Capital'
     );
+    const [radioCobertura, setRadioCobertura] = useState(
+        String(prestadorInicial?.radio?? '')
+    );
     const [matricula, setMatricula] = useState(prestadorInicial?.matricula ?? '');
     const [aniosExperiencia, setAniosExperiencia] = useState(
         String(prestadorInicial?.aniosExperiencia ?? 1)
@@ -128,6 +131,9 @@ export function FormularioPrestador({
             categoriaId: rubroLimpio,
             provincia: provincia.trim() || undefined,
             localidad: localidad.trim() || undefined,
+            radio: radioCobertura.trim()
+                ? Number(radioCobertura)
+                : undefined,
             matricula: matricula.trim() ? matricula.trim() : undefined,
             aniosExperiencia: experienciaNumero,
             acercaDe: acercaDe.trim(),
@@ -309,6 +315,22 @@ export function FormularioPrestador({
                             </optgroup>
                         ))}
                     </select>
+                </div>
+
+                <div className="prestadores-campo">
+                    <label htmlFor="prestador-radio-cobertura">
+                        Radio de cobertura (km)
+                    </label>
+                    <input
+                        id="prestador-radio-cobertura"
+                        type="number"
+                        name="radioCobertura"
+                        min="0"
+                        value={radioCobertura}
+                        onChange={(e) => setRadioCobertura(e.target.value)}
+                        placeholder="Ej: 15"
+                        disabled={enviando}
+                    />
                 </div>
 
                 <div className="prestadores-campo">

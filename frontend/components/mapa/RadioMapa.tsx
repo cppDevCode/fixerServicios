@@ -6,29 +6,49 @@ import 'leaflet/dist/leaflet.css';
 interface RadioMapaProps {
 codigoPostal: string;
 ciudad?: string;
+provincia?: string;
 radioKm: number;
 nombreZona?: string;
 }
 
-export const RadioMapa = ({ codigoPostal, ciudad, radioKm, nombreZona }: RadioMapaProps) => {
+export const RadioMapa = ({ codigoPostal, ciudad, provincia, radioKm, nombreZona }: RadioMapaProps) => {
     const [coordenadas, setCoordenadas] = useState<Coordenadas | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    useEffect(() => {
-        const cargarCoordenadas = async () => {
-            setLoading(true);
-            setError(false);
-        const coords = await obtenerCoordenadas(codigoPostal, ciudad);
+    
+useEffect(() => {
+    let cancelado = false;
+
+    const cargarCoordenadas = async () => {
+        setLoading(true);
+        setError(false);
+        setCoordenadas(null);
+
+        const coords = await obtenerCoordenadas(
+            codigoPostal,
+            ciudad,
+            provincia
+        );
+
+        if (cancelado) return;
+
         if (coords) {
             setCoordenadas(coords);
         } else {
             setError(true);
         }
+
         setLoading(false);
-        };
+    };
+
     cargarCoordenadas();
-    }, [codigoPostal, ciudad]);
+
+    return () => {
+        cancelado = true;
+    };
+}, [codigoPostal, ciudad, provincia]);
+
 
     if (loading) {
     return (

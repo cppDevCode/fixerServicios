@@ -315,7 +315,7 @@ export function PrestadorDetallePage() {
                                 </p>
                             </div>
 
-                            {/* --- ZONA DE ATENCIÓN Y MAPA --- */}
+                            {/*Zona de atención y mapa */}
                             <div className="prestador-atributo" style={{ marginTop: '1rem' }}>
                                 <span>Zona de atención (Radio de cobertura)</span>
                                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem', alignItems: 'flex-start' }}>
@@ -337,6 +337,7 @@ export function PrestadorDetallePage() {
                                         <RadioMapa
                                             codigoPostal={(prestador.codigoPostal ?? 5000).toString()}
                                             ciudad={prestador.localidad || 'Córdoba'}
+                                            provincia={prestador.provincia || 'Córdoba'}
                                             radioKm={prestador.radio || 10}
                                             nombreZona={prestador.localidad || 'Zona de cobertura'}
                                         />
