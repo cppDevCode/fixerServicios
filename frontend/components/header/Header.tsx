@@ -92,12 +92,6 @@ export function Header() {
                             >
                                 Mi Ficha Profesional
                             </NavLink>
-                            <NavLink
-                                to={`/usuarios/${usuarioActual?.id}`}
-                                onClick={cerrarMenu}
-                            >
-                                Mi Perfil de Usuario
-                            </NavLink>
                         </>
                     )}
 
