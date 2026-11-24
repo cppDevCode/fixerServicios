@@ -15,6 +15,8 @@ export interface IPrestador {
     categoriaId: string;
     provincia?: string;
     localidad?: string;
+    radio?: number;
+    codigoPostal?: number;
     telefono: ITelefonoPrestador;
     ratingPromedio?: number;
     fotoUrl?: string;
