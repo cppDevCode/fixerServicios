@@ -1,3 +1,4 @@
+import { IUsuario } from '../interfaces/usuario.interface';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
@@ -8,15 +9,6 @@ import {
   puedeAdministrarUsuarios,
   type IUsuarioSesion,
 } from '../services/sesion.service';
-
-interface IUsuario {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  rol: string;
-  ubicacionId?: string;
-}
 
 export const UsuariosPage = () => {
   const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(() =>

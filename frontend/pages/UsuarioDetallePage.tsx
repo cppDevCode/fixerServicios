@@ -1,3 +1,4 @@
+import {IUsuario} from '../interfaces/usuario.interface';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -6,16 +7,6 @@ import {
   obtenerUsuarioActual,
 } from '../services/sesion.service';
 
-interface IUsuarioDetalle {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  rol: string;
-  ubicacionId?: string;
-  codigoPostal?: string;
-  radio?: number;
-}
 
 export const UsuarioDetallePage = () => {
   const { id } = useParams();
@@ -30,7 +21,7 @@ export const UsuarioDetallePage = () => {
       ? `/prestadores/${usuarioActual?.prestadorId ?? 1}`
       : '/prestadores/catalogo';
 
-  const [usuario, setUsuario] = useState<IUsuarioDetalle | null>(null);
+  const [usuario, setUsuario] = useState<IUsuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
