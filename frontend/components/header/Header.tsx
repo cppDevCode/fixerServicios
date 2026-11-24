@@ -1,11 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import {
-    Link,
-    NavLink,
-    useLocation,
-    useNavigate
-} from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, UserRound, LogOut } from 'lucide-react';
 import fixerLogo from '../../assets/fixer-logo.png';
 import {
@@ -24,7 +18,6 @@ export function Header() {
     const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(
         () => obtenerUsuarioActual()
     );
-
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -58,8 +51,6 @@ export function Header() {
     return (
         <header className="fixer-header">
             <div className="fixer-header__contenedor">
-
-                {/* Logo */}
                 <Link
                     to="/"
                     className="fixer-header__logo"
@@ -69,11 +60,8 @@ export function Header() {
                     <img src={fixerLogo} alt="Fixer" />
                 </Link>
 
-                {/* Navegación principal */}
                 <nav
-                    className={`fixer-header__nav ${
-                        menuAbierto ? 'fixer-header__nav--abierto' : ''
-                    }`}
+                    className={`fixer-header__nav ${menuAbierto ? 'fixer-header__nav--abierto' : ''}`}
                     aria-label="Navegación principal"
                     id="fixer-navegacion"
                 >
@@ -81,31 +69,20 @@ export function Header() {
                         Inicio
                     </NavLink>
 
-                    <NavLink
-                        to="/prestadores/catalogo"
-                        onClick={cerrarMenu}
-                    >
+                    <NavLink to="/prestadores/catalogo" onClick={cerrarMenu}>
                         Explorar servicios
                     </NavLink>
 
                     {esAdmin(usuarioActual) && (
-                    <>
-                        <NavLink
-                            to="/prestadores"
-                            end
-                            onClick={cerrarMenu}
-                        >
-                            Prestadores
-                        </NavLink>
-
-                        <NavLink
-                            to="/usuarios"
-                            onClick={cerrarMenu}
-                        >
-                            Usuarios
-                        </NavLink>
-                    </>
-                )}
+                        <>
+                            <NavLink to="/prestadores" end onClick={cerrarMenu}>
+                                Prestadores
+                            </NavLink>
+                            <NavLink to="/usuarios" onClick={cerrarMenu}>
+                                Usuarios
+                            </NavLink>
+                        </>
+                    )}
 
                     {esPrestador(usuarioActual) && (
                         <>
@@ -115,7 +92,6 @@ export function Header() {
                             >
                                 Mi Ficha Profesional
                             </NavLink>
-
                             <NavLink
                                 to={`/usuarios/${usuarioActual?.id}`}
                                 onClick={cerrarMenu}
@@ -134,31 +110,21 @@ export function Header() {
                         </NavLink>
                     )}
 
-                    <NavLink
-                        to="/como-funciona"
-                        onClick={cerrarMenu}
-                    >
+                    <NavLink to="/como-funciona" onClick={cerrarMenu}>
                         Cómo funciona
                     </NavLink>
 
-                    <NavLink
-                        to="/garantia"
-                        onClick={cerrarMenu}
-                    >
+                    <NavLink to="/garantia" onClick={cerrarMenu}>
                         Garantía
                     </NavLink>
 
                     {!usuarioActual && (
-                        <NavLink
-                            to="/panel-pro"
-                            onClick={cerrarMenu}
-                        >
+                        <NavLink to="/panel-pro" onClick={cerrarMenu}>
                             Panel Pro
                         </NavLink>
                     )}
                 </nav>
 
-                {/* Acciones de sesión */}
                 <div className="fixer-header__acciones">
                     {usuarioActual ? (
                         <>
@@ -167,7 +133,6 @@ export function Header() {
                                 data-testid="usuario-sesion-badge"
                                 className="fixer-header__usuario-badge"
                                 title="Ver mi perfil de usuario"
-                                onClick={cerrarMenu}
                             >
                                 <UserRound size={16} />
                                 <span>
@@ -182,39 +147,41 @@ export function Header() {
                                 className="fixer-header__btn-salir"
                             >
                                 <LogOut size={16} />
-                                <span>Cerrar sesión</span>
+                                <span>Cerrar Sesión</span>
                             </button>
                         </>
                     ) : (
-                        <Link
-                            to="/login"
-                            className="fixer-header__login-btn"
-                            aria-label="Acceder a mi cuenta"
-                            onClick={cerrarMenu}
-                        >
-                            <UserRound size={18} />
-                            <span>Iniciar sesión</span>
-                        </Link>
+                        <>
+                            <Link
+                                to="/login"
+                                className="fixer-header__login-btn"
+                                aria-label="Acceder a mi cuenta"
+                            >
+                                <UserRound size={18} />
+                                <span>Iniciar Sesión</span>
+                            </Link>
+
+                            <Link
+                                to="/panel-pro"
+                                className="fixer-header__publicar"
+                                onClick={cerrarMenu}
+                            >
+                                Publicar servicio
+                            </Link>
+                        </>
                     )}
 
                     <button
                         type="button"
                         className="fixer-header__hamburguesa"
-                        aria-label={
-                            menuAbierto ? 'Cerrar menú' : 'Abrir menú'
-                        }
+                        aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
                         aria-expanded={menuAbierto}
                         aria-controls="fixer-navegacion"
                         onClick={() => setMenuAbierto(!menuAbierto)}
                     >
-                        {menuAbierto ? (
-                            <X size={24} />
-                        ) : (
-                            <Menu size={24} />
-                        )}
+                        {menuAbierto ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
-
             </div>
         </header>
     );
