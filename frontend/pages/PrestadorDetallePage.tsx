@@ -23,6 +23,7 @@ import {
 import { ListadoResenas } from '../components/resenas/ListadoResenas';
 import { FormularioResena } from '../components/resenas/FormularioResena';
 import type { IResena } from '../interfaces/resena.interface';
+import { RadioMapa } from '../components/mapa/RadioMapa';
 
 export function PrestadorDetallePage() {
     const [, setVersionSesion] = useState(0);
@@ -312,6 +313,36 @@ export function PrestadorDetallePage() {
                                     {prestador.acercaDe ||
                                         'Sin descripción registrada.'}
                                 </p>
+                            </div>
+
+                            {/* --- ZONA DE ATENCIÓN Y MAPA --- */}
+                            <div className="prestador-atributo" style={{ marginTop: '1rem' }}>
+                                <span>Zona de atención (Radio de cobertura)</span>
+                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem', alignItems: 'flex-start' }}>
+                                    
+                                    {/* Columna izquierda: Datos */}
+                                    <div style={{ flex: 1 }}>
+                                        <div className="prestador-atributo">
+                                            <span>Zona de atención</span>
+                                            <strong>{prestador.localidad || 'Córdoba'}</strong>
+                                        </div>
+                                        <div className="prestador-atributo" style={{ marginTop: '1rem' }}>
+                                            <span>Radio de cobertura</span>
+                                            <strong>{prestador.radio || 10} km</strong>
+                                        </div>
+                                    </div>
+
+                                    {/* Columna derecha: Mapa */}
+                                    <div style={{ width: '300px', flexShrink: 0 }}>
+                                        <RadioMapa
+                                            codigoPostal={(prestador.codigoPostal ?? 5000).toString()}
+                                            ciudad={prestador.localidad || 'Córdoba'}
+                                            radioKm={prestador.radio || 10}
+                                            nombreZona={prestador.localidad || 'Zona de cobertura'}
+                                        />
+                                    </div>
+
+                                </div>
                             </div>
                         </article>
 

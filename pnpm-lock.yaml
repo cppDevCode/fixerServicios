@@ -19,7 +19,7 @@ importers:
         version: 5.0.9(jspdf@4.2.1)
       lucide-react:
         specifier: ^1.71.0
-        version: 1.71.0(react@19.3.1)
+        version: 1.71.0(react@18.3.1)
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
@@ -457,6 +457,9 @@ packages:
   isarray@2.0.5:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
 
+  js-tokens@4.0.0:
+    resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
   jspdf-autotable@5.0.9:
     resolution: {integrity: sha512-wIOG2ggjG6Y7qvqjgFACZZeu+oHxoxrhwCn1lTMxjPhojLVVvu2U2yS2srVCYl0CXe6pqiG/jQMIIS0CFn1ssw==}
     peerDependencies:
@@ -517,6 +520,10 @@ packages:
 
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
+
+  loose-envify@1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
 
   lucide-react@1.71.0:
     resolution: {integrity: sha512-8YtvF+bqT/EMqAXU7kWvYdRu+TV9j4kS1eIS7IbN1j1Z1DgupbrTL0nDIygdqgBDTD7AJPP607VdVgzDTar4zA==}
@@ -591,8 +598,8 @@ packages:
   raf@3.4.1:
     resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==}
 
-  react@19.3.1:
-    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
     engines: {node: '>=0.10.0'}
 
   readable-stream@2.3.8:
@@ -1396,6 +1403,8 @@ snapshots:
 
   isarray@2.0.5: {}
 
+  js-tokens@4.0.0: {}
+
   jspdf-autotable@5.0.9(jspdf@4.2.1):
     dependencies:
       jspdf: 4.2.1
@@ -1454,9 +1463,13 @@ snapshots:
 
   lodash.uniq@4.5.0: {}
 
-  lucide-react@1.71.0(react@19.3.1):
+  loose-envify@1.4.0:
     dependencies:
-      react: 19.3.1
+      js-tokens: 4.0.0
+
+  lucide-react@1.71.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   math-intrinsics@1.1.0: {}
 
@@ -1518,7 +1531,9 @@ snapshots:
       performance-now: 2.1.0
     optional: true
 
-  react@19.3.1: {}
+  react@18.3.1:
+    dependencies:
+      loose-envify: 1.4.0
 
   readable-stream@2.3.8:
     dependencies:
