@@ -77,7 +77,7 @@ export const UsuarioDetallePage = () => {
           apellido: usuario.apellido,
           email: usuario.email,
           codigoPostal: usuario.codigoPostal,
-          radio: Number(usuario.radio),
+          ...(usuario.rol === 'PRESTADOR' && { radio: Number(usuario.radio) }),
         }),
       });
       const result = await response.json();
@@ -132,10 +132,20 @@ export const UsuarioDetallePage = () => {
           <label className="perfil-label">Código Postal</label>
           <input type="text" name="codigoPostal" value={usuario.codigoPostal || ''} onChange={handleChange} placeholder="Ej: 5000" className="perfil-input" />
         </div>
-        <div className="perfil-form-group">
-          <label className="perfil-label">Radio de Cobertura (km)</label>
-          <input type="number" name="radio" value={usuario.radio || ''} onChange={handleChange} placeholder="Ej: 15" className="perfil-input" />
-        </div>
+
+        {usuario.rol === 'PRESTADOR' && (
+          <div className="perfil-form-group">
+            <label className="perfil-label">Radio de Cobertura (km)</label>
+            <input 
+              type="number" 
+              name="radio" 
+              value={usuario.radio || ''} 
+              onChange={handleChange} 
+              placeholder="Ej: 15"
+              className="perfil-input" 
+            />
+          </div>
+        )}
 
         <div className="perfil-actions">
           <button type="submit" className="btn-save">Guardar Cambios</button>
