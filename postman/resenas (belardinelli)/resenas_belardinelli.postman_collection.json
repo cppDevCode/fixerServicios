@@ -1,0 +1,613 @@
+{
+  "info": {
+    "_postman_id": "a25ca18a-c94b-4b09-ad68-235c270560a1",
+    "name": "resenas (alumno 2) - Fixer Servicios",
+    "description": "Módulo de reseñas. Ejemplos JSON ilustrativos basados en el controlador y servicio; IDs, fechas y totales pueden variar. Persistencia temporal en memoria. Ejecutar con backend local.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "prestadorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "usuarioId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "resenaId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "resenas (alumno 2)",
+      "description": "Endpoints del módulo de reseñas (Integrante 2).",
+      "item": [
+        {
+          "name": "GET Listar reseñas paginadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas?page=1&limit=1",
+            "description": "Ejemplo ilustrativo de paginación. page y limit son opcionales; valores por defecto: 1 y 10."
+          },
+          "response": [
+            {
+              "name": "200 - Reseñas obtenidas correctamente",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas?page=1&limit=1"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Reseñas obtenidas correctamente\",\n  \"datos\": [\n    {\n      \"id\": 31,\n      \"prestadorId\": 1,\n      \"usuarioId\": 3,\n      \"calificacion\": 5,\n      \"comentario\": \"Excelente servicio\",\n      \"createdAt\": \"2026-11-24T10:00:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"pagina\": 1,\n    \"limit\": 1,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Listar reseñas por prestador",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas?page=1&limit=1&prestadorId={{prestadorId}}",
+            "description": "Ejemplo ilustrativo de paginación. prestadorId filtra las reseñas; promedio corresponde a todas las reseñas del prestador, no solo a la página."
+          },
+          "response": [
+            {
+              "name": "200 - Reseñas obtenidas correctamente",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas?page=1&limit=1&prestadorId={{prestadorId}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Reseñas obtenidas correctamente\",\n  \"datos\": [\n    {\n      \"id\": 31,\n      \"prestadorId\": 1,\n      \"usuarioId\": 3,\n      \"calificacion\": 5,\n      \"comentario\": \"Excelente servicio\",\n      \"createdAt\": \"2026-11-24T10:00:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"pagina\": 1,\n    \"limit\": 1,\n    \"total\": 1,\n    \"totalPages\": 1,\n    \"promedio\": 5\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Crear reseña",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"prestadorId\": {{prestadorId}}, \"usuarioId\": {{usuarioId}}, \"calificacion\": 5, \"comentario\": \"Excelente servicio\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "IDs enteros positivos, calificación entera de 1 a 5 y comentario obligatorio. Guarda el ID creado para las siguientes solicitudes."
+          },
+          "response": [
+            {
+              "name": "201 - Reseña creada exitosamente",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"prestadorId\": {{prestadorId}}, \"usuarioId\": {{usuarioId}}, \"calificacion\": 5, \"comentario\": \"Excelente servicio\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 201,\n  \"msj\": \"Reseña creada exitosamente\",\n  \"datos\": {\n    \"id\": 31,\n    \"prestadorId\": 1,\n    \"usuarioId\": 3,\n    \"calificacion\": 5,\n    \"comentario\": \"Excelente servicio\",\n    \"createdAt\": \"2026-11-24T10:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 - La calificación debe ser un entero entre 1 y 5",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"prestadorId\": {{prestadorId}}, \"usuarioId\": {{usuarioId}}, \"calificacion\": 6, \"comentario\": \"Excelente servicio\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 400,\n  \"msj\": \"La calificación debe ser un entero entre 1 y 5\",\n  \"datos\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('resenaId');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reseña creada (201)', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "    const id = pm.response.json().datos?.id;",
+                  "    if (Number.isInteger(id) && id > 0) pm.collectionVariables.set('resenaId', String(id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Obtener reseña por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas/{{resenaId}}",
+            "description": "Ejecutar después de crear una reseña."
+          },
+          "response": [
+            {
+              "name": "200 - Reseña encontrada",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/{{resenaId}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Reseña encontrada\",\n  \"datos\": {\n    \"id\": 31,\n    \"prestadorId\": 1,\n    \"usuarioId\": 3,\n    \"calificacion\": 5,\n    \"comentario\": \"Excelente servicio\",\n    \"createdAt\": \"2026-11-24T10:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 - Reseña con id 9999 no encontrada",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/9999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Reseña con id 9999 no encontrada\",\n  \"datos\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = pm.collectionVariables.get('resenaId');",
+                  "if (!/^[1-9]\\d*$/.test(id || '')) {",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Actualizar reseña",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas/{{resenaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"calificacion\": 4, \"comentario\": \"Muy buen servicio\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Actualiza calificación y comentario de la reseña creada."
+          },
+          "response": [
+            {
+              "name": "200 - Reseña actualizada exitosamente",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/{{resenaId}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"calificacion\": 4, \"comentario\": \"Muy buen servicio\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Reseña actualizada exitosamente\",\n  \"datos\": {\n    \"id\": 31,\n    \"prestadorId\": 1,\n    \"usuarioId\": 3,\n    \"calificacion\": 4,\n    \"comentario\": \"Muy buen servicio\",\n    \"createdAt\": \"2026-11-24T10:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 - La calificación debe ser un entero entre 1 y 5",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/{{resenaId}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"calificacion\": 6, \"comentario\": \"Muy buen servicio\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 400,\n  \"msj\": \"La calificación debe ser un entero entre 1 y 5\",\n  \"datos\": null\n}"
+            },
+            {
+              "name": "404 - Reseña con id 9999 no encontrada",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/9999",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"calificacion\": 4, \"comentario\": \"Muy buen servicio\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Reseña con id 9999 no encontrada\",\n  \"datos\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = pm.collectionVariables.get('resenaId');",
+                  "if (!/^[1-9]\\d*$/.test(id || '')) {",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Eliminar reseña",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/resenas/{{resenaId}}",
+            "description": "Elimina la reseña de prueba y limpia la variable."
+          },
+          "response": [
+            {
+              "name": "200 - Reseña eliminada exitosamente",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/{{resenaId}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 200,\n  \"msj\": \"Reseña eliminada exitosamente\",\n  \"datos\": null\n}"
+            },
+            {
+              "name": "400 - Se requiere un id válido para eliminar la reseña",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/abc"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 400,\n  \"msj\": \"Se requiere un id válido para eliminar la reseña\",\n  \"datos\": null\n}"
+            },
+            {
+              "name": "404 - Reseña con id 9999 no encontrada",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/resenas/9999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": 404,\n  \"msj\": \"Reseña con id 9999 no encontrada\",\n  \"datos\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = pm.collectionVariables.get('resenaId');",
+                  "if (!/^[1-9]\\d*$/.test(id || '')) {",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.unset('resenaId');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
