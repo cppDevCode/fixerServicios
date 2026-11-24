@@ -6,35 +6,47 @@ export interface ITelefonoUsuario {
     nroTelefono: string;
 }
 
-// Entidad principal
+export interface IUbicacion {
+    id: number;
+    pais: string;
+    provincia: string;
+    localidad: string;
+    codigoPostal: string;
+    radio: number;
+}
+
+// Entidad principal alineada 1:1 con IUsuarioPublico del Backend
 export interface IUsuario {
-    id: string;
+    id: number;
     nombre: string;
     apellido: string;
     email: string;
     rol: RolUsuario;
-    
-    // Datos de ubicación y cobertura
-    ubicacionId?: string;
+
+    // Datos de ubicación y cobertura normalizados (FK -> UBICACION)
+    ubicacionId?: number;
+    ubicacion?: IUbicacion;
     codigoPostal?: string;
-    radio?: number; // Solo aplica a prestadores
-    
-    // Datos de seguridad
+    radio?: number;
+
+    // Datos de seguridad (solo pregunta; nunca hashes en cliente)
     preguntaSecreta?: string;
-    respuestaSecreta?: string;
-    
+
     // Vínculo con la entidad Prestador (si el rol es PRESTADOR)
     prestadorId?: number;
-    
+
     // Datos opcionales de perfil
     telefono?: ITelefonoUsuario;
     fechaNacimiento?: string;
     createdAt?: string;
+    updatedAt?: string;
 }
 
-export type ICrearUsuario = Omit<IUsuario, 'id' | 'createdAt'>;
+export type ICrearUsuario = Omit<IUsuario, 'id' | 'createdAt' | 'updatedAt' | 'ubicacion'>;
 
-export type IActualizarUsuario = Partial<Omit<IUsuario, 'id' | 'createdAt'>>;
+export type IActualizarUsuario = Partial<
+    Omit<IUsuario, 'id' | 'createdAt' | 'updatedAt' | 'ubicacion'>
+>;
 
 export interface IMetaPaginacion {
     pagina: number;
@@ -53,7 +65,7 @@ export interface RespuestaApi<T> {
 export interface IFiltrosUsuario {
     page?: number;
     limit?: number;
-    search?: string; // Busca por nombre, email o ciudad
+    search?: string; // Busca por nombre, email o localidad/provincia
     rol?: RolUsuario;
     sortBy?: keyof IUsuario;
     order?: 'asc' | 'desc';

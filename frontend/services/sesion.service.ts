@@ -1,7 +1,7 @@
 export type RolUsuario = 'ADMIN' | 'PRESTADOR' | 'USUARIO';
 
 export interface IUsuarioSesion {
-    id: string;
+    id: number;
     nombre: string;
     apellido?: string;
     email: string;
@@ -41,14 +41,19 @@ export function obtenerUsuarioActual(): IUsuarioSesion | null {
             return null;
         }
 
+        const idNumerico = Number(usuario.id);
+        if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+            return null;
+        }
+
         return {
-            id: String(usuario.id),
+            id: idNumerico,
             nombre: String(usuario.nombre ?? ''),
             apellido: usuario.apellido ? String(usuario.apellido) : undefined,
             email: String(usuario.email ?? ''),
             rol: rolNormalizado,
             prestadorId:
-                usuario.prestadorId !== undefined
+                usuario.prestadorId !== undefined && usuario.prestadorId !== null
                     ? Number(usuario.prestadorId)
                     : undefined,
         };

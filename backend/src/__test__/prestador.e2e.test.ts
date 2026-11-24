@@ -43,13 +43,13 @@ describe('Módulo Prestadores - Tests End-to-End (E2E)', () => {
             aniosExperiencia: 19,
             acercaDe: 'Termofusión de alta presión y detección ultrasónica de fugas',
             ofreceGarantia: true,
-            categoriaId: 'Plomería',
+            categoriaId: 1,
+            ubicacionId: 1,
             telefono: {
                 codPais: '+54',
                 codArea: '11',
                 nroTelefono: '49998888',
             },
-            ratingPromedio: 4.95,
             fotoUrl: 'https://randomuser.me/api/portraits/men/85.jpg',
         };
 

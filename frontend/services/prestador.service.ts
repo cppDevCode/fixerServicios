@@ -11,16 +11,27 @@ import { construirHeadersAutenticacion } from './sesion.service';
 export const API_BASE_URL = '/api/v1';
 
 export const CATEGORIAS_POR_DEFECTO: ICategoria[] = [
-    { id: 'Albañilería', nombre: 'Albañilería' },
-    { id: 'Carpintería', nombre: 'Carpintería' },
-    { id: 'Cerrajería', nombre: 'Cerrajería' },
-    { id: 'Electricidad', nombre: 'Electricidad' },
-    { id: 'Gasista', nombre: 'Gasista' },
-    { id: 'Jardinería', nombre: 'Jardinería' },
-    { id: 'Pintura', nombre: 'Pintura' },
-    { id: 'Plomería', nombre: 'Plomería' },
-    { id: 'Refrigeración', nombre: 'Refrigeración' },
+    { id: 6, slug: 'albanileria', nombre: 'Albañilería' },
+    { id: 5, slug: 'carpinteria', nombre: 'Carpintería' },
+    { id: 8, slug: 'cerrajeria', nombre: 'Cerrajería' },
+    { id: 2, slug: 'electricidad', nombre: 'Electricidad' },
+    { id: 3, slug: 'gasista', nombre: 'Gasista' },
+    { id: 7, slug: 'jardineria', nombre: 'Jardinería' },
+    { id: 4, slug: 'pintura', nombre: 'Pintura' },
+    { id: 1, slug: 'plomeria', nombre: 'Plomería' },
+    { id: 9, slug: 'refrigeracion', nombre: 'Refrigeración' },
 ];
+
+export function obtenerNombreCategoria(
+    prestador: Pick<IPrestador, 'categoriaId' | 'categoriaNombre'>,
+    categorias: ICategoria[] = CATEGORIAS_POR_DEFECTO
+): string {
+    if (prestador.categoriaNombre && prestador.categoriaNombre.trim() !== '') {
+        return prestador.categoriaNombre;
+    }
+    const encontrada = categorias.find((c) => c.id === prestador.categoriaId);
+    return encontrada?.nombre ?? String(prestador.categoriaId);
+}
 
 export const LOCALIDADES_POR_DEFECTO: string[] = [
     'CABA',

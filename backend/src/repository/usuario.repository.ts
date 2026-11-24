@@ -1,93 +1,166 @@
 import { IUsuario } from '../interfaces/usuario.interface';
 import { IUbicacion } from '../interfaces/ubicacion.interface';
+import {
+    UbicacionRepository,
+    ubicacionRepositorySingleton,
+} from './ubicacion.repository';
 
-// Mock de Ubicaciones
-export const ubicacionesMock: IUbicacion[] = [
-  { id: '1', pais: 'Argentina', provincia: 'Córdoba', ciudad: 'Córdoba Capital', codigoPostal: '5000', radio: 10 },
-  { id: '2', pais: 'Argentina', provincia: 'Buenos Aires', ciudad: 'La Plata', codigoPostal: '1900', radio: 15 },
-  { id: '3', pais: 'Argentina', provincia: 'Santa Fe', ciudad: 'Rosario', codigoPostal: '2000', radio: 20 },
-];
-
-// Mock de Usuarios
+// Mock normalizado de Usuarios (IDs numéricos homogéneos con RESENA.usuarioId y PRESTADOR.id)
+// Incluye clientes 3..7 referenciados en resena.mock.ts para garantizar integridad referencial.
 export const usuariosMock: IUsuario[] = [
-  {
-    id: '1',
-    nombre: 'Bruna',
-    apellido: 'Ramírez',
-    email: 'bruna@example.com',
-    passwordHash: '123456',
-    rol: 'ADMIN',
-    ubicacionId: '1',
-    preguntaSecreta: '¿Nombre de tu primera mascota?',
-    respuestaSecretaHash: 'Firulais',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    nombre: 'Carlos',
-    apellido: 'Gómez',
-    email: 'carlos@example.com',
-    passwordHash: '123456',
-    rol: 'PRESTADOR',
-    prestadorId: 1,
-    ubicacionId: '2',
-    preguntaSecreta: '¿Ciudad de nacimiento?',
-    respuestaSecretaHash: 'Cordoba',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    nombre: 'Berta',
-    apellido: 'Martínez',
-    email: 'berta@example.com',
-    passwordHash: '123456',
-    rol: 'USUARIO',
-    ubicacionId: '3',
-    preguntaSecreta: '¿Nombre de tu primera mascota?',
-    respuestaSecretaHash: 'Luna',
-    createdAt: new Date().toISOString(),
-  },
-
+    {
+        id: 1,
+        nombre: 'Bruna',
+        apellido: 'Ramírez',
+        email: 'bruna@example.com',
+        passwordHash: '123456',
+        rol: 'ADMIN',
+        ubicacionId: 1,
+        preguntaSecreta: '¿Nombre de tu primera mascota?',
+        respuestaSecretaHash: 'Firulais',
+        createdAt: new Date('2026-01-01T10:00:00.000Z').toISOString(),
+    },
+    {
+        id: 2,
+        nombre: 'Carlos',
+        apellido: 'Gómez',
+        email: 'carlos@example.com',
+        passwordHash: '123456',
+        rol: 'PRESTADOR',
+        prestadorId: 1,
+        ubicacionId: 1,
+        preguntaSecreta: '¿Ciudad de nacimiento?',
+        respuestaSecretaHash: 'Cordoba',
+        createdAt: new Date('2026-01-01T10:05:00.000Z').toISOString(),
+    },
+    {
+        id: 3,
+        nombre: 'Berta',
+        apellido: 'Martínez',
+        email: 'berta@example.com',
+        passwordHash: '123456',
+        rol: 'USUARIO',
+        ubicacionId: 3,
+        preguntaSecreta: '¿Nombre de tu primera mascota?',
+        respuestaSecretaHash: 'Luna',
+        createdAt: new Date('2026-01-01T10:10:00.000Z').toISOString(),
+    },
+    {
+        id: 4,
+        nombre: 'Lucas',
+        apellido: 'Pereyra',
+        email: 'lucas@example.com',
+        passwordHash: '123456',
+        rol: 'USUARIO',
+        ubicacionId: 2,
+        preguntaSecreta: '¿Ciudad de nacimiento?',
+        respuestaSecretaHash: 'La Plata',
+        createdAt: new Date('2026-01-01T10:15:00.000Z').toISOString(),
+    },
+    {
+        id: 5,
+        nombre: 'Mariana',
+        apellido: 'Sosa',
+        email: 'mariana@example.com',
+        passwordHash: '123456',
+        rol: 'USUARIO',
+        ubicacionId: 4,
+        preguntaSecreta: '¿Nombre de tu primera mascota?',
+        respuestaSecretaHash: 'Toby',
+        createdAt: new Date('2026-01-01T10:20:00.000Z').toISOString(),
+    },
+    {
+        id: 6,
+        nombre: 'Nicolás',
+        apellido: 'Herrera',
+        email: 'nicolas@example.com',
+        passwordHash: '123456',
+        rol: 'USUARIO',
+        ubicacionId: 5,
+        preguntaSecreta: '¿Ciudad de nacimiento?',
+        respuestaSecretaHash: 'Mendoza',
+        createdAt: new Date('2026-01-01T10:25:00.000Z').toISOString(),
+    },
+    {
+        id: 7,
+        nombre: 'Florencia',
+        apellido: 'Díaz',
+        email: 'florencia@example.com',
+        passwordHash: '123456',
+        rol: 'USUARIO',
+        ubicacionId: 1,
+        preguntaSecreta: '¿Nombre de tu primera mascota?',
+        respuestaSecretaHash: 'Milo',
+        createdAt: new Date('2026-01-01T10:30:00.000Z').toISOString(),
+    },
 ];
 
-// Clase Repository
 export class UsuarioRepository {
-  async findAll(): Promise<IUsuario[]> {
-    return usuariosMock;
-  }
+    private usuarios: IUsuario[] = usuariosMock.map((u) => ({ ...u }));
 
-  async findById(id: string): Promise<IUsuario | undefined> {
-    return usuariosMock.find(u => u.id === id);
-  }
+    constructor(
+        private readonly ubicacionRepo: UbicacionRepository = ubicacionRepositorySingleton
+    ) {}
 
-  async findByEmail(email: string): Promise<IUsuario | undefined> {
-    return usuariosMock.find(u => u.email === email);
-  }
+    async findAll(): Promise<IUsuario[]> {
+        return this.usuarios.map((u) => ({ ...u }));
+    }
 
-  async update(id: string, data: Partial<IUsuario>): Promise<IUsuario | null> {
-    const index = usuariosMock.findIndex(u => u.id === id);
-    if (index === -1) return null;
-    
-    usuariosMock[index] = { ...usuariosMock[index], ...data };
-    return usuariosMock[index];
-  }
+    async findById(id: number): Promise<IUsuario | undefined> {
+        const encontrado = this.usuarios.find((u) => u.id === id);
+        return encontrado ? { ...encontrado } : undefined;
+    }
 
-  async findUbicacionById(id: string): Promise<IUbicacion | undefined> {
-    return ubicacionesMock.find(u => u.id === id);
-  }
+    existsById(id: number): boolean {
+        return this.usuarios.some((u) => u.id === id);
+    }
 
-  async create(data: Omit<IUsuario, 'id' | 'createdAt'>): Promise<IUsuario> {
-    const nuevoId = (usuariosMock.length + 1).toString();
-    const nuevoUsuario: IUsuario = {
-      ...data,
-      id: nuevoId,
-      createdAt: new Date().toISOString(),
-    };
-    usuariosMock.push(nuevoUsuario);
-    return nuevoUsuario;
-  }
+    async findByEmail(email: string): Promise<IUsuario | undefined> {
+        const emailNormalizado = email.trim().toLowerCase();
+        const encontrado = this.usuarios.find(
+            (u) => u.email.trim().toLowerCase() === emailNormalizado
+        );
+        return encontrado ? { ...encontrado } : undefined;
+    }
+
+    async update(
+        id: number,
+        data: Partial<Omit<IUsuario, 'id' | 'createdAt'>>
+    ): Promise<IUsuario | null> {
+        const index = this.usuarios.findIndex((u) => u.id === id);
+        if (index === -1) return null;
+
+        this.usuarios[index] = {
+            ...this.usuarios[index],
+            ...data,
+            id,
+            updatedAt: new Date().toISOString(),
+        };
+        return { ...this.usuarios[index] };
+    }
+
+    async create(data: Omit<IUsuario, 'id' | 'createdAt'>): Promise<IUsuario> {
+        const nuevoId = this.siguienteId();
+        const nuevoUsuario: IUsuario = {
+            ...data,
+            id: nuevoId,
+            createdAt: new Date().toISOString(),
+        };
+        this.usuarios.push(nuevoUsuario);
+        return { ...nuevoUsuario };
+    }
+
+    async findUbicacionById(id: number): Promise<IUbicacion | undefined> {
+        return this.ubicacionRepo.findById(id);
+    }
 
     async findAllUbicaciones(): Promise<IUbicacion[]> {
-    return ubicacionesMock;
-  }
+        return this.ubicacionRepo.findAll();
+    }
+
+    private siguienteId(): number {
+        return this.usuarios.reduce((max, u) => Math.max(max, u.id), 0) + 1;
+    }
 }
+
+export const usuarioRepositorySingleton = new UsuarioRepository();

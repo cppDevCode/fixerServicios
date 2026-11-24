@@ -26,10 +26,19 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
     describe('Interfaces y Fixtures (ICategoria e IPrestador)', () => {
         it('crearCategoria genera una categoría válida y permite sobrescribir campos', () => {
             const categoriaBase = crearCategoria();
-            expect(categoriaBase).toEqual({ id: 'Plomería', nombre: 'Plomería' });
+            expect(categoriaBase).toEqual({
+                id: 1,
+                slug: 'plomeria',
+                nombre: 'Plomería',
+            });
 
-            const categoriaCustom = crearCategoria({ id: 'cat-gas', nombre: 'Gasista Matriculado' });
-            expect(categoriaCustom.id).toBe('cat-gas');
+            const categoriaCustom = crearCategoria({
+                id: 10,
+                slug: 'cat-gas',
+                nombre: 'Gasista Matriculado',
+            });
+            expect(categoriaCustom.id).toBe(10);
+            expect(categoriaCustom.slug).toBe('cat-gas');
             expect(categoriaCustom.nombre).toBe('Gasista Matriculado');
             expect(categoriasFixture.length).toBeGreaterThanOrEqual(4);
         });
@@ -80,7 +89,8 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(existente).toBeDefined();
             expect(existente?.nombre).toBe('Carlos');
             expect(existente?.apellido).toBe('Gómez');
-            expect(existente?.categoriaId).toBe('Plomería');
+            expect(existente?.categoriaId).toBe(1);
+            expect(existente?.ubicacionId).toBe(1);
 
             const inexistente = repository.findById(9999);
             expect(inexistente).toBeUndefined();
@@ -90,7 +100,7 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             const nuevosDatos = crearDatosPrestador({
                 nombre: 'Mariano',
                 apellido: 'Ibarra',
-                categoriaId: 'Cerrajería',
+                categoriaId: 8,
             });
 
             const creado = repository.create(nuevosDatos);
@@ -255,7 +265,7 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
             expect(porNueveDeJulio.meta.total).toBe(1);
             expect(porNueveDeJulio.datos[0].nombre).toBe('Diego');
             expect(porNueveDeJulio.datos[0].localidad).toBe('9 de Julio');
-            expect(conTilde.datos.every((p) => p.categoriaId === 'Plomería')).toBe(true);
+            expect(conTilde.datos.every((p) => p.categoriaId === 1 && p.categoriaNombre === 'Plomería')).toBe(true);
             expect(conTilde.datos.map((p) => p.nombre)).toEqual([
                 'Carlos',
                 'Diego',
@@ -455,7 +465,7 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
                     body: {
                         nombre: 'Esteban',
                         apellido: 'Quito',
-                        categoriaId: 'Carpintería',
+                        categoriaId: 5,
                     },
                 } as unknown as Request,
                 res201
@@ -468,7 +478,8 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
                     id: 17,
                     nombre: 'Esteban',
                     apellido: 'Quito',
-                    categoriaId: 'Carpintería',
+                    categoriaId: 5,
+                    categoriaNombre: 'Carpintería',
                     aniosExperiencia: 0,
                     acercaDe: '',
                     ofreceGarantia: false,
@@ -483,7 +494,7 @@ describe('Módulo Prestadores - Tests Unitarios', () => {
                     body: {
                         nombre: 'Valeria',
                         apellido: 'Sosa',
-                        categoriaId: 'Pintura',
+                        categoriaId: 4,
                         fotoUrl: '  https://randomuser.me/api/portraits/women/22.jpg  ',
                     },
                 } as unknown as Request,

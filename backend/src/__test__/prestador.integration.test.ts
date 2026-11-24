@@ -47,7 +47,10 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
             const nombres = res.body.datos.map((p: { nombre: string }) => p.nombre);
             expect(nombres).toEqual(['Carlos', 'Diego', 'Fernando', 'Jorge', 'Roberto']);
             expect(
-                res.body.datos.every((p: { categoriaId: string }) => p.categoriaId === 'Plomería')
+                res.body.datos.every(
+                    (p: { categoriaId: number; categoriaNombre?: string }) =>
+                        p.categoriaId === 1 && p.categoriaNombre === 'Plomería'
+                )
             ).toBe(true);
 
             const resLocalidad = await request(app)
@@ -86,7 +89,8 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 id: 1,
                 nombre: 'Carlos',
                 apellido: 'Gómez',
-                categoriaId: 'Plomería',
+                categoriaId: 1,
+                categoriaNombre: 'Plomería',
             });
         });
 
@@ -131,7 +135,7 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
             const nuevoPrestador = crearDatosPrestador({
                 nombre: 'Nicolás',
                 apellido: 'Cabrera',
-                categoriaId: 'Gasista',
+                categoriaId: 3,
             });
 
             const res = await request(app)
@@ -145,7 +149,8 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 id: expect.any(Number),
                 nombre: 'Nicolás',
                 apellido: 'Cabrera',
-                categoriaId: 'Gasista',
+                categoriaId: 3,
+                categoriaNombre: 'Gasista',
             });
 
             // Limpieza para mantener el estado en memoria consistente
@@ -310,7 +315,7 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 prestadorId: 1,
             });
 
-            // PRESTADOR puede editar su propio perfil (id 1), pero no su ratingPromedio
+            // PRESTADOR puede editar su propio perfil (id 1), pero ratingPromedio siempre se deriva desde RESENA (3.5)
             const resPropio = await request(app)
                 .put('/api/v1/prestadores/1')
                 .set('x-usuario-rol', 'PRESTADOR')
@@ -318,7 +323,7 @@ describe('API Prestadores - Tests de Integración (/api/v1/prestadores)', () => 
                 .send({ aniosExperiencia: 10, ratingPromedio: 1.5 })
                 .expect(200);
 
-            expect(resPropio.body.datos.ratingPromedio).toBe(4.8);
+            expect(resPropio.body.datos.ratingPromedio).toBe(3.5);
 
             // PRESTADOR no puede editar otro prestador (id 2) -> 403
             const resAjeno = await request(app)

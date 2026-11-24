@@ -1,5 +1,5 @@
-
 export interface ICategoria {
-    id: string;
+    id: number;
+    slug: string;
     nombre: string;
 }

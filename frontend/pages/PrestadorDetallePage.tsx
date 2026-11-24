@@ -9,6 +9,7 @@ import {
     CATEGORIAS_POR_DEFECTO,
     eliminarPrestador,
     obtenerCategorias,
+    obtenerNombreCategoria,
     obtenerPrestadorPorId,
 } from '../services/prestador.service';
 import {
@@ -41,10 +42,9 @@ export function PrestadorDetallePage() {
         };
     }, []);
 
-    const idNumericoUsuario = usuarioActual ? Number(usuarioActual.id) : NaN;
     const usuarioId =
-        Number.isInteger(idNumericoUsuario) && idNumericoUsuario > 0
-            ? idNumericoUsuario
+        usuarioActual && Number.isInteger(usuarioActual.id) && usuarioActual.id > 0
+            ? usuarioActual.id
             : null;
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -134,6 +134,13 @@ export function PrestadorDetallePage() {
     const actualizarResenas = () => {
         setVersionResenas((version) => version + 1);
         setResenaEditar(null);
+        if (prestador) {
+            obtenerPrestadorPorId(prestador.id)
+                .then((res) => setPrestador(res.datos))
+                .catch(() => {
+                    // Mantiene el estado actual si falla la recarga del promedio
+                });
+        }
     };
 
     const puedeEditar = prestador
@@ -244,7 +251,7 @@ export function PrestadorDetallePage() {
                                 </div>
 
                                 <span className="badge-prestador badge-prestador--rubro">
-                                    {prestador.categoriaId}
+                                    {obtenerNombreCategoria(prestador, categorias)}
                                 </span>
                             </div>
 
@@ -293,7 +300,7 @@ export function PrestadorDetallePage() {
 
                                 <div className="prestador-atributo">
                                     <span>Rubro principal</span>
-                                    <strong>{prestador.categoriaId}</strong>
+                                    <strong>{obtenerNombreCategoria(prestador, categorias)}</strong>
                                 </div>
 
                                 <div className="prestador-atributo">
@@ -335,7 +342,7 @@ export function PrestadorDetallePage() {
                                     {/* Columna derecha: Mapa */}
                                     <div style={{ width: '300px', flexShrink: 0 }}>
                                         <RadioMapa
-                                            codigoPostal={(prestador.codigoPostal ?? 5000).toString()}
+                                            codigoPostal={prestador.codigoPostal ?? '5000'}
                                             ciudad={prestador.localidad || 'Córdoba'}
                                             provincia={prestador.provincia || 'Córdoba'}
                                             radioKm={prestador.radio || 10}

@@ -15,7 +15,6 @@ import {
     PROVINCIAS_ARGENTINA,
     PROVINCIAS_LOCALIDADES_ARGENTINA,
 } from '../../services/ubicacionesArgentina';
-import { esPrestador, obtenerUsuarioActual } from '../../services/sesion.service';
 import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
@@ -41,8 +40,8 @@ export function FormularioPrestador({
 
     const [nombre, setNombre] = useState(prestadorInicial?.nombre ?? '');
     const [apellido, setApellido] = useState(prestadorInicial?.apellido ?? '');
-    const [categoriaId, setCategoriaId] = useState(
-        prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 'Plomería'
+    const [categoriaId, setCategoriaId] = useState<number>(
+        prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 1
     );
     const provinciaInicial =
         prestadorInicial?.provincia ??
@@ -74,11 +73,6 @@ export function FormularioPrestador({
     const [nroTelefono, setNroTelefono] = useState(
         prestadorInicial?.telefono?.nroTelefono ?? ''
     );
-    const [ratingPromedio, setRatingPromedio] = useState(
-        prestadorInicial?.ratingPromedio !== undefined
-            ? String(prestadorInicial.ratingPromedio)
-            : '4.5'
-    );
     const [fotoUrl, setFotoUrl] = useState(prestadorInicial?.fotoUrl ?? '');
 
     const [enviando, setEnviando] = useState(false);
@@ -86,7 +80,6 @@ export function FormularioPrestador({
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esEdicion = Boolean(prestadorInicial?.id);
-    const ocultarCalificacion = esPrestador(obtenerUsuarioActual());
 
     const manejarArchivoFoto = (evento: ChangeEvent<HTMLInputElement>) => {
         const archivo = evento.target.files?.[0];
@@ -108,9 +101,8 @@ export function FormularioPrestador({
 
         const nombreLimpio = nombre.trim();
         const apellidoLimpio = apellido.trim();
-        const rubroLimpio = categoriaId.trim();
 
-        if (!nombreLimpio || !apellidoLimpio || !rubroLimpio) {
+        if (!nombreLimpio || !apellidoLimpio || !Number.isInteger(categoriaId) || categoriaId <= 0) {
             setError('Los campos nombre, apellido y rubro son obligatorios.');
             return;
         }
@@ -121,14 +113,10 @@ export function FormularioPrestador({
             return;
         }
 
-        const ratingNumero = ratingPromedio.trim()
-            ? Number(ratingPromedio)
-            : undefined;
-
         const payload: ICrearPrestador = {
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
-            categoriaId: rubroLimpio,
+            categoriaId,
             provincia: provincia.trim() || undefined,
             localidad: localidad.trim() || undefined,
             radio: radioCobertura.trim()
@@ -143,11 +131,6 @@ export function FormularioPrestador({
                 codArea: codArea.trim() || '11',
                 nroTelefono: nroTelefono.trim(),
             },
-            ratingPromedio: ocultarCalificacion
-                ? prestadorInicial?.ratingPromedio
-                : ratingNumero !== undefined && !Number.isNaN(ratingNumero)
-                  ? ratingNumero
-                  : undefined,
             fotoUrl: fotoUrl.trim()
                 ? fotoUrl.trim()
                 : esEdicion
@@ -235,7 +218,7 @@ export function FormularioPrestador({
                         id="prestador-rubro"
                         name="categoriaId"
                         value={categoriaId}
-                        onChange={(e) => setCategoriaId(e.target.value)}
+                        onChange={(e) => setCategoriaId(Number(e.target.value))}
                         disabled={enviando}
                     >
                         {listaCategorias.map((cat) => (
@@ -359,25 +342,6 @@ export function FormularioPrestador({
                         disabled={enviando}
                     />
                 </div>
-
-                {!ocultarCalificacion && (
-                    <div className="prestadores-campo">
-                        <label htmlFor="prestador-rating">
-                            Calificación inicial (1 a 5)
-                        </label>
-                        <input
-                            id="prestador-rating"
-                            name="ratingPromedio"
-                            type="number"
-                            step="0.1"
-                            min="1"
-                            max="5"
-                            value={ratingPromedio}
-                            onChange={(e) => setRatingPromedio(e.target.value)}
-                            disabled={enviando}
-                        />
-                    </div>
-                )}
             </div>
 
             <div className="prestadores-campo">

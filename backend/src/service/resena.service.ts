@@ -1,5 +1,16 @@
 import { IResena } from '../interfaces/resena.interface';
-import { ResenaRepository } from '../repository/resena.repository';
+import {
+    PrestadorRepository,
+    prestadorRepositorySingleton,
+} from '../repository/prestador.repository';
+import {
+    ResenaRepository,
+    resenaRepositorySingleton,
+} from '../repository/resena.repository';
+import {
+    UsuarioRepository,
+    usuarioRepositorySingleton,
+} from '../repository/usuario.repository';
 
 export class ErrorValidacion extends Error {
     constructor(message: string) {
@@ -18,7 +29,11 @@ interface QueryParams {
 }
 
 export class ResenaService {
-    constructor(private repository: ResenaRepository = new ResenaRepository()) {}
+    constructor(
+        private readonly repository: ResenaRepository = resenaRepositorySingleton,
+        private readonly prestadorRepo: PrestadorRepository = prestadorRepositorySingleton,
+        private readonly usuarioRepo: UsuarioRepository = usuarioRepositorySingleton
+    ) {}
 
     listar(params: QueryParams) {
         const page = Number(params.page) || 1;
@@ -51,10 +66,8 @@ export class ResenaService {
     }
 
     obtenerRating(prestadorId: number): number {
-        const reseñasDelPrestador = this.repository
-            .findAll()
-            .filter((r) => r.prestadorId === prestadorId);
-        return this.calcularPromedio(reseñasDelPrestador);
+        const resenasDelPrestador = this.repository.findByPrestadorId(prestadorId);
+        return this.calcularPromedio(resenasDelPrestador);
     }
 
     crear(datos: Partial<Omit<IResena, 'id' | 'createdAt'>>): IResena {
@@ -66,13 +79,25 @@ export class ResenaService {
         if (!esIdValido(usuarioId)) {
             throw new ErrorValidacion('usuarioId inválido');
         }
+        if (!this.prestadorRepo.findById(prestadorId)) {
+            throw new ErrorValidacion(
+                `El prestador con id ${prestadorId} no existe`
+            );
+        }
+        if (!this.usuarioRepo.existsById(usuarioId)) {
+            throw new ErrorValidacion(
+                `El usuario con id ${usuarioId} no existe`
+            );
+        }
         if (
             typeof calificacion !== 'number' ||
             !Number.isInteger(calificacion) ||
             calificacion < 1 ||
             calificacion > 5
         ) {
-            throw new ErrorValidacion('La calificación debe ser un entero entre 1 y 5');
+            throw new ErrorValidacion(
+                'La calificación debe ser un entero entre 1 y 5'
+            );
         }
         if (typeof comentario !== 'string' || comentario.trim() === '') {
             throw new ErrorValidacion('El comentario es obligatorio');
@@ -89,7 +114,7 @@ export class ResenaService {
     actualizar(
         id: number,
         datos: Pick<IResena, 'calificacion' | 'comentario'>
-        ): IResena | undefined {
+    ): IResena | undefined {
         if (!esIdValido(id)) {
             throw new ErrorValidacion('El ID de la reseña es inválido');
         }
@@ -107,13 +132,8 @@ export class ResenaService {
             );
         }
 
-        if (
-            typeof comentario !== 'string' ||
-            comentario.trim() === ''
-        ) {
-            throw new ErrorValidacion(
-                'El comentario es obligatorio'
-            );
+        if (typeof comentario !== 'string' || comentario.trim() === '') {
+            throw new ErrorValidacion('El comentario es obligatorio');
         }
 
         return this.repository.update(id, {

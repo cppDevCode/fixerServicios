@@ -35,33 +35,39 @@ describe('Módulo Categorías - Tests End-to-End (E2E)', () => {
         const resCrear = await fetch(baseUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: 'Domotica', nombre: 'Domótica e IoT' }),
+            body: JSON.stringify({ slug: 'domotica', nombre: 'Domótica e IoT' }),
         });
         expect(resCrear.status).toBe(201);
+        const bodyCrear = (await resCrear.json()) as RespuestaApi<ICategoria>;
+        const idCreado = bodyCrear.datos.id;
+        expect(typeof idCreado).toBe('number');
 
         const resBusqueda = await fetch(`${baseUrl}?search=domotica`);
         expect(resBusqueda.status).toBe(200);
         const bodyBusqueda = (await resBusqueda.json()) as RespuestaApi<ICategoria[]>;
-        expect(bodyBusqueda.datos).toEqual([{ id: 'Domotica', nombre: 'Domótica e IoT' }]);
+        expect(bodyBusqueda.datos).toEqual([
+            { id: idCreado, slug: 'domotica', nombre: 'Domótica e IoT' },
+        ]);
 
-        const resDetalle = await fetch(`${baseUrl}/Domotica`);
+        const resDetalle = await fetch(`${baseUrl}/${idCreado}`);
         expect(resDetalle.status).toBe(200);
 
-        const resActualizar = await fetch(`${baseUrl}/Domotica`, {
+        const resActualizar = await fetch(`${baseUrl}/${idCreado}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre: 'Domótica Residencial' }),
         });
         expect(resActualizar.status).toBe(200);
         const bodyActualizar = (await resActualizar.json()) as RespuestaApi<ICategoria>;
+        expect(bodyActualizar.datos.id).toBe(idCreado);
         expect(bodyActualizar.datos.nombre).toBe('Domótica Residencial');
 
-        const resEliminar = await fetch(`${baseUrl}/Domotica`, {
+        const resEliminar = await fetch(`${baseUrl}/${idCreado}`, {
             method: 'DELETE',
         });
         expect(resEliminar.status).toBe(200);
 
-        const resNoExiste = await fetch(`${baseUrl}/Domotica`);
+        const resNoExiste = await fetch(`${baseUrl}/${idCreado}`);
         expect(resNoExiste.status).toBe(404);
     });
 });

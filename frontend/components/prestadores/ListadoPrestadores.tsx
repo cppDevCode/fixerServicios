@@ -12,6 +12,7 @@ import {
 import {
     CATEGORIAS_POR_DEFECTO,
     obtenerCategorias,
+    obtenerNombreCategoria,
     obtenerPrestadores,
 } from '../../services/prestador.service';
 import { AvatarPrestador } from './AvatarPrestador';
@@ -401,7 +402,7 @@ export function ListadoPrestadores({
                                         </td>
                                         <td>
                                             <span className="badge-prestador badge-prestador--rubro">
-                                                {p.categoriaId}
+                                                {obtenerNombreCategoria(p, categorias)}
                                             </span>
                                         </td>
                                         <td>

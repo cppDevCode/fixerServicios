@@ -4,6 +4,7 @@ import type { ICategoria, IPrestador } from '../../interfaces/prestador.interfac
 import {
     CATEGORIAS_POR_DEFECTO,
     obtenerCategorias,
+    obtenerNombreCategoria,
     obtenerPrestadores,
 } from '../../services/prestador.service';
 import { obtenerLocalidadesConProfesionales } from '../../services/ubicacionesArgentina';
@@ -166,8 +167,15 @@ export function CatalogoPrestadoresUsuario({
 
         return prestadoresBase
             .filter((p) => {
-                if (rubroSeleccionado && p.categoriaId !== rubroSeleccionado) {
-                    return false;
+                const rubroNombre = obtenerNombreCategoria(p, categorias);
+                if (rubroSeleccionado) {
+                    const coincideRubro =
+                        String(p.categoriaId) === rubroSeleccionado ||
+                        rubroNombre.toLowerCase() ===
+                            rubroSeleccionado.toLowerCase();
+                    if (!coincideRubro) {
+                        return false;
+                    }
                 }
                 if (
                     localidadSeleccionada &&
@@ -178,7 +186,7 @@ export function CatalogoPrestadoresUsuario({
                 }
                 if (termino) {
                     const texto =
-                        `${p.nombre} ${p.apellido} ${p.categoriaId} ${p.localidad ?? ''} ${p.acercaDe}`.toLowerCase();
+                        `${p.nombre} ${p.apellido} ${rubroNombre} ${p.localidad ?? ''} ${p.acercaDe}`.toLowerCase();
                     if (!texto.includes(termino)) {
                         return false;
                     }
@@ -212,6 +220,7 @@ export function CatalogoPrestadoresUsuario({
             });
     }, [
         prestadoresBase,
+        categorias,
         rubroSeleccionado,
         localidadSeleccionada,
         busquedaActiva,
@@ -350,7 +359,7 @@ export function CatalogoPrestadoresUsuario({
                         >
                             <option value="">🔧 Todos los rubros</option>
                             {categorias.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
+                                <option key={cat.id} value={cat.nombre}>
                                     🔧 {cat.nombre}
                                 </option>
                             ))}

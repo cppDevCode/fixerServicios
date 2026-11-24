@@ -71,8 +71,13 @@ const prestadorMock: IPrestador = {
     aniosExperiencia: 10,
     acercaDe: 'Especialista en cañerías y filtraciones urgentes',
     ofreceGarantia: true,
-    categoriaId: 'Plomería',
+    categoriaId: 1,
+    categoriaNombre: 'Plomería',
+    ubicacionId: 1,
+    provincia: 'Córdoba',
     localidad: 'Córdoba Capital',
+    codigoPostal: '5000',
+    radio: 10,
     telefono: {
         codPais: '+54',
         codArea: '11',
@@ -269,7 +274,7 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
                 json: async () => ({
                     codigo: 200,
                     msj: 'Categorías obtenidas correctamente',
-                    datos: [{ id: 'Plomería', nombre: 'Plomería' }],
+                    datos: [{ id: 1, slug: 'plomeria', nombre: 'Plomería' }],
                 }),
             });
             vi.stubGlobal('fetch', fetchSpy);
@@ -278,7 +283,9 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             expect(fetchSpy).toHaveBeenCalledWith(
                 '/api/v1/categorias?search=plomeria'
             );
-            expect(res.datos).toEqual([{ id: 'Plomería', nombre: 'Plomería' }]);
+            expect(res.datos).toEqual([
+                { id: 1, slug: 'plomeria', nombre: 'Plomería' },
+            ]);
         });
     });
 
@@ -511,8 +518,18 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             const sugerencias = calcularCategoriasMasBuscadas(
                 [
                     prestadorMock,
-                    { ...prestadorMock, id: 2, categoriaId: 'Plomería' },
-                    { ...prestadorMock, id: 3, categoriaId: 'Electricidad' },
+                    {
+                        ...prestadorMock,
+                        id: 2,
+                        categoriaId: 1,
+                        categoriaNombre: 'Plomería',
+                    },
+                    {
+                        ...prestadorMock,
+                        id: 3,
+                        categoriaId: 2,
+                        categoriaNombre: 'Electricidad',
+                    },
                 ],
                 CATEGORIAS_POR_DEFECTO,
                 { Gasista: 4 },
@@ -520,8 +537,10 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
             );
 
             expect(sugerencias).toHaveLength(4);
-            expect(sugerencias[0].categoriaId).toBe('Gasista');
-            expect(sugerencias[1].categoriaId).toBe('Plomería');
+            expect(sugerencias[0].categoriaId).toBe(3);
+            expect(sugerencias[0].nombre).toBe('Gasista');
+            expect(sugerencias[1].categoriaId).toBe(1);
+            expect(sugerencias[1].nombre).toBe('Plomería');
             expect(sugerencias[1].etiqueta).toBe('Plomería de urgencia');
 
             const htmlHome = renderToStaticMarkup(
@@ -548,20 +567,20 @@ describe('Módulo Prestadores (Frontend) - Tests Unitarios', () => {
 
         it('sesion.service.ts valida permisos diferenciados para los roles ADMIN, PRESTADOR y USUARIO', () => {
             const admin: IUsuarioSesion = {
-                id: '1',
+                id: 1,
                 nombre: 'Bruna',
                 email: 'bruna@example.com',
                 rol: 'ADMIN',
             };
             const prestador: IUsuarioSesion = {
-                id: '2',
+                id: 2,
                 nombre: 'Carlos',
                 email: 'carlos@example.com',
                 rol: 'PRESTADOR',
                 prestadorId: 1,
             };
             const usuario: IUsuarioSesion = {
-                id: '3',
+                id: 3,
                 nombre: 'Berta',
                 email: 'berta@example.com',
                 rol: 'USUARIO',
