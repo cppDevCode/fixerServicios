@@ -74,7 +74,7 @@ useEffect(() => {
 
     return (
     <div style={{ height: '250px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-        <MapContainer center={centro} zoom={12} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+        <MapContainer key={`${coordenadas.lat},${coordenadas.lon}`} center={centro} zoom={12} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
