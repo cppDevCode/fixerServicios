@@ -1,42 +1,69 @@
 export interface Coordenadas {
-  lat: number;
-  lon: number;
+    lat: number;
+    lon: number;
 }
 
-/**
- *  API gratuita de Nominatim: convierte una dirección (código postal + ciudad + país) en coordenadas.
- */
 export async function obtenerCoordenadas(
-  codigoPostal: string,
-  ciudad: string = '',
-  pais: string = 'Argentina'
+    codigoPostal: string,
+    ciudad: string = '',
+    provincia: string = '',
+    pais: string = 'Argentina'
 ): Promise<Coordenadas | null> {
-  const query = [codigoPostal, ciudad, pais].filter(Boolean).join(', ');
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
 
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Fixer-App/1.0 (proyecto-facultad)',
-      },
+    const localidadLimpia = ciudad.trim();
+    const provinciaLimpia = provincia.trim();
+    const codigoPostalLimpio = codigoPostal.trim();
+
+    const params = new URLSearchParams({
+        format: 'jsonv2',
+        country: pais,
+        countrycodes: 'ar',
+        limit: '1',
+        addressdetails: '1',
     });
 
-    if (!response.ok) {
-      throw new Error('Error al consultar Nominatim');
+    if (localidadLimpia) {
+        params.set('city', localidadLimpia);
+
+        if (provinciaLimpia) {
+            params.set('state', provinciaLimpia);
+        }
+    } else if (codigoPostalLimpio) {
+        // Si no tenemos localidad, utilizamos el código postal.
+        params.set('postalcode', codigoPostalLimpio);
+
+        if (provinciaLimpia) {
+            params.set('state', provinciaLimpia);
+        }
+    } else {
+        console.error('No hay datos suficientes para ubicar al prestador.');
+        return null;
     }
 
-    const data = await response.json();
+    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
 
-    if (!data || data.length === 0) {
-      return null; // No se encontraron coordenadas
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error('Error al consultar Nominatim');
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            return null;
+        }
+
+        const resultado = data[0];
+
+        return {
+            lat: Number(resultado.lat),
+            lon: Number(resultado.lon),
+        };
+
+    } catch (error) {
+        console.error('Error en geocoding:', error);
+        return null;
     }
-
-    return {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
-    };
-  } catch (error) {
-    console.error('Error en geocoding:', error);
-    return null;
-  }
 }

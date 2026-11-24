@@ -1,3 +1,4 @@
+import {IUsuario} from '../interfaces/usuario.interface';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -6,16 +7,6 @@ import {
   obtenerUsuarioActual,
 } from '../services/sesion.service';
 
-interface IUsuarioDetalle {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  rol: string;
-  ubicacionId?: string;
-  codigoPostal?: string;
-  radio?: number;
-}
 
 export const UsuarioDetallePage = () => {
   const { id } = useParams();
@@ -30,7 +21,7 @@ export const UsuarioDetallePage = () => {
       ? `/prestadores/${usuarioActual?.prestadorId ?? 1}`
       : '/prestadores/catalogo';
 
-  const [usuario, setUsuario] = useState<IUsuarioDetalle | null>(null);
+  const [usuario, setUsuario] = useState<IUsuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -77,7 +68,7 @@ export const UsuarioDetallePage = () => {
           apellido: usuario.apellido,
           email: usuario.email,
           codigoPostal: usuario.codigoPostal,
-          radio: Number(usuario.radio),
+          ...(usuario.rol === 'PRESTADOR' && { radio: Number(usuario.radio) }),
         }),
       });
       const result = await response.json();
@@ -132,10 +123,20 @@ export const UsuarioDetallePage = () => {
           <label className="perfil-label">Código Postal</label>
           <input type="text" name="codigoPostal" value={usuario.codigoPostal || ''} onChange={handleChange} placeholder="Ej: 5000" className="perfil-input" />
         </div>
-        <div className="perfil-form-group">
-          <label className="perfil-label">Radio de Cobertura (km)</label>
-          <input type="number" name="radio" value={usuario.radio || ''} onChange={handleChange} placeholder="Ej: 15" className="perfil-input" />
-        </div>
+
+        {usuario.rol === 'PRESTADOR' && (
+          <div className="perfil-form-group">
+            <label className="perfil-label">Radio de Cobertura (km)</label>
+            <input 
+              type="number" 
+              name="radio" 
+              value={usuario.radio || ''} 
+              onChange={handleChange} 
+              placeholder="Ej: 15"
+              className="perfil-input" 
+            />
+          </div>
+        )}
 
         <div className="perfil-actions">
           <button type="submit" className="btn-save">Guardar Cambios</button>
