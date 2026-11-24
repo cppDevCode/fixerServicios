@@ -1,0 +1,1468 @@
+{
+  "info": {
+    "_postman_id": "d3b5a7c9-8e1f-4a2b-9c3d-333344445555",
+    "name": "usuarios (alumno 3) - Fixer Servicios",
+    "description": "Colección de Postman del Módulo 3: Usuarios, Autenticación, Ubicación y Middleware Global de Errores (Integrante 3: Julieta Dabús). Incluye endpoints de autenticación (/auth/*), gestión de usuarios (/usuarios/*), scripts de validación automática y ejemplos de respuestas JSON basadas en el contrato unificado { code, msg, data, meta }.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "usuarioId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "usuarioAdminEmail",
+      "value": "bruna@example.com",
+      "type": "string"
+    },
+    {
+      "key": "usuarioAdminPassword",
+      "value": "123456",
+      "type": "string"
+    },
+    {
+      "key": "usuarioRecuperacionEmail",
+      "value": "berta@example.com",
+      "type": "string"
+    },
+    {
+      "key": "usuarioRecuperacionRespuesta",
+      "value": "Luna",
+      "type": "string"
+    },
+    {
+      "key": "nuevoUsuarioEmail",
+      "value": "lucia.fernandez@example.com",
+      "type": "string"
+    },
+    {
+      "key": "nuevoUsuarioId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "usuarios (alumno 3)",
+      "description": "Endpoints del Módulo 3: Usuarios, Acceso y Ubicación (Integrante 3: Julieta Dabús).",
+      "item": [
+        {
+          "name": "Autenticación y Recuperación",
+          "description": "Flujos de inicio de sesión, consulta de pregunta secreta, validación de respuesta secreta y cambio de contraseña.",
+          "item": [
+            {
+              "name": "POST Login de Usuario",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Retorna token y datos de sesión del usuario', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.msg).to.eql('Login exitoso');",
+                      "    pm.expect(jsonData.data).to.have.property('token');",
+                      "    pm.expect(jsonData.data.usuario).to.include.all.keys('id', 'nombre', 'apellido', 'email', 'rol');",
+                      "    if (jsonData.data.token) {",
+                      "        pm.collectionVariables.set('authToken', jsonData.data.token);",
+                      "    }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{usuarioAdminEmail}}\",\n  \"password\": \"{{usuarioAdminPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Autentica a un usuario registrado por email y contraseña. Devuelve un token JWT simulado y el perfil de sesión (incluyendo rol y prestadorId si aplica). Cuentas de prueba mock: bruna@example.com (ADMIN), carlos@example.com (PRESTADOR), berta@example.com (USUARIO), todas con contraseña '123456'."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Login exitoso",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"bruna@example.com\",\n  \"password\": \"123456\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Login exitoso\",\n  \"data\": {\n    \"token\": \"jwt-falso-simulado-12345\",\n    \"usuario\": {\n      \"id\": \"1\",\n      \"nombre\": \"Bruna\",\n      \"apellido\": \"Ramírez\",\n      \"email\": \"bruna@example.com\",\n      \"rol\": \"ADMIN\",\n      \"prestadorId\": null\n    }\n  }\n}"
+                },
+                {
+                  "name": "400 Bad Request - Email y contraseña son requeridos",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"bruna@example.com\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 400,\n  \"msg\": \"Email y contraseña son requeridos\",\n  \"data\": null\n}"
+                },
+                {
+                  "name": "401 Unauthorized - Credenciales inválidas",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"bruna@example.com\",\n  \"password\": \"clave-incorrecta\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 401,\n  \"msg\": \"Credenciales inválidas\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST Obtener Pregunta Secreta",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Retorna la pregunta secreta del usuario', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.msg).to.eql('Pregunta obtenida');",
+                      "    pm.expect(jsonData.data).to.have.property('id');",
+                      "    pm.expect(jsonData.data).to.have.property('preguntaSecreta');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{usuarioRecuperacionEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/pregunta-secreta",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "pregunta-secreta"
+                  ]
+                },
+                "description": "Paso 1 del flujo de recuperación de contraseña. Obtiene el ID y la pregunta secreta asociada al email del usuario."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Pregunta obtenida",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"berta@example.com\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/pregunta-secreta",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "pregunta-secreta"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Pregunta obtenida\",\n  \"data\": {\n    \"id\": \"3\",\n    \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\"\n  }\n}"
+                },
+                {
+                  "name": "404 Not Found - Usuario no encontrado",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"inexistente@example.com\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/pregunta-secreta",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "pregunta-secreta"
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 404,\n  \"msg\": \"Usuario no encontrado\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST Recuperar Password (Validar Respuesta Secreta)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Valida la respuesta secreta correctamente', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.data).to.have.property('mensaje', 'Contraseña restablecida exitosamente');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{usuarioRecuperacionEmail}}\",\n  \"respuesta\": \"{{usuarioRecuperacionRespuesta}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/recuperar-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "recuperar-password"
+                  ]
+                },
+                "description": "Paso 2 del flujo de recuperación de contraseña. Evalúa si la respuesta secreta enviada coincide exactamente con la registrada para el usuario."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Respuesta secreta válida",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"berta@example.com\",\n  \"respuesta\": \"Luna\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/recuperar-password",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "recuperar-password"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Ok\",\n  \"data\": {\n    \"mensaje\": \"Contraseña restablecida exitosamente\"\n  }\n}"
+                },
+                {
+                  "name": "500 Internal Server Error - Respuesta secreta incorrecta (errorHandler)",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"berta@example.com\",\n  \"respuesta\": \"RespuestaIncorrecta\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/recuperar-password",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "recuperar-password"
+                      ]
+                    }
+                  },
+                  "status": "Internal Server Error",
+                  "code": 500,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 500,\n  \"msg\": \"Respuesta secreta incorrecta\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST Cambiar Contraseña",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Contraseña actualizada exitosamente', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.msg).to.eql('Contraseña actualizada exitosamente');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{usuarioRecuperacionEmail}}\",\n  \"nuevaPassword\": \"123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/cambiar-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "cambiar-password"
+                  ]
+                },
+                "description": "Paso 3 del flujo de recuperación de contraseña. Actualiza el passwordHash del usuario identificado por su email."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Contraseña actualizada exitosamente",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"berta@example.com\",\n  \"nuevaPassword\": \"nuevaClave123\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/cambiar-password",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "cambiar-password"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Contraseña actualizada exitosamente\",\n  \"data\": null\n}"
+                },
+                {
+                  "name": "400 Bad Request - Faltan datos obligatorios",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"berta@example.com\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/cambiar-password",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "cambiar-password"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 400,\n  \"msg\": \"Faltan datos obligatorios\",\n  \"data\": null\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Gestión de Usuarios y Ubicación",
+          "description": "Listado paginado con búsqueda por email/nombre/ciudad, detalle de usuario, alta (cliente o prestador) y actualización de perfil con código postal y radio de cobertura.",
+          "item": [
+            {
+              "name": "GET Listar Usuarios (Paginado)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Retorna estructura ApiResponse paginada sin exponer hashes', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.msg).to.eql('Ok');",
+                      "    pm.expect(jsonData.data).to.be.an('array');",
+                      "    pm.expect(jsonData.meta).to.include.all.keys('page', 'limit', 'total', 'totalPages');",
+                      "    jsonData.data.forEach(function (usuario) {",
+                      "        pm.expect(usuario).to.not.have.property('passwordHash');",
+                      "        pm.expect(usuario).to.not.have.property('respuestaSecretaHash');",
+                      "    });",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN",
+                    "type": "text",
+                    "description": "Rol autorizado por verificarPermisoAdminUsuarios (ADMIN permitido; USUARIO o PRESTADOR retorna 403)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Número de página (por defecto 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Cantidad de registros por página (por defecto 10)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "Córdoba",
+                      "description": "Búsqueda opcional por email, nombre, apellido o ciudad de ubicación",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Obtiene el padrón paginado de usuarios sanitizado (sin passwordHash ni respuestaSecretaHash). Protegido por middleware verificarPermisoAdminUsuarios."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Listado Paginado de Usuarios",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "x-usuario-rol",
+                        "value": "ADMIN"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios?page=1&limit=10",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "limit",
+                          "value": "10"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Ok\",\n  \"data\": [\n    {\n      \"id\": \"1\",\n      \"nombre\": \"Bruna\",\n      \"apellido\": \"Ramírez\",\n      \"email\": \"bruna@example.com\",\n      \"rol\": \"ADMIN\",\n      \"ubicacionId\": \"1\",\n      \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n      \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n    },\n    {\n      \"id\": \"2\",\n      \"nombre\": \"Carlos\",\n      \"apellido\": \"Gómez\",\n      \"email\": \"carlos@example.com\",\n      \"rol\": \"PRESTADOR\",\n      \"prestadorId\": 1,\n      \"ubicacionId\": \"2\",\n      \"preguntaSecreta\": \"¿Ciudad de nacimiento?\",\n      \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n    },\n    {\n      \"id\": \"3\",\n      \"nombre\": \"Berta\",\n      \"apellido\": \"Martínez\",\n      \"email\": \"berta@example.com\",\n      \"rol\": \"USUARIO\",\n      \"ubicacionId\": \"3\",\n      \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n      \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 3,\n    \"totalPages\": 1\n  }\n}"
+                },
+                {
+                  "name": "403 Forbidden - Acceso denegado a rol no administrador",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "x-usuario-rol",
+                        "value": "USUARIO"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios?page=1&limit=10",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "limit",
+                          "value": "10"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Forbidden",
+                  "code": 403,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 403,\n  \"msg\": \"Acceso denegado: solo el rol ADMIN puede administrar el padrón de usuarios\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "GET Buscar Usuarios (por Email, Nombre o Ciudad)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Filtra correctamente por ciudad/email/nombre normalizado sin tildes', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.data).to.be.an('array');",
+                      "    pm.expect(jsonData.data.length).to.be.above(0);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-usuario-rol",
+                    "value": "ADMIN",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios?page=1&limit=10&search=Córdoba",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "search",
+                      "value": "Córdoba",
+                      "description": "Coincidencia parcial insensible a mayúsculas y tildes sobre email, nombre, apellido o ciudad asociada por ubicacionId"
+                    }
+                  ]
+                },
+                "description": "Filtra usuarios cruzando con el repositorio de ubicaciones (ciudad) además de email, nombre y apellido con normalización NFD (sin tildes)."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Usuarios filtrados por ciudad Córdoba",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "x-usuario-rol",
+                        "value": "ADMIN"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios?page=1&limit=10&search=Córdoba",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "limit",
+                          "value": "10"
+                        },
+                        {
+                          "key": "search",
+                          "value": "Córdoba"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Ok\",\n  \"data\": [\n    {\n      \"id\": \"1\",\n      \"nombre\": \"Bruna\",\n      \"apellido\": \"Ramírez\",\n      \"email\": \"bruna@example.com\",\n      \"rol\": \"ADMIN\",\n      \"ubicacionId\": \"1\",\n      \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n      \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "GET Detalle de Usuario por ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Retorna el usuario solicitado', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.data).to.include.all.keys('id', 'nombre', 'apellido', 'email', 'rol');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{usuarioId}}"
+                  ]
+                },
+                "description": "Obtiene el detalle completo de un usuario por su ID (en memoria: '1' Bruna, '2' Carlos, '3' Berta)."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Usuario encontrado",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios/3",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios",
+                        "3"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Ok\",\n  \"data\": {\n    \"id\": \"3\",\n    \"nombre\": \"Berta\",\n    \"apellido\": \"Martínez\",\n    \"email\": \"berta@example.com\",\n    \"passwordHash\": \"123456\",\n    \"rol\": \"USUARIO\",\n    \"ubicacionId\": \"3\",\n    \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n    \"respuestaSecretaHash\": \"Luna\",\n    \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n  }\n}"
+                },
+                {
+                  "name": "500 Internal Server Error - Usuario no encontrado (errorHandler)",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios/9999",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios",
+                        "9999"
+                      ]
+                    }
+                  },
+                  "status": "Internal Server Error",
+                  "code": 500,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 500,\n  \"msg\": \"Usuario no encontrado\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST Registrar Usuario",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const emailUnico = 'lucia.' + Date.now() + '@example.com';",
+                      "pm.collectionVariables.set('nuevoUsuarioEmail', emailUnico);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test('Usuario registrado y guardado en nuevoUsuarioId', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(201);",
+                      "    pm.expect(jsonData.msg).to.eql('Usuario registrado exitosamente');",
+                      "    pm.expect(jsonData.data).to.have.property('usuario');",
+                      "    pm.expect(jsonData.data.usuario).to.have.property('id');",
+                      "    pm.collectionVariables.set('nuevoUsuarioId', String(jsonData.data.usuario.id));",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Lucía\",\n  \"apellido\": \"Fernández\",\n  \"email\": \"{{nuevoUsuarioEmail}}\",\n  \"password\": \"Password123\",\n  \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n  \"respuestaSecreta\": \"Toby\",\n  \"esPrestador\": false,\n  \"especialidad\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                },
+                "description": "Registra un nuevo usuario en memoria. Valida formato de email, contraseña de al menos 6 caracteres, respuesta secreta obligatoria y unicidad de email. Si 'esPrestador' es true, además crea su perfil profesional vinculado en el módulo de Prestadores usando 'especialidad'. El script pre-request genera un email único para permitir ejecuciones repetidas."
+              },
+              "response": [
+                {
+                  "name": "201 Created - Usuario cliente registrado",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nombre\": \"Lucía\",\n  \"apellido\": \"Fernández\",\n  \"email\": \"lucia.fernandez@example.com\",\n  \"password\": \"Password123\",\n  \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n  \"respuestaSecreta\": \"Toby\",\n  \"esPrestador\": false,\n  \"especialidad\": \"\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 201,\n  \"msg\": \"Usuario registrado exitosamente\",\n  \"data\": {\n    \"usuario\": {\n      \"id\": \"4\",\n      \"nombre\": \"Lucía\",\n      \"apellido\": \"Fernández\",\n      \"email\": \"lucia.fernandez@example.com\",\n      \"passwordHash\": \"Password123\",\n      \"rol\": \"USUARIO\",\n      \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n      \"respuestaSecretaHash\": \"Toby\",\n      \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n    },\n    \"prestador\": null\n  }\n}"
+                },
+                {
+                  "name": "400 Bad Request - Faltan datos obligatorios",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nombre\": \"Lucía\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 400,\n  \"msg\": \"Faltan datos obligatorios\",\n  \"data\": null\n}"
+                },
+                {
+                  "name": "400 Bad Request - El email ya está registrado",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nombre\": \"Bruna\",\n  \"apellido\": \"Ramírez\",\n  \"email\": \"bruna@example.com\",\n  \"password\": \"123456\",\n  \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n  \"respuestaSecreta\": \"Firulais\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 400,\n  \"msg\": \"El email ya está registrado\",\n  \"data\": null\n}"
+                }
+              ]
+            },
+            {
+              "name": "PATCH Actualizar Perfil de Usuario y Cobertura",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code es 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Perfil de usuario actualizado correctamente', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.code).to.eql(200);",
+                      "    pm.expect(jsonData.msg).to.eql('Usuario actualizado');",
+                      "    pm.expect(jsonData.data).to.have.property('id');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Berta\",\n  \"apellido\": \"Martínez\",\n  \"ubicacionId\": \"3\",\n  \"codigoPostal\": \"2000\",\n  \"radio\": 20\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{usuarioId}}"
+                  ]
+                },
+                "description": "Actualiza parcialmente el perfil de un usuario, incluyendo su ubicación, código postal y radio de cobertura (en km). Valida unicidad de email si se modifica."
+              },
+              "response": [
+                {
+                  "name": "200 OK - Usuario actualizado",
+                  "originalRequest": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nombre\": \"Berta\",\n  \"apellido\": \"Martínez\",\n  \"ubicacionId\": \"3\",\n  \"codigoPostal\": \"2000\",\n  \"radio\": 20\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios/3",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios",
+                        "3"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 200,\n  \"msg\": \"Usuario actualizado\",\n  \"data\": {\n    \"id\": \"3\",\n    \"nombre\": \"Berta\",\n    \"apellido\": \"Martínez\",\n    \"email\": \"berta@example.com\",\n    \"passwordHash\": \"123456\",\n    \"rol\": \"USUARIO\",\n    \"ubicacionId\": \"3\",\n    \"codigoPostal\": \"2000\",\n    \"radio\": 20,\n    \"preguntaSecreta\": \"¿Nombre de tu primera mascota?\",\n    \"respuestaSecretaHash\": \"Luna\",\n    \"createdAt\": \"2026-11-24T18:00:00.000Z\"\n  }\n}"
+                },
+                {
+                  "name": "500 Internal Server Error - Email en uso por otro usuario (errorHandler)",
+                  "originalRequest": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"bruna@example.com\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios/3",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios",
+                        "3"
+                      ]
+                    }
+                  },
+                  "status": "Internal Server Error",
+                  "code": 500,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 500,\n  \"msg\": \"El email ya está en uso por otro usuario\",\n  \"data\": null\n}"
+                },
+                {
+                  "name": "500 Internal Server Error - Usuario no encontrado (errorHandler)",
+                  "originalRequest": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nombre\": \"Nombre Nuevo\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/usuarios/9999",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "usuarios",
+                        "9999"
+                      ]
+                    }
+                  },
+                  "status": "Internal Server Error",
+                  "code": 500,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"code\": 500,\n  \"msg\": \"Usuario no encontrado\",\n  \"data\": null\n}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
