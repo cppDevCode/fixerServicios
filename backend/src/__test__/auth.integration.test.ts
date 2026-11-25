@@ -122,6 +122,29 @@ describe('Auth API - Integración', () => {
       .post('/api/v1/auth/login')
       .send({ email: emailPrueba, password: 'claveInicial1' })
       .expect(423);
+
+    // Mientras está bloqueada, no permite editar los datos de Mi Ficha Profesional (423)
+    const prestadorId: number = registro.body.data.prestador.id;
+    const resEdicionBloqueada = await request(app)
+      .put(`/api/v1/prestadores/${prestadorId}`)
+      .set('x-usuario-rol', 'PRESTADOR')
+      .set('x-usuario-id', String(userId))
+      .set('x-prestador-id', String(prestadorId))
+      .send({ aniosExperiencia: 25 })
+      .expect(423);
+    expect(resEdicionBloqueada.body.codigo).toBe(423);
+
+    // Confirmar que el perfil de usuario informa bloqueadoHasta para persistir el bloqueo en UI
+    const resUsuario = await request(app)
+      .get(`/api/v1/usuarios/${userId}`)
+      .expect(200);
+    expect(resUsuario.body.data.bloqueadoHasta).toBeTruthy();
+
+    // Limpieza del prestador creado para no alterar conteo global de prestadores
+    await request(app)
+      .delete(`/api/v1/prestadores/${prestadorId}`)
+      .set('x-usuario-rol', 'ADMIN')
+      .expect(200);
   });
 
   it('PATCH /api/v1/usuarios/:id/password actualiza la contraseña cuando todos los datos son válidos', async () => {
@@ -161,6 +184,13 @@ describe('Auth API - Integración', () => {
     await request(app)
       .post('/api/v1/auth/login')
       .send({ email: emailOk, password: 'passwordNueva2' })
+      .expect(200);
+
+    // Limpieza del prestador temporal creado
+    const prestadorIdOk: number = registro.body.data.prestador.id;
+    await request(app)
+      .delete(`/api/v1/prestadores/${prestadorIdOk}`)
+      .set('x-usuario-rol', 'ADMIN')
       .expect(200);
   });
 });

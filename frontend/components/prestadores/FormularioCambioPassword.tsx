@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import {
     cambiarPasswordUsuario,
@@ -8,10 +8,14 @@ import './Prestadores.css';
 
 export interface FormularioCambioPasswordProps {
     usuarioId: number;
+    bloqueadoHastaInicial?: string | null;
+    onCuentaBloqueada?: (bloqueadoHasta: string) => void;
 }
 
 export function FormularioCambioPassword({
     usuarioId,
+    bloqueadoHastaInicial = null,
+    onCuentaBloqueada,
 }: FormularioCambioPasswordProps) {
     const [passwordActual, setPasswordActual] = useState('');
     const [nuevaPassword, setNuevaPassword] = useState('');
@@ -24,7 +28,13 @@ export function FormularioCambioPassword({
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
-    const [bloqueadoHasta, setBloqueadoHasta] = useState<string | null>(null);
+    const [bloqueadoHasta, setBloqueadoHasta] = useState<string | null>(
+        bloqueadoHastaInicial
+    );
+
+    useEffect(() => {
+        setBloqueadoHasta(bloqueadoHastaInicial ?? null);
+    }, [bloqueadoHastaInicial]);
 
     const estaBloqueado = Boolean(
         bloqueadoHasta && new Date(bloqueadoHasta).getTime() > Date.now()
@@ -64,10 +74,11 @@ export function FormularioCambioPassword({
             }
 
             if (resultado.status === 423) {
-                setBloqueadoHasta(
+                const hasta =
                     resultado.bloqueadoHasta ??
-                        new Date(Date.now() + 30 * 60 * 1000).toISOString()
-                );
+                    new Date(Date.now() + 30 * 60 * 1000).toISOString();
+                setBloqueadoHasta(hasta);
+                onCuentaBloqueada?.(hasta);
                 setPasswordActual('');
                 setError(resultado.mensaje);
                 return;

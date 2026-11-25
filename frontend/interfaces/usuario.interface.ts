@@ -29,8 +29,9 @@ export interface IUsuario {
     codigoPostal?: string;
     radio?: number;
 
-    // Datos de seguridad (solo pregunta; nunca hashes en cliente)
+    // Datos de seguridad (solo pregunta y estado de bloqueo; nunca hashes en cliente)
     preguntaSecreta?: string;
+    bloqueadoHasta?: string;
 
     // Vínculo con la entidad Prestador (si el rol es PRESTADOR)
     prestadorId?: number;

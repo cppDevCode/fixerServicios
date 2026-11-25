@@ -59,6 +59,66 @@ export function PrestadorDetallePage() {
     const [error, setError] = useState<string | null>(null);
     const [versionResenas, setVersionResenas] = useState(0);
     const [resenaEditar, setResenaEditar] = useState<IResena | null>(null);
+    const [bloqueadoHasta, setBloqueadoHasta] = useState<string | null>(null);
+
+    const esPropietarioPrestador = esPrestador(usuarioActual);
+
+    useEffect(() => {
+        if (!esPropietarioPrestador || usuarioId === null) {
+            setBloqueadoHasta(null);
+            return;
+        }
+
+        let activo = true;
+        fetch(`/api/v1/usuarios/${usuarioId}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((body: { data?: { bloqueadoHasta?: string } } | null) => {
+                if (!activo) return;
+                const hasta = body?.data?.bloqueadoHasta;
+                if (hasta && new Date(hasta).getTime() > Date.now()) {
+                    setBloqueadoHasta(hasta);
+                } else {
+                    setBloqueadoHasta(null);
+                }
+            })
+            .catch(() => {
+                // Mantiene el estado local de bloqueo si no se puede consultar el usuario
+            });
+
+        return () => {
+            activo = false;
+        };
+    }, [esPropietarioPrestador, usuarioId]);
+
+    useEffect(() => {
+        if (!bloqueadoHasta) return;
+        const restanteMs = new Date(bloqueadoHasta).getTime() - Date.now();
+        if (restanteMs <= 0) {
+            setBloqueadoHasta(null);
+            return;
+        }
+        const timer = window.setTimeout(() => {
+            setBloqueadoHasta(null);
+        }, restanteMs);
+        return () => window.clearTimeout(timer);
+    }, [bloqueadoHasta]);
+
+    const cuentaBloqueada = Boolean(
+        esPropietarioPrestador &&
+            bloqueadoHasta &&
+            new Date(bloqueadoHasta).getTime() > Date.now()
+    );
+
+    const horaDesbloqueo = bloqueadoHasta
+        ? new Date(bloqueadoHasta).toLocaleTimeString('es-AR', {
+              hour: '2-digit',
+              minute: '2-digit',
+          })
+        : null;
+
+    const mensajeBloqueoFicha = horaDesbloqueo
+        ? `Tu cuenta está bloqueada hasta las ${horaDesbloqueo} por 3 intentos fallidos de contraseña. No podés editar los datos de tu ficha profesional hasta entonces.`
+        : 'Tu cuenta está bloqueada por 30 minutos debido a 3 intentos fallidos de contraseña. No podés editar los datos de tu ficha profesional hasta entonces.';
 
     useEffect(() => {
         let activo = true;
@@ -362,16 +422,28 @@ export function PrestadorDetallePage() {
                                     categorias={categorias}
                                     prestadorInicial={prestador}
                                     titulo="Editar datos del prestador"
-                                    textoBoton="Guardar cambios"
+                                    textoBoton={
+                                        cuentaBloqueada
+                                            ? 'Edición bloqueada (30 min)'
+                                            : 'Guardar cambios'
+                                    }
+                                    bloqueado={cuentaBloqueada}
+                                    mensajeBloqueo={mensajeBloqueoFicha}
                                     onGuardado={(actualizado) =>
                                         setPrestador(actualizado)
                                     }
                                 />
 
-                                {esPrestador(usuarioActual) &&
+                                {esPropietarioPrestador &&
                                     usuarioId !== null && (
                                         <FormularioCambioPassword
                                             usuarioId={usuarioId}
+                                            bloqueadoHastaInicial={
+                                                bloqueadoHasta
+                                            }
+                                            onCuentaBloqueada={(hasta) =>
+                                                setBloqueadoHasta(hasta)
+                                            }
                                         />
                                     )}
                             </div>

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { FormularioCambioPassword } from '../../components/prestadores/FormularioCambioPassword';
+import { FormularioPrestador } from '../../components/prestadores/FormularioPrestador';
 import {
     cambiarPasswordUsuario,
     validarCambioPassword,
@@ -133,5 +134,33 @@ describe('Cambio de contraseña desde Mi Ficha Profesional', () => {
         expect(html).toContain('3 intentos fallidos');
         expect(html).toContain('30 minutos');
         expect(html).toContain('Actualizar contraseña');
+    });
+
+    it('deshabilita la edición de FormularioPrestador y FormularioCambioPassword cuando la cuenta está bloqueada', () => {
+        const futuro = new Date(Date.now() + 25 * 60 * 1000).toISOString();
+
+        const htmlPasswordBloqueado = renderToStaticMarkup(
+            createElement(FormularioCambioPassword, {
+                usuarioId: 2,
+                bloqueadoHastaInicial: futuro,
+            })
+        );
+        expect(htmlPasswordBloqueado).toContain('Cuenta bloqueada (30 min)');
+        expect(htmlPasswordBloqueado).toContain('disabled=""');
+
+        const htmlFichaBloqueada = renderToStaticMarkup(
+            createElement(FormularioPrestador, {
+                bloqueado: true,
+                textoBoton: 'Edición bloqueada (30 min)',
+                mensajeBloqueo:
+                    'Tu cuenta está bloqueada por 30 minutos. No podés editar tu ficha.',
+            })
+        );
+        expect(htmlFichaBloqueada).toContain(
+            'data-testid="prestador-edicion-bloqueada"'
+        );
+        expect(htmlFichaBloqueada).toContain('No podés editar tu ficha.');
+        expect(htmlFichaBloqueada).toContain('Edición bloqueada (30 min)');
+        expect(htmlFichaBloqueada).toContain('disabled=""');
     });
 });

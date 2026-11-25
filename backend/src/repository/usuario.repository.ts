@@ -115,6 +115,33 @@ export class UsuarioRepository {
         return this.usuarios.some((u) => u.id === id);
     }
 
+    obtenerBloqueoActivo(
+        usuarioId?: number,
+        prestadorId?: number,
+        ahoraMs: number = Date.now()
+    ): { bloqueadoHasta: string; minutosRestantes: number } | null {
+        const usuario = this.usuarios.find(
+            (u) =>
+                (usuarioId !== undefined && u.id === usuarioId) ||
+                (prestadorId !== undefined && u.prestadorId === prestadorId)
+        );
+        if (!usuario?.bloqueadoHasta) {
+            return null;
+        }
+        const hastaMs = new Date(usuario.bloqueadoHasta).getTime();
+        if (!Number.isFinite(hastaMs) || ahoraMs >= hastaMs) {
+            return null;
+        }
+        const minutosRestantes = Math.max(
+            1,
+            Math.ceil((hastaMs - ahoraMs) / 60000)
+        );
+        return {
+            bloqueadoHasta: usuario.bloqueadoHasta,
+            minutosRestantes,
+        };
+    }
+
     async findByEmail(email: string): Promise<IUsuario | undefined> {
         const emailNormalizado = email.trim().toLowerCase();
         const encontrado = this.usuarios.find(

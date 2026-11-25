@@ -94,8 +94,15 @@ export class UsuarioService {
                 ? this.ubicacionRepo.findById(usuario.ubicacionId)
                 : undefined;
 
+        const bloqueoVigente =
+            datosPublicos.bloqueadoHasta &&
+            new Date(datosPublicos.bloqueadoHasta).getTime() > Date.now()
+                ? datosPublicos.bloqueadoHasta
+                : undefined;
+
         return {
             ...datosPublicos,
+            bloqueadoHasta: bloqueoVigente,
             ...(ubicacion
                 ? {
                       ubicacion,
