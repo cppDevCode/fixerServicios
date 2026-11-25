@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { IPrestador } from '../interfaces/prestador.interface';
 import { PrestadorService } from '../service/prestador.service';
-import { UsuarioService } from '../service/usuario.service';
+import {
+    ErrorCredencialesInvalidas,
+    ErrorCuentaBloqueada,
+    ErrorValidacionUsuario,
+    UsuarioService,
+} from '../service/usuario.service';
 
 const parsearIdEnteroPositivo = (valor: unknown): number | null => {
     const num = Number(valor);
@@ -197,10 +202,105 @@ export class UsuarioController {
                 .status(200)
                 .json({ code: 200, msg: 'Login exitoso', data: result });
         } catch (error: unknown) {
+            if (error instanceof ErrorCuentaBloqueada) {
+                return res.status(423).json({
+                    code: 423,
+                    msg: error.message,
+                    data: {
+                        bloqueadoHasta: error.bloqueadoHasta,
+                        minutosRestantes: error.minutosRestantes,
+                    },
+                });
+            }
             if (error instanceof Error && error.message === 'Credenciales inválidas') {
                 return res
                     .status(401)
                     .json({ code: 401, msg: error.message, data: null });
+            }
+            next(error);
+        }
+    };
+
+    cambiarPasswordAutenticado = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const id = parsearIdEnteroPositivo(req.params.id);
+            if (id === null) {
+                return res
+                    .status(400)
+                    .json({ code: 400, msg: 'ID de usuario inválido', data: null });
+            }
+
+            const rolHeader =
+                typeof req.headers['x-usuario-rol'] === 'string'
+                    ? req.headers['x-usuario-rol'].trim().toUpperCase()
+                    : undefined;
+            const usuarioIdHeader = parsearIdEnteroPositivo(
+                req.headers['x-usuario-id']
+            );
+
+            if (
+                rolHeader &&
+                rolHeader !== 'ADMIN' &&
+                usuarioIdHeader !== null &&
+                usuarioIdHeader !== id
+            ) {
+                return res.status(403).json({
+                    code: 403,
+                    msg: 'Acceso denegado: solo podés cambiar tu propia contraseña',
+                    data: null,
+                });
+            }
+
+            const { passwordActual, nuevaPassword, confirmarPassword } =
+                req.body ?? {};
+
+            const resultado = await this.service.cambiarPasswordAutenticado(id, {
+                passwordActual:
+                    typeof passwordActual === 'string' ? passwordActual : '',
+                nuevaPassword:
+                    typeof nuevaPassword === 'string' ? nuevaPassword : '',
+                confirmarPassword:
+                    typeof confirmarPassword === 'string'
+                        ? confirmarPassword
+                        : '',
+            });
+
+            res.status(200).json({
+                code: 200,
+                msg: resultado.mensaje,
+                data: resultado,
+            });
+        } catch (error: unknown) {
+            if (error instanceof ErrorValidacionUsuario) {
+                return res
+                    .status(400)
+                    .json({ code: 400, msg: error.message, data: null });
+            }
+            if (error instanceof ErrorCredencialesInvalidas) {
+                return res.status(401).json({
+                    code: 401,
+                    msg: error.message,
+                    data: { intentosRestantes: error.intentosRestantes },
+                });
+            }
+            if (error instanceof ErrorCuentaBloqueada) {
+                return res.status(423).json({
+                    code: 423,
+                    msg: error.message,
+                    data: {
+                        bloqueadoHasta: error.bloqueadoHasta,
+                        minutosRestantes: error.minutosRestantes,
+                    },
+                });
+            }
+            if (error instanceof Error && error.message === 'Usuario no encontrado') {
+                return res
+                    .status(404)
+                    .json({ code: 404, msg: error.message, data: null });
             }
             next(error);
         }

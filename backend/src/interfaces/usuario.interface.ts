@@ -21,6 +21,8 @@ export interface IUsuario {
     fechaNacimiento?: string;
     preguntaSecreta?: string;
     respuestaSecretaHash?: string;
+    intentosFallidosPassword?: number;
+    bloqueadoHasta?: string;
     createdAt: string;
     updatedAt?: string;
 }
@@ -30,7 +32,10 @@ export interface IUsuario {
  * enriquecida con datos de su UBICACION asociada.
  */
 export interface IUsuarioPublico
-    extends Omit<IUsuario, 'passwordHash' | 'respuestaSecretaHash'> {
+    extends Omit<
+        IUsuario,
+        'passwordHash' | 'respuestaSecretaHash' | 'intentosFallidosPassword'
+    > {
     ubicacion?: IUbicacion;
     codigoPostal?: string;
     radio?: number;

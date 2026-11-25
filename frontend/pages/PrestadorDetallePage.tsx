@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AvatarPrestador } from '../components/prestadores/AvatarPrestador';
+import { FormularioCambioPassword } from '../components/prestadores/FormularioCambioPassword';
 import { FormularioPrestador } from '../components/prestadores/FormularioPrestador';
 import '../components/prestadores/Prestadores.css';
 import type { ICategoria, IPrestador } from '../interfaces/prestador.interface';
@@ -355,16 +356,25 @@ export function PrestadorDetallePage() {
                         </article>
 
                         {puedeEditar && (
-                            <FormularioPrestador
-                                key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
-                                categorias={categorias}
-                                prestadorInicial={prestador}
-                                titulo="Editar datos del prestador"
-                                textoBoton="Guardar cambios"
-                                onGuardado={(actualizado) =>
-                                    setPrestador(actualizado)
-                                }
-                            />
+                            <div className="prestador-detalle-columna-edicion">
+                                <FormularioPrestador
+                                    key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
+                                    categorias={categorias}
+                                    prestadorInicial={prestador}
+                                    titulo="Editar datos del prestador"
+                                    textoBoton="Guardar cambios"
+                                    onGuardado={(actualizado) =>
+                                        setPrestador(actualizado)
+                                    }
+                                />
+
+                                {esPrestador(usuarioActual) &&
+                                    usuarioId !== null && (
+                                        <FormularioCambioPassword
+                                            usuarioId={usuarioId}
+                                        />
+                                    )}
+                            </div>
                         )}
                     </div>
 

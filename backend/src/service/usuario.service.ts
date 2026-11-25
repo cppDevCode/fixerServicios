@@ -13,6 +13,43 @@ import {
 } from '../repository/usuario.repository';
 import { PrestadorService } from './prestador.service';
 
+export const MAX_INTENTOS_FALLIDOS_PASSWORD = 3;
+export const DURACION_BLOQUEO_MS = 30 * 60 * 1000; // 30 minutos
+
+export class ErrorValidacionUsuario extends Error {
+    public readonly statusCode = 400;
+
+    constructor(message: string) {
+        super(message);
+        this.name = 'ErrorValidacionUsuario';
+    }
+}
+
+export class ErrorCredencialesInvalidas extends Error {
+    public readonly statusCode = 401;
+
+    constructor(
+        message: string,
+        public readonly intentosRestantes?: number
+    ) {
+        super(message);
+        this.name = 'ErrorCredencialesInvalidas';
+    }
+}
+
+export class ErrorCuentaBloqueada extends Error {
+    public readonly statusCode = 423;
+
+    constructor(
+        message: string,
+        public readonly bloqueadoHasta: string,
+        public readonly minutosRestantes: number
+    ) {
+        super(message);
+        this.name = 'ErrorCuentaBloqueada';
+    }
+}
+
 const normalizarTexto = (texto: string): string => {
     return texto
         .toLowerCase()
@@ -45,10 +82,12 @@ export class UsuarioService {
         const {
             passwordHash: _passwordHash,
             respuestaSecretaHash: _respuestaSecretaHash,
+            intentosFallidosPassword: _intentosFallidosPassword,
             ...datosPublicos
         } = usuario;
         void _passwordHash;
         void _respuestaSecretaHash;
+        void _intentosFallidosPassword;
 
         const ubicacion =
             usuario.ubicacionId !== undefined
@@ -65,6 +104,27 @@ export class UsuarioService {
                   }
                 : {}),
         };
+    }
+
+    private verificarBloqueoActivo(user: IUsuario, ahoraMs: number): boolean {
+        if (!user.bloqueadoHasta) {
+            return false;
+        }
+        const hastaMs = new Date(user.bloqueadoHasta).getTime();
+        if (Number.isFinite(hastaMs) && ahoraMs < hastaMs) {
+            const minutosRestantes = Math.max(
+                1,
+                Math.ceil((hastaMs - ahoraMs) / 60000)
+            );
+            throw new ErrorCuentaBloqueada(
+                `Tu cuenta está bloqueada por múltiples intentos fallidos. Intentá nuevamente en ${minutosRestantes} ${
+                    minutosRestantes === 1 ? 'minuto' : 'minutos'
+                }.`,
+                user.bloqueadoHasta,
+                minutosRestantes
+            );
+        }
+        return true; // Existía un bloqueo pero ya expiró
     }
 
     async listarUsuarios(
@@ -210,10 +270,26 @@ export class UsuarioService {
         return this.proyectarPublico(creado);
     }
 
-    async login(email: string, passwordPlana: string) {
+    async login(
+        email: string,
+        passwordPlana: string,
+        ahoraMs: number = Date.now()
+    ) {
         const user = await this.repo.findByEmail(email);
 
-        if (!user || user.passwordHash !== passwordPlana) {
+        if (!user) {
+            throw new Error('Credenciales inválidas');
+        }
+
+        const bloqueoExpirado = this.verificarBloqueoActivo(user, ahoraMs);
+        if (bloqueoExpirado) {
+            await this.repo.update(user.id, {
+                intentosFallidosPassword: 0,
+                bloqueadoHasta: undefined,
+            });
+        }
+
+        if (user.passwordHash !== passwordPlana) {
             throw new Error('Credenciales inválidas');
         }
 
@@ -254,6 +330,93 @@ export class UsuarioService {
                 prestadorId,
             },
         };
+    }
+
+    async cambiarPasswordAutenticado(
+        id: number,
+        datos: {
+            passwordActual: string;
+            nuevaPassword: string;
+            confirmarPassword: string;
+        },
+        ahoraMs: number = Date.now()
+    ): Promise<{ mensaje: string }> {
+        const { passwordActual, nuevaPassword, confirmarPassword } = datos;
+
+        if (!passwordActual || !nuevaPassword || !confirmarPassword) {
+            throw new ErrorValidacionUsuario(
+                'Debés completar la contraseña actual, la nueva contraseña y su confirmación'
+            );
+        }
+
+        if (nuevaPassword.length < 6) {
+            throw new ErrorValidacionUsuario(
+                'La nueva contraseña debe tener al menos 6 caracteres'
+            );
+        }
+
+        if (nuevaPassword !== confirmarPassword) {
+            throw new ErrorValidacionUsuario(
+                'La nueva contraseña y su confirmación no coinciden'
+            );
+        }
+
+        const user = await this.repo.findById(id);
+        if (!user) {
+            throw new Error('Usuario no encontrado');
+        }
+
+        const bloqueoExpirado = this.verificarBloqueoActivo(user, ahoraMs);
+        const intentosPrevios = bloqueoExpirado
+            ? 0
+            : (user.intentosFallidosPassword ?? 0);
+
+        if (user.passwordHash !== passwordActual) {
+            const nuevosIntentos = intentosPrevios + 1;
+
+            if (nuevosIntentos >= MAX_INTENTOS_FALLIDOS_PASSWORD) {
+                const bloqueadoHasta = new Date(
+                    ahoraMs + DURACION_BLOQUEO_MS
+                ).toISOString();
+                await this.repo.update(id, {
+                    intentosFallidosPassword: nuevosIntentos,
+                    bloqueadoHasta,
+                });
+
+                throw new ErrorCuentaBloqueada(
+                    'La contraseña actual es incorrecta. Superaste los 3 intentos fallidos y tu cuenta fue bloqueada por 30 minutos.',
+                    bloqueadoHasta,
+                    30
+                );
+            }
+
+            await this.repo.update(id, {
+                intentosFallidosPassword: nuevosIntentos,
+                bloqueadoHasta: undefined,
+            });
+
+            const restantes = MAX_INTENTOS_FALLIDOS_PASSWORD - nuevosIntentos;
+            throw new ErrorCredencialesInvalidas(
+                `La contraseña actual es incorrecta. Te ${
+                    restantes === 1 ? 'queda 1 intento' : `quedan ${restantes} intentos`
+                } antes de que la cuenta se bloquee por 30 minutos.`,
+                restantes
+            );
+        }
+
+        if (nuevaPassword === passwordActual) {
+            throw new ErrorValidacionUsuario(
+                'La nueva contraseña debe ser diferente a la contraseña actual'
+            );
+        }
+
+        await this.repo.update(id, {
+            passwordHash: nuevaPassword,
+            intentosFallidosPassword: 0,
+            bloqueadoHasta: undefined,
+        });
+
+        return { mensaje: 'Contraseña actualizada exitosamente' };
     }
 
     async obtenerPreguntaSecreta(email: string) {
