@@ -104,6 +104,7 @@
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
+
 /* Botones */
 .btn-primary {
   width: 100%;
@@ -330,6 +331,16 @@
   margin: 0;
 }
 
+.auth-form .form-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.password-input-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .registro-wrapper {
@@ -341,5 +352,6 @@
   }
   .registro-formulario {
     padding: 2rem;
+    overflow-y: visible;
   }
 }

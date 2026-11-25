@@ -128,10 +128,9 @@ export const RegistroPage = () => {
               </div>
             )}
 
-            <div className="form-row">
+           
               <div className="form-group">
                 <label className="form-label">Nombre completo</label>
-
                 <input
                   type="text"
                   name="nombre"
@@ -144,7 +143,6 @@ export const RegistroPage = () => {
 
               <div className="form-group">
                 <label className="form-label">Apellido</label>
-
                 <input
                   type="text"
                   name="apellido"
@@ -153,7 +151,7 @@ export const RegistroPage = () => {
                   className="form-input"
                 />
               </div>
-            </div>
+            
 
             <div className="form-group">
               <label className="form-label">Correo Electrónico</label>
