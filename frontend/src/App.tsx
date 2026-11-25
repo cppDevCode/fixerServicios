@@ -16,12 +16,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegistroPage />} />
-        <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
-        
         <Route element={<Layout />}>
           {/* Ruta raíz establecida en la vista Home del sitio */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegistroPage />} />
+          <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/prestadores" element={<PrestadoresPage />} />
           <Route path="/prestadores/catalogo" element={<PrestadoresPage vistaInicial="catalogo" />} />
