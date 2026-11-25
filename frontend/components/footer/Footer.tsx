@@ -95,13 +95,7 @@ export function Footer() {
 
             {/* BARRA INFERIOR */}
             <div className="fixer-footer__inferior">
-            <p>© 2026 Fixer. Proyecto académico UTN.</p>
-
-            <div className="fixer-footer__legales">
-                <span>Privacidad</span>
-                <span>Términos de uso</span>
-                <span>Seguridad</span>
-            </div>
+                <p>© 2026 Fixer. Proyecto académico UTN.</p>
             </div>
         </div>
         </footer>
