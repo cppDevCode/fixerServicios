@@ -80,7 +80,7 @@ export function Footer() {
                 </Link>
 
                 <Link to="/panel-pro">Panel Pro</Link>
-                <Link to="/panel-pro">Publicar servicio</Link>
+                
             </div>
 
             {/* ATENCIÓN */}

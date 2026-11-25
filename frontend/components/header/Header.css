@@ -93,27 +93,6 @@
     cursor: not-allowed;
 }
 
-.fixer-header__publicar {
-    padding: 8px 14px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background-color: var(--color-secondary);
-    color: white;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-}
-
-.fixer-header__publicar:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
 
 .fixer-header__usuario-badge {
     display: inline-flex;
