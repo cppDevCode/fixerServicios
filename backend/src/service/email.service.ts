@@ -67,7 +67,7 @@ export class EmailService {
             `  Correo: ${datos.destinatario}`,
             `  Contraseña temporal: ${datos.passwordTemporal}`,
             '',
-            'Por motivos de seguridad, al iniciar sesión por primera vez se te solicitará obligatoriamente cambiar esta contraseña.',
+            'Por motivos de seguridad, al iniciar sesión por primera vez se te solicitará obligatoriamente cambiar esta contraseña y configurar tu pregunta y respuesta secreta de recuperación.',
             '',
             'Saludos,',
             'Equipo de Fixer Servicios',
@@ -78,7 +78,7 @@ export class EmailService {
             '<p>Tu perfil profesional fue registrado en <strong>Fixer Servicios</strong> por un administrador.</p>',
             `<p><strong>Correo:</strong> ${datos.destinatario}<br/>`,
             `<strong>Contraseña temporal:</strong> <code>${datos.passwordTemporal}</code></p>`,
-            '<p>Por motivos de seguridad, al iniciar sesión por primera vez deberás cambiar esta contraseña de forma obligatoria.</p>',
+            '<p>Por motivos de seguridad, al iniciar sesión por primera vez deberás cambiar esta contraseña y configurar tu pregunta y respuesta secreta de recuperación de forma obligatoria.</p>',
             '<p>Equipo de Fixer Servicios</p>',
         ].join('');
 

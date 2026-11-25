@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import {
     cambiarPasswordUsuario,
+    PREGUNTAS_SECRETAS_OPCIONES,
     validarCambioPassword,
 } from '../../services/password.service';
 import './Prestadores.css';
@@ -24,6 +25,10 @@ export function FormularioCambioPassword({
     const [passwordActual, setPasswordActual] = useState('');
     const [nuevaPassword, setNuevaPassword] = useState('');
     const [confirmarPassword, setConfirmarPassword] = useState('');
+    const [preguntaSecreta, setPreguntaSecreta] = useState<string>(
+        PREGUNTAS_SECRETAS_OPCIONES[0]
+    );
+    const [respuestaSecreta, setRespuestaSecreta] = useState('');
 
     const [mostrarActual, setMostrarActual] = useState(false);
     const [mostrarNueva, setMostrarNueva] = useState(false);
@@ -49,11 +54,17 @@ export function FormularioCambioPassword({
         setError(null);
         setMensajeExito(null);
 
-        const errorLocal = validarCambioPassword({
-            passwordActual,
-            nuevaPassword,
-            confirmarPassword,
-        });
+        const errorLocal = validarCambioPassword(
+            {
+                passwordActual,
+                nuevaPassword,
+                confirmarPassword,
+                ...(obligatorio
+                    ? { preguntaSecreta, respuestaSecreta }
+                    : {}),
+            },
+            { exigirPreguntaSecreta: obligatorio }
+        );
 
         if (errorLocal) {
             setError(errorLocal);
@@ -66,6 +77,12 @@ export function FormularioCambioPassword({
                 passwordActual,
                 nuevaPassword,
                 confirmarPassword,
+                ...(obligatorio
+                    ? {
+                          preguntaSecreta: preguntaSecreta.trim(),
+                          respuestaSecreta: respuestaSecreta.trim(),
+                      }
+                    : {}),
             });
 
             if (resultado.ok) {
@@ -73,6 +90,7 @@ export function FormularioCambioPassword({
                 setPasswordActual('');
                 setNuevaPassword('');
                 setConfirmarPassword('');
+                setRespuestaSecreta('');
                 setBloqueadoHasta(null);
                 onPasswordCambiada?.();
                 return;
@@ -124,7 +142,7 @@ export function FormularioCambioPassword({
                     </h3>
                     <p className="formulario-cambio-password__subtitulo">
                         {obligatorio
-                            ? 'Ingresaste con la contraseña temporal enviada a tu correo electrónico. Para continuar usando tu cuenta debés definir una nueva contraseña personal.'
+                            ? 'Ingresaste con la contraseña temporal enviada a tu correo electrónico. Para continuar usando tu cuenta debés definir una nueva contraseña personal y configurar tu pregunta y respuesta secreta de recuperación.'
                             : 'Por seguridad, tras 3 intentos fallidos de contraseña actual la cuenta se bloquea por 30 minutos.'}
                     </p>
                 </div>
@@ -137,8 +155,9 @@ export function FormularioCambioPassword({
                     data-testid="cambio-password-obligatorio"
                 >
                     Ingresá como contraseña actual la clave temporal que recibiste
-                    en tu correo y escribí dos veces tu nueva contraseña. Tras 3
-                    intentos fallidos la cuenta se bloquea por 30 minutos.
+                    en tu correo, escribí dos veces tu nueva contraseña y elegí tu
+                    pregunta y respuesta secreta de recuperación. Tras 3 intentos
+                    fallidos la cuenta se bloquea por 30 minutos.
                 </div>
             )}
 
@@ -264,6 +283,47 @@ export function FormularioCambioPassword({
                 </div>
             </div>
 
+            {obligatorio && (
+                <>
+                    <div className="prestadores-campo">
+                        <label htmlFor="cambio-password-pregunta-secreta">
+                            Pregunta secreta de recuperación *
+                        </label>
+                        <select
+                            id="cambio-password-pregunta-secreta"
+                            name="preguntaSecreta"
+                            value={preguntaSecreta}
+                            onChange={(e) => setPreguntaSecreta(e.target.value)}
+                            disabled={enviando || estaBloqueado}
+                        >
+                            {PREGUNTAS_SECRETAS_OPCIONES.map((opcion) => (
+                                <option key={opcion} value={opcion}>
+                                    {opcion}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="prestadores-campo">
+                        <label htmlFor="cambio-password-respuesta-secreta">
+                            Respuesta secreta *
+                        </label>
+                        <input
+                            id="cambio-password-respuesta-secreta"
+                            name="respuestaSecreta"
+                            type="text"
+                            value={respuestaSecreta}
+                            onChange={(e) =>
+                                setRespuestaSecreta(e.target.value)
+                            }
+                            placeholder="Tu respuesta secreta (sensible a mayúsculas)"
+                            autoComplete="off"
+                            disabled={enviando || estaBloqueado}
+                        />
+                    </div>
+                </>
+            )}
+
             <div className="formulario-prestador__acciones">
                 <button
                     type="submit"
@@ -275,7 +335,9 @@ export function FormularioCambioPassword({
                         ? 'Actualizando...'
                         : estaBloqueado
                           ? 'Cuenta bloqueada (30 min)'
-                          : 'Actualizar contraseña'}
+                          : obligatorio
+                            ? 'Guardar contraseña y pregunta secreta'
+                            : 'Actualizar contraseña'}
                 </button>
             </div>
         </form>

@@ -255,8 +255,13 @@ export class UsuarioController {
                 });
             }
 
-            const { passwordActual, nuevaPassword, confirmarPassword } =
-                req.body ?? {};
+            const {
+                passwordActual,
+                nuevaPassword,
+                confirmarPassword,
+                preguntaSecreta,
+                respuestaSecreta,
+            } = req.body ?? {};
 
             const resultado = await this.service.cambiarPasswordAutenticado(id, {
                 passwordActual:
@@ -267,6 +272,14 @@ export class UsuarioController {
                     typeof confirmarPassword === 'string'
                         ? confirmarPassword
                         : '',
+                preguntaSecreta:
+                    typeof preguntaSecreta === 'string'
+                        ? preguntaSecreta
+                        : undefined,
+                respuestaSecreta:
+                    typeof respuestaSecreta === 'string'
+                        ? respuestaSecreta
+                        : undefined,
             });
 
             res.status(200).json({

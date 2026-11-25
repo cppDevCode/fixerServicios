@@ -279,7 +279,7 @@ describe('Auth API - Integración', () => {
       .send({ aniosExperiencia: 9 })
       .expect(403);
 
-    // Cambia obligatoriamente su contraseña ingresándola 2 veces
+    // Intentar cambiar la contraseña temporal sin definir pregunta/respuesta secreta -> 400
     await request(app)
       .patch(`/api/v1/usuarios/${usuarioId}/password`)
       .set('x-usuario-rol', 'PRESTADOR')
@@ -289,6 +289,32 @@ describe('Auth API - Integración', () => {
         nuevaPassword: 'MiClaveDefinitiva#2026',
         confirmarPassword: 'MiClaveDefinitiva#2026',
       })
+      .expect(400);
+
+    // Cambia obligatoriamente su contraseña e ingresa pregunta y respuesta secreta
+    await request(app)
+      .patch(`/api/v1/usuarios/${usuarioId}/password`)
+      .set('x-usuario-rol', 'PRESTADOR')
+      .set('x-usuario-id', String(usuarioId))
+      .send({
+        passwordActual: passwordTemporal,
+        nuevaPassword: 'MiClaveDefinitiva#2026',
+        confirmarPassword: 'MiClaveDefinitiva#2026',
+        preguntaSecreta: '¿Ciudad de nacimiento?',
+        respuestaSecreta: 'Córdoba',
+      })
+      .expect(200);
+
+    // Verificar que la pregunta y respuesta secreta quedaron guardadas para recuperación
+    const preguntaRes = await request(app)
+      .post('/api/v1/auth/pregunta-secreta')
+      .send({ email: emailPro })
+      .expect(200);
+    expect(preguntaRes.body.data.preguntaSecreta).toBe('¿Ciudad de nacimiento?');
+
+    await request(app)
+      .post('/api/v1/auth/recuperar-password')
+      .send({ email: emailPro, respuesta: 'Córdoba' })
       .expect(200);
 
     // Re-login con nueva clave -> debeCambiarPassword: false y ficha habilitada

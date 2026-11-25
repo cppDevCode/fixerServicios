@@ -346,10 +346,18 @@ export class UsuarioService {
             passwordActual: string;
             nuevaPassword: string;
             confirmarPassword: string;
+            preguntaSecreta?: string;
+            respuestaSecreta?: string;
         },
         ahoraMs: number = Date.now()
     ): Promise<{ mensaje: string }> {
-        const { passwordActual, nuevaPassword, confirmarPassword } = datos;
+        const {
+            passwordActual,
+            nuevaPassword,
+            confirmarPassword,
+            preguntaSecreta,
+            respuestaSecreta,
+        } = datos;
 
         if (!passwordActual || !nuevaPassword || !confirmarPassword) {
             throw new ErrorValidacionUsuario(
@@ -378,6 +386,25 @@ export class UsuarioService {
         const intentosPrevios = bloqueoExpirado
             ? 0
             : (user.intentosFallidosPassword ?? 0);
+
+        const requierePreguntaSecreta = Boolean(user.debeCambiarPassword);
+        const preguntaLimpia =
+            typeof preguntaSecreta === 'string' ? preguntaSecreta.trim() : '';
+        const respuestaLimpia =
+            typeof respuestaSecreta === 'string' ? respuestaSecreta.trim() : '';
+
+        if (requierePreguntaSecreta) {
+            if (!preguntaLimpia) {
+                throw new ErrorValidacionUsuario(
+                    'Debés seleccionar una pregunta secreta de recuperación'
+                );
+            }
+            if (!respuestaLimpia) {
+                throw new ErrorValidacionUsuario(
+                    'La respuesta secreta es obligatoria'
+                );
+            }
+        }
 
         if (user.passwordHash !== passwordActual) {
             const nuevosIntentos = intentosPrevios + 1;
@@ -423,9 +450,17 @@ export class UsuarioService {
             intentosFallidosPassword: 0,
             bloqueadoHasta: undefined,
             debeCambiarPassword: false,
+            ...(preguntaLimpia ? { preguntaSecreta: preguntaLimpia } : {}),
+            ...(respuestaLimpia
+                ? { respuestaSecretaHash: respuestaLimpia }
+                : {}),
         });
 
-        return { mensaje: 'Contraseña actualizada exitosamente' };
+        return {
+            mensaje: requierePreguntaSecreta
+                ? 'Contraseña y pregunta secreta actualizadas exitosamente'
+                : 'Contraseña actualizada exitosamente',
+        };
     }
 
     async obtenerPreguntaSecreta(email: string) {

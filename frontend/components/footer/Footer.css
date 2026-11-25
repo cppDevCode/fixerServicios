@@ -130,6 +130,56 @@
     font-size: 12px;
 }
 
+/* MODO COMPACTO EN VISTAS DE AUTENTICACIÓN (ESCRITORIO) */
+
+@media (min-width: 769px) {
+    .layout-container--auth .fixer-footer__contenedor {
+        padding: 14px 32px 10px;
+    }
+
+    .layout-container--auth .fixer-footer__columnas {
+        gap: 28px;
+        padding-bottom: 10px;
+        align-items: start;
+    }
+
+    .layout-container--auth .fixer-footer__marca {
+        gap: 6px;
+    }
+
+    .layout-container--auth .fixer-footer__logo {
+        width: 105px;
+    }
+
+    .layout-container--auth .fixer-footer__marca p {
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .layout-container--auth .fixer-footer__columna {
+        gap: 5px;
+    }
+
+    .layout-container--auth .fixer-footer__columna h3 {
+        margin: 0 0 2px;
+        font-size: 13px;
+    }
+
+    .layout-container--auth .fixer-footer__columna a,
+    .layout-container--auth .fixer-footer__columna > span {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .layout-container--auth .fixer-footer__estado {
+        margin-top: 2px;
+    }
+
+    .layout-container--auth .fixer-footer__inferior {
+        padding-top: 8px;
+    }
+}
+
 
 
 /* TABLET */
