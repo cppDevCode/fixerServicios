@@ -44,7 +44,9 @@ export interface IFiltrosPrestador {
 export type ICrearPrestador = Omit<
     IPrestador,
     'id' | 'categoriaNombre' | 'ratingPromedio'
->;
+> & {
+    email?: string;
+};
 
 export type IActualizarPrestador = Partial<
     Omit<IPrestador, 'id' | 'categoriaNombre' | 'ratingPromedio'>

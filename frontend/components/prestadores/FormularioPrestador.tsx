@@ -44,6 +44,7 @@ export function FormularioPrestador({
 
     const [nombre, setNombre] = useState(prestadorInicial?.nombre ?? '');
     const [apellido, setApellido] = useState(prestadorInicial?.apellido ?? '');
+    const [email, setEmail] = useState('');
     const [categoriaId, setCategoriaId] = useState<number>(
         prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 1
     );
@@ -109,10 +110,21 @@ export function FormularioPrestador({
 
         const nombreLimpio = nombre.trim();
         const apellidoLimpio = apellido.trim();
+        const emailLimpio = email.trim().toLowerCase();
 
         if (!nombreLimpio || !apellidoLimpio || !Number.isInteger(categoriaId) || categoriaId <= 0) {
             setError('Los campos nombre, apellido y rubro son obligatorios.');
             return;
+        }
+
+        if (!esEdicion) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailLimpio || !emailRegex.test(emailLimpio)) {
+                setError(
+                    'Ingresá un correo electrónico válido del prestador para enviarle su contraseña temporal.'
+                );
+                return;
+            }
         }
 
         const experienciaNumero = Number(aniosExperiencia);
@@ -124,6 +136,7 @@ export function FormularioPrestador({
         const payload: ICrearPrestador = {
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
+            ...(!esEdicion ? { email: emailLimpio } : {}),
             categoriaId,
             provincia: provincia.trim() || undefined,
             localidad: localidad.trim() || undefined,
@@ -156,12 +169,14 @@ export function FormularioPrestador({
             setMensajeExito(
                 esEdicion
                     ? 'Datos del prestador actualizados correctamente.'
-                    : 'Prestador registrado exitosamente.'
+                    : respuesta.msj ||
+                          `Prestador registrado exitosamente. Se envió una contraseña temporal a ${emailLimpio}.`
             );
 
             if (!esEdicion) {
                 setNombre('');
                 setApellido('');
+                setEmail('');
                 setMatricula('');
                 setAcercaDe('');
                 setNroTelefono('');
@@ -230,6 +245,24 @@ export function FormularioPrestador({
                         disabled={deshabilitado}
                     />
                 </div>
+
+                {!esEdicion && (
+                    <div className="prestadores-campo">
+                        <label htmlFor="prestador-email">
+                            Correo electrónico * (recibirá contraseña temporal)
+                        </label>
+                        <input
+                            id="prestador-email"
+                            name="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Ej: profesional@ejemplo.com"
+                            autoComplete="email"
+                            disabled={deshabilitado}
+                        />
+                    </div>
+                )}
 
                 <div className="prestadores-campo">
                     <label htmlFor="prestador-rubro">Rubro / Categoría *</label>

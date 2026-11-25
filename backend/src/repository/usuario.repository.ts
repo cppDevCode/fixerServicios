@@ -120,11 +120,12 @@ export class UsuarioRepository {
         prestadorId?: number,
         ahoraMs: number = Date.now()
     ): { bloqueadoHasta: string; minutosRestantes: number } | null {
-        const usuario = this.usuarios.find(
-            (u) =>
-                (usuarioId !== undefined && u.id === usuarioId) ||
-                (prestadorId !== undefined && u.prestadorId === prestadorId)
-        );
+        const usuario =
+            usuarioId !== undefined
+                ? this.usuarios.find((u) => u.id === usuarioId)
+                : prestadorId !== undefined
+                  ? this.usuarios.find((u) => u.prestadorId === prestadorId)
+                  : undefined;
         if (!usuario?.bloqueadoHasta) {
             return null;
         }
@@ -140,6 +141,27 @@ export class UsuarioRepository {
             bloqueadoHasta: usuario.bloqueadoHasta,
             minutosRestantes,
         };
+    }
+
+    requiereCambioPassword(
+        usuarioId?: number,
+        prestadorId?: number
+    ): boolean {
+        const usuario =
+            usuarioId !== undefined
+                ? this.usuarios.find((u) => u.id === usuarioId)
+                : prestadorId !== undefined
+                  ? this.usuarios.find((u) => u.prestadorId === prestadorId)
+                  : undefined;
+        return Boolean(usuario?.debeCambiarPassword);
+    }
+
+    desvincularPrestador(prestadorId: number): void {
+        for (const usuario of this.usuarios) {
+            if (usuario.prestadorId === prestadorId) {
+                usuario.prestadorId = undefined;
+            }
+        }
     }
 
     async findByEmail(email: string): Promise<IUsuario | undefined> {

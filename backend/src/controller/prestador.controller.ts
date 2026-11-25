@@ -2,12 +2,27 @@ import { Request, Response } from 'express';
 import { IPrestador } from '../interfaces/prestador.interface';
 import { RespuestaApi } from '../interfaces/respuestaApi.interface';
 import {
+    UsuarioRepository,
+    usuarioRepositorySingleton,
+} from '../repository/usuario.repository';
+import {
+    EmailService,
+    emailServiceSingleton,
+    generarPasswordSeguraAleatoria,
+} from '../service/email.service';
+import {
     ErrorValidacionPrestador,
     PrestadorService,
 } from '../service/prestador.service';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export class PrestadorController {
-    constructor(private readonly service = new PrestadorService()) {}
+    constructor(
+        private readonly service = new PrestadorService(),
+        private readonly usuarioRepo: UsuarioRepository = usuarioRepositorySingleton,
+        private readonly emailService: EmailService = emailServiceSingleton
+    ) {}
 
     public listar = (req: Request, res: Response): void => {
         const {
@@ -62,10 +77,11 @@ export class PrestadorController {
         });
     };
 
-    public crear = (req: Request, res: Response): void => {
+    public crear = (req: Request, res: Response): void | Promise<void> => {
         const {
             nombre,
             apellido,
+            email,
             fotoUrl,
             categoriaId,
             ubicacionId,
@@ -87,6 +103,34 @@ export class PrestadorController {
             res.status(400).json({
                 codigo: 400,
                 msj: 'Los campos nombre, apellido y categoriaId son obligatorios',
+                datos: null,
+            });
+            return;
+        }
+
+        const rolHeader =
+            typeof req.headers?.['x-usuario-rol'] === 'string'
+                ? req.headers['x-usuario-rol'].trim().toUpperCase()
+                : undefined;
+
+        const emailLimpio =
+            typeof email === 'string' && email.trim() !== ''
+                ? email.trim().toLowerCase()
+                : undefined;
+
+        if (rolHeader === 'ADMIN' && !emailLimpio) {
+            res.status(400).json({
+                codigo: 400,
+                msj: 'El correo electrónico del prestador es obligatorio para generar y enviar sus credenciales de acceso',
+                datos: null,
+            });
+            return;
+        }
+
+        if (emailLimpio && !EMAIL_REGEX.test(emailLimpio)) {
+            res.status(400).json({
+                codigo: 400,
+                msj: 'Formato de correo electrónico inválido',
                 datos: null,
             });
             return;
@@ -128,32 +172,101 @@ export class PrestadorController {
                 ? Number(ubicacionId)
                 : undefined;
 
+        const datosPrestador = {
+            nombre,
+            apellido,
+            fotoUrl: fotoLimpia,
+            matricula: req.body.matricula,
+            aniosExperiencia: Number(aniosExperiencia) || 0,
+            acercaDe: acercaDe || '',
+            ofreceGarantia: Boolean(ofreceGarantia),
+            categoriaId,
+            ubicacionId: ubicacionIdNumerica,
+            provincia: provinciaLimpia,
+            localidad: localidadLimpia,
+            codigoPostal: codigoPostalLimpio,
+            radio: radioNumerico,
+            telefono: telefono || {
+                codPais: '+54',
+                codArea: '11',
+                nroTelefono: '',
+            },
+        };
+
+        if (!emailLimpio) {
+            try {
+                const nuevo: IPrestador = this.service.crear(datosPrestador);
+                res.status(201).json({
+                    codigo: 201,
+                    msj: 'Prestador creado exitosamente',
+                    datos: nuevo,
+                });
+            } catch (error: unknown) {
+                if (error instanceof ErrorValidacionPrestador) {
+                    res.status(400).json({
+                        codigo: 400,
+                        msj: error.message,
+                        datos: null,
+                    });
+                    return;
+                }
+                throw error;
+            }
+            return;
+        }
+
+        return this.crearConCuentaYCorreo(datosPrestador, emailLimpio, res);
+    };
+
+    private crearConCuentaYCorreo = async (
+        datosPrestador: Parameters<PrestadorService['crear']>[0],
+        emailLimpio: string,
+        res: Response
+    ): Promise<void> => {
         try {
-            const nuevo: IPrestador = this.service.crear({
-                nombre,
-                apellido,
-                fotoUrl: fotoLimpia,
-                matricula: req.body.matricula,
-                aniosExperiencia: Number(aniosExperiencia) || 0,
-                acercaDe: acercaDe || '',
-                ofreceGarantia: Boolean(ofreceGarantia),
-                categoriaId,
-                ubicacionId: ubicacionIdNumerica,
-                provincia: provinciaLimpia,
-                localidad: localidadLimpia,
-                codigoPostal: codigoPostalLimpio,
-                radio: radioNumerico,
-                telefono: telefono || {
-                    codPais: '+54',
-                    codArea: '11',
-                    nroTelefono: '',
-                },
+            const usuarioExistente =
+                await this.usuarioRepo.findByEmail(emailLimpio);
+            if (usuarioExistente) {
+                res.status(409).json({
+                    codigo: 409,
+                    msj: `Ya existe una cuenta registrada con el correo ${emailLimpio}`,
+                    datos: null,
+                });
+                return;
+            }
+
+            const nuevo: IPrestador = this.service.crear(datosPrestador);
+            const passwordTemporal = generarPasswordSeguraAleatoria(12);
+
+            await this.usuarioRepo.create({
+                nombre: nuevo.nombre,
+                apellido: nuevo.apellido,
+                email: emailLimpio,
+                passwordHash: passwordTemporal,
+                rol: 'PRESTADOR',
+                prestadorId: nuevo.id,
+                ubicacionId: nuevo.ubicacionId,
+                telefono: nuevo.telefono,
+                debeCambiarPassword: true,
+            });
+
+            const correo = await this.emailService.enviarCredencialesTemporales({
+                destinatario: emailLimpio,
+                nombre: nuevo.nombre,
+                apellido: nuevo.apellido,
+                passwordTemporal,
             });
 
             res.status(201).json({
                 codigo: 201,
-                msj: 'Prestador creado exitosamente',
+                msj: `Prestador creado exitosamente. Se enviaron las credenciales temporales a ${emailLimpio}`,
                 datos: nuevo,
+                credenciales: {
+                    email: correo.para,
+                    enviado: true,
+                    modo: correo.modo,
+                    debeCambiarPassword: true,
+                },
             });
         } catch (error: unknown) {
             if (error instanceof ErrorValidacionPrestador) {

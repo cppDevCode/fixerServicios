@@ -7,6 +7,7 @@ export interface IUsuarioSesion {
     email: string;
     rol: RolUsuario;
     prestadorId?: number;
+    debeCambiarPassword?: boolean;
 }
 
 export const EVENTO_CAMBIO_SESION = 'fixer-sesion-cambiada';
@@ -56,10 +57,24 @@ export function obtenerUsuarioActual(): IUsuarioSesion | null {
                 usuario.prestadorId !== undefined && usuario.prestadorId !== null
                     ? Number(usuario.prestadorId)
                     : undefined,
+            debeCambiarPassword: Boolean(usuario.debeCambiarPassword),
         };
     } catch {
         return null;
     }
+}
+
+export function marcarPasswordCambiada(): void {
+    const actual = obtenerUsuarioActual();
+    if (!actual || typeof window === 'undefined' || !window.localStorage) {
+        return;
+    }
+    const actualizado: IUsuarioSesion = {
+        ...actual,
+        debeCambiarPassword: false,
+    };
+    window.localStorage.setItem('usuario', JSON.stringify(actualizado));
+    window.dispatchEvent(new Event(EVENTO_CAMBIO_SESION));
 }
 
 export function guardarSesionUsuario(

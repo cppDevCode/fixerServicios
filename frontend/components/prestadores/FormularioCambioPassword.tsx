@@ -9,13 +9,17 @@ import './Prestadores.css';
 export interface FormularioCambioPasswordProps {
     usuarioId: number;
     bloqueadoHastaInicial?: string | null;
+    obligatorio?: boolean;
     onCuentaBloqueada?: (bloqueadoHasta: string) => void;
+    onPasswordCambiada?: () => void;
 }
 
 export function FormularioCambioPassword({
     usuarioId,
     bloqueadoHastaInicial = null,
+    obligatorio = false,
     onCuentaBloqueada,
+    onPasswordCambiada,
 }: FormularioCambioPasswordProps) {
     const [passwordActual, setPasswordActual] = useState('');
     const [nuevaPassword, setNuevaPassword] = useState('');
@@ -70,6 +74,7 @@ export function FormularioCambioPassword({
                 setNuevaPassword('');
                 setConfirmarPassword('');
                 setBloqueadoHasta(null);
+                onPasswordCambiada?.();
                 return;
             }
 
@@ -112,13 +117,30 @@ export function FormularioCambioPassword({
             <div className="formulario-cambio-password__cabecera">
                 <Lock size={18} aria-hidden="true" />
                 <div>
-                    <h3>Cambiar contraseña</h3>
+                    <h3>
+                        {obligatorio
+                            ? 'Cambio de contraseña obligatorio'
+                            : 'Cambiar contraseña'}
+                    </h3>
                     <p className="formulario-cambio-password__subtitulo">
-                        Por seguridad, tras 3 intentos fallidos de contraseña actual
-                        la cuenta se bloquea por 30 minutos.
+                        {obligatorio
+                            ? 'Ingresaste con la contraseña temporal enviada a tu correo electrónico. Para continuar usando tu cuenta debés definir una nueva contraseña personal.'
+                            : 'Por seguridad, tras 3 intentos fallidos de contraseña actual la cuenta se bloquea por 30 minutos.'}
                     </p>
                 </div>
             </div>
+
+            {obligatorio && (
+                <div
+                    className="formulario-cambio-password__aviso-obligatorio"
+                    role="status"
+                    data-testid="cambio-password-obligatorio"
+                >
+                    Ingresá como contraseña actual la clave temporal que recibiste
+                    en tu correo y escribí dos veces tu nueva contraseña. Tras 3
+                    intentos fallidos la cuenta se bloquea por 30 minutos.
+                </div>
+            )}
 
             {error && (
                 <div

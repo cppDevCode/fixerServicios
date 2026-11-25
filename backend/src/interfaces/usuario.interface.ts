@@ -23,6 +23,7 @@ export interface IUsuario {
     respuestaSecretaHash?: string;
     intentosFallidosPassword?: number;
     bloqueadoHasta?: string;
+    debeCambiarPassword?: boolean;
     createdAt: string;
     updatedAt?: string;
 }

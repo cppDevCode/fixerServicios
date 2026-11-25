@@ -16,6 +16,10 @@ import {
     UbicacionRepository,
     ubicacionRepositorySingleton,
 } from '../repository/ubicacion.repository';
+import {
+    UsuarioRepository,
+    usuarioRepositorySingleton,
+} from '../repository/usuario.repository';
 
 export class ErrorValidacionPrestador extends Error {
     constructor(message: string) {
@@ -43,7 +47,8 @@ export class PrestadorService {
         private readonly repository: PrestadorRepository = prestadorRepositorySingleton,
         private readonly categoriaRepo: CategoriaRepository = categoriaRepositorySingleton,
         private readonly ubicacionRepo: UbicacionRepository = ubicacionRepositorySingleton,
-        private readonly resenaRepo: ResenaRepository = resenaRepositorySingleton
+        private readonly resenaRepo: ResenaRepository = resenaRepositorySingleton,
+        private readonly usuarioRepo: UsuarioRepository = usuarioRepositorySingleton
     ) {}
 
     public listar(filtros: IFiltrosPrestador) {
@@ -258,8 +263,9 @@ export class PrestadorService {
     public eliminar(id: number): boolean {
         const eliminado = this.repository.delete(id);
         if (eliminado) {
-            // Integridad referencial ON DELETE CASCADE hacia RESENA
+            // Integridad referencial ON DELETE CASCADE hacia RESENA y ON DELETE SET NULL hacia USUARIO
             this.resenaRepo.deleteByPrestadorId(id);
+            this.usuarioRepo.desvincularPrestador(id);
         }
         return eliminado;
     }

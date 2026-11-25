@@ -335,6 +335,7 @@ export class UsuarioService {
                 email: user.email,
                 rol: user.rol,
                 prestadorId,
+                debeCambiarPassword: Boolean(user.debeCambiarPassword),
             },
         };
     }
@@ -421,6 +422,7 @@ export class UsuarioService {
             passwordHash: nuevaPassword,
             intentosFallidosPassword: 0,
             bloqueadoHasta: undefined,
+            debeCambiarPassword: false,
         });
 
         return { mensaje: 'Contraseña actualizada exitosamente' };

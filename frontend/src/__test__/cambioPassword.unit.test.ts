@@ -163,4 +163,26 @@ describe('Cambio de contraseña desde Mi Ficha Profesional', () => {
         expect(htmlFichaBloqueada).toContain('Edición bloqueada (30 min)');
         expect(htmlFichaBloqueada).toContain('disabled=""');
     });
+
+    it('solicita email al crear prestador desde Admin y muestra modo obligatorio en FormularioCambioPassword', () => {
+        const htmlAltaAdmin = renderToStaticMarkup(
+            createElement(FormularioPrestador, {
+                titulo: 'Nuevo prestador',
+            })
+        );
+        expect(htmlAltaAdmin).toContain('id="prestador-email"');
+        expect(htmlAltaAdmin).toContain('recibirá contraseña temporal');
+
+        const htmlObligatorio = renderToStaticMarkup(
+            createElement(FormularioCambioPassword, {
+                usuarioId: 10,
+                obligatorio: true,
+            })
+        );
+        expect(htmlObligatorio).toContain('Cambio de contraseña obligatorio');
+        expect(htmlObligatorio).toContain(
+            'data-testid="cambio-password-obligatorio"'
+        );
+        expect(htmlObligatorio).toContain('contraseña temporal');
+    });
 });

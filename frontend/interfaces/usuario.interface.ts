@@ -32,6 +32,7 @@ export interface IUsuario {
     // Datos de seguridad (solo pregunta y estado de bloqueo; nunca hashes en cliente)
     preguntaSecreta?: string;
     bloqueadoHasta?: string;
+    debeCambiarPassword?: boolean;
 
     // Vínculo con la entidad Prestador (si el rol es PRESTADOR)
     prestadorId?: number;

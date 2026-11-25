@@ -1283,3 +1283,19 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.formulario-cambio-password__aviso-obligatorio {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.cambio-password-obligatorio-pantalla {
+    max-width: 540px;
+    margin: 32px auto;
+    padding: 0 16px;
+}

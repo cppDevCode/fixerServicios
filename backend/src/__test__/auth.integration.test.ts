@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { Servidor } from '../core/Servidor';
+import { emailServiceSingleton } from '../service/email.service';
 
 const app = new Servidor().obtenerApp();
 
@@ -190,6 +191,124 @@ describe('Auth API - Integración', () => {
     const prestadorIdOk: number = registro.body.data.prestador.id;
     await request(app)
       .delete(`/api/v1/prestadores/${prestadorIdOk}`)
+      .set('x-usuario-rol', 'ADMIN')
+      .expect(200);
+  });
+
+  it('Alta de prestador desde ADMIN solicita email, genera contraseña segura aleatoria, la envía por correo y obliga a cambiarla al iniciar sesión', async () => {
+    const emailPro = `alta.admin.${Date.now()}@example.com`;
+
+    // ADMIN sin email -> 400
+    await request(app)
+      .post('/api/v1/prestadores')
+      .set('x-usuario-rol', 'ADMIN')
+      .send({
+        nombre: 'Ignacio',
+        apellido: 'Paz',
+        categoriaId: 1,
+        aniosExperiencia: 8,
+        acercaDe: 'Plomero matriculado',
+        ofreceGarantia: true,
+        telefono: { codPais: '+54', codArea: '351', nroTelefono: '4123456' },
+      })
+      .expect(400);
+
+    // ADMIN con email válido -> 201 + cuenta PRESTADOR + envío de correo con contraseña temporal
+    const altaRes = await request(app)
+      .post('/api/v1/prestadores')
+      .set('x-usuario-rol', 'ADMIN')
+      .send({
+        nombre: 'Ignacio',
+        apellido: 'Paz',
+        email: emailPro,
+        categoriaId: 1,
+        provincia: 'Córdoba',
+        localidad: 'Córdoba Capital',
+        aniosExperiencia: 8,
+        acercaDe: 'Plomero matriculado',
+        ofreceGarantia: true,
+        telefono: { codPais: '+54', codArea: '351', nroTelefono: '4123456' },
+      })
+      .expect(201);
+
+    const prestadorId: number = altaRes.body.datos.id;
+    expect(altaRes.body.credenciales).toMatchObject({
+      email: emailPro,
+      enviado: true,
+      debeCambiarPassword: true,
+    });
+
+    // Correo duplicado -> 409 Conflict
+    await request(app)
+      .post('/api/v1/prestadores')
+      .set('x-usuario-rol', 'ADMIN')
+      .send({
+        nombre: 'Otro',
+        apellido: 'Pro',
+        email: emailPro,
+        categoriaId: 2,
+        aniosExperiencia: 2,
+        acercaDe: 'Test duplicado',
+        ofreceGarantia: false,
+        telefono: { codPais: '+54', codArea: '11', nroTelefono: '40009999' },
+      })
+      .expect(409);
+
+    // Verificar correo enviado con contraseña segura aleatoria
+    const correoEnviado = emailServiceSingleton.obtenerUltimoCorreoPara(emailPro);
+    expect(correoEnviado).toBeDefined();
+    const passwordTemporal = correoEnviado!.passwordTemporal;
+    expect(passwordTemporal.length).toBeGreaterThanOrEqual(12);
+
+    // Login con la contraseña temporal -> exige cambio obligatorio (debeCambiarPassword: true)
+    const loginTemporal = await request(app)
+      .post('/api/v1/auth/login')
+      .send({ email: emailPro, password: passwordTemporal })
+      .expect(200);
+
+    expect(loginTemporal.body.data.usuario.debeCambiarPassword).toBe(true);
+    expect(loginTemporal.body.data.usuario.prestadorId).toBe(prestadorId);
+    const usuarioId: number = loginTemporal.body.data.usuario.id;
+
+    // Antes de cambiar la contraseña temporal no puede editar su ficha -> 403
+    await request(app)
+      .put(`/api/v1/prestadores/${prestadorId}`)
+      .set('x-usuario-rol', 'PRESTADOR')
+      .set('x-usuario-id', String(usuarioId))
+      .set('x-prestador-id', String(prestadorId))
+      .send({ aniosExperiencia: 9 })
+      .expect(403);
+
+    // Cambia obligatoriamente su contraseña ingresándola 2 veces
+    await request(app)
+      .patch(`/api/v1/usuarios/${usuarioId}/password`)
+      .set('x-usuario-rol', 'PRESTADOR')
+      .set('x-usuario-id', String(usuarioId))
+      .send({
+        passwordActual: passwordTemporal,
+        nuevaPassword: 'MiClaveDefinitiva#2026',
+        confirmarPassword: 'MiClaveDefinitiva#2026',
+      })
+      .expect(200);
+
+    // Re-login con nueva clave -> debeCambiarPassword: false y ficha habilitada
+    const loginDefinitivo = await request(app)
+      .post('/api/v1/auth/login')
+      .send({ email: emailPro, password: 'MiClaveDefinitiva#2026' })
+      .expect(200);
+    expect(loginDefinitivo.body.data.usuario.debeCambiarPassword).toBe(false);
+
+    await request(app)
+      .put(`/api/v1/prestadores/${prestadorId}`)
+      .set('x-usuario-rol', 'PRESTADOR')
+      .set('x-usuario-id', String(usuarioId))
+      .set('x-prestador-id', String(prestadorId))
+      .send({ aniosExperiencia: 9 })
+      .expect(200);
+
+    // Limpieza del prestador creado
+    await request(app)
+      .delete(`/api/v1/prestadores/${prestadorId}`)
       .set('x-usuario-rol', 'ADMIN')
       .expect(200);
   });
