@@ -23,7 +23,9 @@ export const UsuariosPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [exportando, setExportando] = useState(false);
+  const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
+  
   const API_URL = '/api/v1';
 
   useEffect(() => {
@@ -94,15 +96,67 @@ export const UsuariosPage = () => {
     setPage(1);
   };
 
-  const handleExport = () => {
-    const datos = usuarios.map(u => ({
-      'ID': u.id, 'Nombre': u.nombre, 'Apellido': u.apellido,
-      'Email': u.email, 'Rol': u.rol, 'Ubicación ID': u.ubicacionId || '-'
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(datos);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
-    XLSX.writeFile(workbook, 'Padron_Usuarios.xlsx');
+  const handleExport = async () => {
+      if (exportando) return;
+
+      setExportando(true);
+      setErrorExportacion(null);
+
+      try {
+          const params = new URLSearchParams({
+              page: '1',
+              limit: String(Math.max(totalItems, 1)),
+              search,
+          });
+
+          const response = await fetch(
+              `${API_URL}/usuarios?${params.toString()}`,
+              {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      ...construirHeadersAutenticacion(usuarioActual),
+                  },
+              }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok || result.code !== 200) {
+              throw new Error(
+                  result.msg || 'Error al exportar los usuarios'
+              );
+          }
+
+          const datos = result.data.map((u: IUsuario) => ({
+              'ID': u.id,
+              'Nombre': u.nombre,
+              'Apellido': u.apellido,
+              'Email': u.email,
+              'Rol': u.rol,
+              'Ubicación ID': u.ubicacionId || '-',
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(datos);
+          const workbook = XLSX.utils.book_new();
+
+          XLSX.utils.book_append_sheet(
+              workbook,
+              worksheet,
+              'Usuarios'
+          );
+
+          XLSX.writeFile(workbook, 'Padron_Usuarios.xlsx');
+
+      } catch (err) {
+          setErrorExportacion(
+              err instanceof Error
+                  ? err.message
+                  : 'No se pudo exportar el padrón de usuarios.'
+          );
+      } finally {
+          setExportando(false);
+      }
   };
 
   return (
@@ -120,8 +174,17 @@ export const UsuariosPage = () => {
           onChange={handleSearch}
           className="search-input"
         />
-        <button onClick={handleExport} className="btn-export">
-          📥 Exportar a Excel
+        {errorExportacion && (
+            <div className="error-state" role="alert">
+                {errorExportacion}
+            </div>
+        )}
+        <button
+            onClick={handleExport}
+            className="btn-export"
+            disabled={exportando || loading}
+        >
+            {exportando ? 'Exportando...' : '📥 Exportar a Excel'}
         </button>
       </div>
 

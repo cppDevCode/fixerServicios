@@ -153,10 +153,22 @@ export function ListadoPrestadores({
         setMensajeExportacion(null);
 
         try {
+            const respuesta = prestadoresIniciales
+                ? { datos: prestadoresIniciales }
+                : await obtenerPrestadores({
+                    page: 1,
+                    limit: Math.max(total, 1),
+                    rubro: rubro || undefined,
+                    search: search || undefined,
+                    sortBy,
+                    order,
+                });
+
             const resultado = await exportarCatalogoPrestadores(
-                prestadores,
+                respuesta.datos,
                 formatoExportacion
             );
+
             setMensajeExportacion(
                 `Catálogo exportado (${resultado.nombreArchivo} - ${resultado.totalRegistros} registros).`
             );
