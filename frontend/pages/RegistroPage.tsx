@@ -71,10 +71,7 @@ export const RegistroPage = () => {
     <div className="auth-container-registro">
       <div className="registro-wrapper">
         <div className="registro-formulario">
-          <div className="auth-header" style={{ textAlign: 'left' }}>
-            <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>
-              Fixer
-            </h1>
+          <div className="auth-header">
             <h2 className="registro-titulo">Creá tu cuenta en Fixer</h2>
 
             <p className="auth-subtitle">
@@ -86,58 +83,60 @@ export const RegistroPage = () => {
           {success && <div className="success-message">{success}</div>}
 
           <form onSubmit={handleRegistro} className="auth-form">
-            <div className="checkbox-prestador">
-              <input
-                type="checkbox"
-                id="esPrestador"
-                name="esPrestador"
-                checked={formData.esPrestador}
-                onChange={handleChange}
-              />
+            <div className="prestador-opciones-fila">
+              <div className="checkbox-prestador">
+                <input
+                  type="checkbox"
+                  id="esPrestador"
+                  name="esPrestador"
+                  checked={formData.esPrestador}
+                  onChange={handleChange}
+                />
 
-              <label htmlFor="esPrestador">
-                <strong>Quiero ofrecer servicios profesionales</strong>
-                <span>
-                  Soy un profesional de oficios (plomería, electricidad, gas,
-                  etc.) y quiero captar nuevos clientes.
-                </span>
-              </label>
+                <label htmlFor="esPrestador">
+                  <strong>Quiero ofrecer servicios profesionales</strong>
+                  <span>
+                    Soy un profesional de oficios y quiero captar nuevos clientes.
+                  </span>
+                </label>
+              </div>
+
+              {formData.esPrestador && (
+                <div className="form-group prestador-especialidad-grupo">
+                  <label className="form-label">Especialidad</label>
+
+                  <select
+                    name="especialidad"
+                    value={formData.especialidad}
+                    onChange={handleChange}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Seleccioná tu especialidad...</option>
+                    <option value="Albañilería">Albañilería</option>
+                    <option value="Carpintería">Carpintería</option>
+                    <option value="Cerrajería">Cerrajería</option>
+                    <option value="Electricidad">Electricidad</option>
+                    <option value="Gasista">Gasista</option>
+                    <option value="Jardinería">Jardinería</option>
+                    <option value="Pintura">Pintura</option>
+                    <option value="Plomería">Plomería</option>
+                    <option value="Refrigeración">Refrigeración</option>
+                  </select>
+                </div>
+              )}
             </div>
 
-            {formData.esPrestador && (
+            <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Especialidad</label>
-
-                <select
-                  name="especialidad"
-                  onChange={handleChange}
-                  className="form-select"
-                  required
-                >
-                  <option value="">Seleccioná tu especialidad...</option>
-                  <option value="Albañilería">Albañilería</option>
-                  <option value="Carpintería">Carpintería</option>
-                  <option value="Cerrajería">Cerrajería</option>
-                  <option value="Electricidad">Electricidad</option>
-                  <option value="Gasista">Gasista</option>
-                  <option value="Jardinería">Jardinería</option>
-                  <option value="Pintura">Pintura</option>
-                  <option value="Plomería">Plomería</option>
-                  <option value="Refrigeración">Refrigeración</option>
-                </select>
-              </div>
-            )}
-
-           
-              <div className="form-group">
-                <label className="form-label">Nombre completo</label>
+                <label className="form-label">Nombre</label>
                 <input
                   type="text"
                   name="nombre"
                   required
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="Ej: Martina Gómez"
+                  placeholder="Ej: Martina"
                 />
               </div>
 
@@ -149,108 +148,114 @@ export const RegistroPage = () => {
                   required
                   onChange={handleChange}
                   className="form-input"
+                  placeholder="Ej: Gómez"
                 />
               </div>
-            
-
-            <div className="form-group">
-              <label className="form-label">Correo Electrónico</label>
-
-              <input
-                type="email"
-                name="email"
-                required
-                onChange={handleChange}
-                className="form-input"
-                placeholder="martina@ejemplo.com"
-              />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Contraseña segura</label>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Correo Electrónico</label>
 
-              <div className="password-input-wrapper">
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
+                  type="email"
+                  name="email"
                   required
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="Mínimo 6 caracteres"
-                  autoComplete="new-password"
+                  placeholder="martina@ejemplo.com"
                 />
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
-                  aria-label={
-                    showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-                  }
-                  aria-pressed={showPassword}
-                >
-                  {showPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
+              <div className="form-group">
+                <label className="form-label">Contraseña segura</label>
+
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    required
+                    onChange={handleChange}
+                    className="form-input"
+                    placeholder="Mínimo 6 caracteres"
+                    autoComplete="new-password"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="password-toggle"
+                    aria-label={
+                      showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                    }
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                Pregunta secreta de recuperación
-              </label>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  Pregunta secreta de recuperación
+                </label>
 
-              <select
-                name="preguntaSecreta"
-                onChange={handleChange}
-                className="form-select"
+                <select
+                  name="preguntaSecreta"
+                  value={formData.preguntaSecreta}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="¿Nombre de tu primera mascota?">
+                    ¿Nombre de tu primera mascota?
+                  </option>
+                  <option value="¿Ciudad de nacimiento?">
+                    ¿Ciudad de nacimiento?
+                  </option>
+                  <option value="¿Nombre de tu mejor amigo de la infancia?">
+                    ¿Nombre de tu mejor amigo de la infancia?
+                  </option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Respuesta secreta</label>
+
+                <input
+                  type="text"
+                  name="respuestaSecreta"
+                  required
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Sensible a mayúsculas"
+                />
+              </div>
+            </div>
+
+            <div className="registro-acciones-pie">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary"
               >
-                <option value="¿Nombre de tu primera mascota?">
-                  ¿Nombre de tu primera mascota?
-                </option>
-                <option value="¿Ciudad de nacimiento?">
-                  ¿Ciudad de nacimiento?
-                </option>
-                <option value="¿Nombre de tu mejor amigo de la infancia?">
-                  ¿Nombre de tu mejor amigo de la infancia?
-                </option>
-              </select>
+                {loading
+                  ? 'Registrando...'
+                  : formData.esPrestador
+                    ? 'Crear Cuenta de Prestador'
+                    : 'Crear Cuenta de Cliente'}
+              </button>
+
+              <Link to="/login" className="auth-link-gray">
+                ¿Ya tenés una cuenta? <span>Iniciar sesión</span>
+              </Link>
             </div>
-
-            <div className="form-group">
-              <label className="form-label">Respuesta secreta</label>
-
-              <input
-                type="text"
-                name="respuestaSecreta"
-                required
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Tu respuesta secreta (sensible a mayúsculas)"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-            >
-              {loading
-                ? 'Registrando...'
-                : formData.esPrestador
-                  ? 'Crear Cuenta de Prestador'
-                  : 'Crear Cuenta de Cliente'}
-            </button>
           </form>
-
-          <div className="auth-links" style={{ textAlign: 'center' }}>
-            <Link to="/login" className="auth-link-gray">
-              ¿Ya tenés una cuenta? <span>Iniciar sesión</span>
-            </Link>
-          </div>
         </div>
 
         <div className="registro-imagen">

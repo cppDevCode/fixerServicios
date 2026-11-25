@@ -89,10 +89,7 @@ export const LoginPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-header" style={{ textAlign: 'left' }}>
-          <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>
-            Fixer
-          </h1>
+        <div className="auth-header">
           <h2 className="registro-titulo">Iniciar Sesión</h2>
           <p className="auth-subtitle">
             Soluciones para tu hogar

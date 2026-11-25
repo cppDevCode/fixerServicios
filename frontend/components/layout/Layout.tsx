@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from '../header/Header';
 import { Footer } from '../footer/Footer';
 import { FormularioCambioPassword } from '../prestadores/FormularioCambioPassword';
@@ -12,6 +12,7 @@ import {
 import './Layout.css';
 
 export const Layout = () => {
+    const location = useLocation();
     const [usuarioActual, setUsuarioActual] = useState<IUsuarioSesion | null>(
         () => obtenerUsuarioActual()
     );
@@ -29,9 +30,16 @@ export const Layout = () => {
     }, []);
 
     const requiereCambioPassword = Boolean(usuarioActual?.debeCambiarPassword);
+    const esRutaAuth =
+        !requiereCambioPassword &&
+        (location.pathname === '/login' ||
+            location.pathname === '/registro' ||
+            location.pathname === '/recuperar-password');
 
     return (
-        <div className="layout-container">
+        <div
+            className={`layout-container${esRutaAuth ? ' layout-container--auth' : ''}`}
+        >
             <Header />
 
             <main className="content-area">
