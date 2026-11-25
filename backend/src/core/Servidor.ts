@@ -17,7 +17,22 @@ export class Servidor {
     }
 
     private middlewares() {
-        this.app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:5174']}));
+        const origenesEnv = (process.env.CORS_ORIGIN ?? '')
+            .split(',')
+            .map((origen) => origen.trim())
+            .filter(Boolean);
+        const origenesPermitidos = Array.from(
+            new Set([
+                'http://localhost:5173',
+                'http://localhost:5174',
+                ...origenesEnv,
+            ])
+        );
+        this.app.use(
+            cors({
+                origin: origenesEnv.includes('*') ? '*' : origenesPermitidos,
+            })
+        );
         this.app.use(express.json({ limit: '5mb' }));
     }
 
