@@ -67,7 +67,9 @@ El archivo [`backend/src/__test__/prestador.integration.test.ts`](../backend/src
 | **`201 Created`** | `POST /api/v1/prestadores` | Creación de un nuevo prestador con asignación de `id` autoincremental y normalización de `fotoUrl`. |
 | **`400 Bad Request`** | `POST /api/v1/prestadores` | Rechazo cuando falta cualquiera de los campos obligatorios (`nombre`, `apellido` o `categoriaId`). |
 | **`400 Bad Request`** | `PUT /api/v1/prestadores` y `DELETE /api/v1/prestadores` | Rechazo cuando no se proporciona el identificador `id` ni en la URL ni en el cuerpo de la petición. |
-| **`403 Forbidden`** | `POST`, `PUT`, `DELETE /api/v1/prestadores` | Validación de permisos por rol (`ADMIN`, `PRESTADOR` sobre ficha ajena y `USUARIO`). |
+| **`403 Forbidden`** | `POST`, `PUT`, `DELETE /api/v1/prestadores` | Validación de permisos por rol (`ADMIN`, `PRESTADOR` sobre ficha ajena, `USUARIO` y prestador con `debeCambiarPassword: true`). |
+| **`409 Conflict`** | `POST /api/v1/prestadores`, `POST / PUT / DELETE /api/v1/categorias` | Rechazo ante correo electrónico duplicado, categoría duplicada o intento de baja de categoría con prestadores asociados (`ON DELETE RESTRICT`). |
+| **`423 Locked`** | `PUT /api/v1/prestadores/:id`, `POST /api/v1/auth/login`, `PATCH /api/v1/usuarios/:id/password` | Bloqueo activo por 30 minutos tras 3 intentos fallidos de contraseña actual. |
 | **`404 Not Found`** | `GET`, `PUT`, `DELETE /api/v1/prestadores/99999` | Respuesta controlada `{ codigo: 404, msj: 'Prestador con id ... no encontrado', datos: null }` ante IDs inexistentes. |
 
 ---
