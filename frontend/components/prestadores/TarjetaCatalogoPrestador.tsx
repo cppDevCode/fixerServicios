@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { IPrestador } from '../../interfaces/prestador.interface';
 import { formatearTelefonoPrestador } from '../../services/exportarCatalogo.service';
+import { obtenerNombreCategoria } from '../../services/prestador.service';
 import { AvatarPrestador } from './AvatarPrestador';
 
 const ESPECIALIDADES_POR_RUBRO: Record<string, string> = {
@@ -16,9 +17,10 @@ const ESPECIALIDADES_POR_RUBRO: Record<string, string> = {
 };
 
 export function obtenerTituloEspecialidad(prestador: IPrestador): string {
+    const rubroNombre = obtenerNombreCategoria(prestador);
     return (
-        ESPECIALIDADES_POR_RUBRO[prestador.categoriaId] ??
-        `Especialista en ${prestador.categoriaId}`
+        ESPECIALIDADES_POR_RUBRO[rubroNombre] ??
+        `Especialista en ${rubroNombre}`
     );
 }
 
@@ -76,7 +78,7 @@ export function TarjetaCatalogoPrestador({
                         <span className="catalogo-tarjeta__subtitulo">
                             {prestador.matricula
                                 ? `Matrícula ${prestador.matricula}`
-                                : `Especialista en ${prestador.categoriaId}`}
+                                : `Especialista en ${obtenerNombreCategoria(prestador)}`}
                         </span>
                     </div>
                 </div>
@@ -103,7 +105,7 @@ export function TarjetaCatalogoPrestador({
 
                 <div className="catalogo-tarjeta__etiquetas">
                     <span className="catalogo-chip catalogo-chip--azul">
-                        {prestador.categoriaId}
+                        {obtenerNombreCategoria(prestador)}
                     </span>
 
                     <span className="catalogo-chip catalogo-chip--naranja">

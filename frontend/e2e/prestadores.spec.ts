@@ -121,6 +121,9 @@ test.describe('Módulo 1: Prestadores (E2E Frontend)', () => {
 
         await page.locator('#prestador-nombre').fill('Ramiro');
         await page.locator('#prestador-apellido').fill('Villalba');
+        await page
+            .locator('#prestador-email')
+            .fill(`ramiro.villalba.${Date.now()}@example.com`);
         await page.locator('#prestador-rubro').selectOption('Gasista');
         await page.locator('#prestador-provincia').selectOption('Mendoza');
         await page.locator('#prestador-localidad').selectOption('San Rafael');

@@ -4,6 +4,7 @@ import type {
     IPrestador,
     ITelefonoPrestador,
 } from '../interfaces/prestador.interface';
+import { obtenerNombreCategoria } from './prestador.service';
 
 export interface ResultadoArchivoCatalogo {
     contenido: string | Uint8Array;
@@ -50,8 +51,9 @@ export function generarContenidoPdf(prestadores: IPrestador[]): string {
             const garantia = p.ofreceGarantia ? 'Si' : 'No';
             const rating = p.ratingPromedio !== undefined ? p.ratingPromedio.toFixed(1) : '-';
             const tel = formatearTelefonoPrestador(p.telefono);
+            const rubro = obtenerNombreCategoria(p);
             lineas.push(
-                `#${p.id} ${p.nombre} ${p.apellido} | ${p.categoriaId} | Mat: ${matricula} | Exp: ${p.aniosExperiencia}a | Garantia: ${garantia} | Tel: ${tel} | Rating: ${rating}`
+                `#${p.id} ${p.nombre} ${p.apellido} | ${rubro} | Mat: ${matricula} | Exp: ${p.aniosExperiencia}a | Garantia: ${garantia} | Tel: ${tel} | Rating: ${rating}`
             );
         }
     }
@@ -107,7 +109,7 @@ export async function generarExcelCatalogo(
             id: p.id,
             nombre: p.nombre,
             apellido: p.apellido,
-            rubro: p.categoriaId,
+            rubro: obtenerNombreCategoria(p),
             matricula: p.matricula ?? 'Sin matrícula',
             experiencia: p.aniosExperiencia,
             garantia: p.ofreceGarantia ? 'Sí' : 'No',

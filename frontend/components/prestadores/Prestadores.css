@@ -1212,3 +1212,90 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Columna de edición y formulario de cambio de contraseña en Mi Ficha Profesional */
+
+.prestador-detalle-columna-edicion {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formulario-cambio-password__cabecera {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--color-primary);
+}
+
+.formulario-cambio-password__cabecera h3 {
+    margin: 0;
+    color: var(--color-text);
+}
+
+.formulario-cambio-password__subtitulo {
+    margin: 4px 0 0;
+    font-size: 0.84rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.formulario-cambio-password__exito {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.campo-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.campo-password-wrapper input {
+    width: 100%;
+    padding-right: 42px;
+}
+
+.campo-password-toggle {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.campo-password-toggle:hover:not(:disabled) {
+    color: var(--color-primary);
+}
+
+.campo-password-toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.formulario-cambio-password__aviso-obligatorio {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.cambio-password-obligatorio-pantalla {
+    max-width: 540px;
+    margin: 32px auto;
+    padding: 0 16px;
+}

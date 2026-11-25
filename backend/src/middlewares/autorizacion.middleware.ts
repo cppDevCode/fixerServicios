@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { RespuestaApi } from '../interfaces/respuestaApi.interface';
+import { usuarioRepositorySingleton } from '../repository/usuario.repository';
 
 function obtenerCabecera(req: Request, nombre: string): string | undefined {
     const valor = req.headers[nombre];
@@ -55,13 +56,51 @@ export function verificarPermisoEditarPrestador(
         const prestadorIdSesion = Number(
             obtenerCabecera(req, 'x-prestador-id')
         );
-        const prestadorIdObjetivo = Number(req.params.id);
+        const usuarioIdSesionRaw = Number(
+            obtenerCabecera(req, 'x-usuario-id')
+        );
+        const usuarioIdSesion =
+            Number.isInteger(usuarioIdSesionRaw) && usuarioIdSesionRaw > 0
+                ? usuarioIdSesionRaw
+                : undefined;
+        const prestadorIdObjetivo = Number(req.params.id || req.body?.id);
 
         if (
             Number.isInteger(prestadorIdSesion) &&
             prestadorIdSesion > 0 &&
             prestadorIdSesion === prestadorIdObjetivo
         ) {
+            const bloqueo = usuarioRepositorySingleton.obtenerBloqueoActivo(
+                usuarioIdSesion,
+                prestadorIdSesion
+            );
+            if (bloqueo) {
+                const respuestaBloqueada: RespuestaApi<null> = {
+                    codigo: 423,
+                    msj: `Tu cuenta está bloqueada por intentos fallidos de contraseña. No podés editar tu ficha profesional durante los próximos ${bloqueo.minutosRestantes} ${
+                        bloqueo.minutosRestantes === 1 ? 'minuto' : 'minutos'
+                    }.`,
+                    datos: null,
+                };
+                res.status(423).json(respuestaBloqueada);
+                return;
+            }
+
+            if (
+                usuarioRepositorySingleton.requiereCambioPassword(
+                    usuarioIdSesion,
+                    prestadorIdSesion
+                )
+            ) {
+                const respuestaCambioObligatorio: RespuestaApi<null> = {
+                    codigo: 403,
+                    msj: 'Debés cambiar tu contraseña temporal antes de editar tu ficha profesional',
+                    datos: null,
+                };
+                res.status(403).json(respuestaCambioObligatorio);
+                return;
+            }
+
             if (
                 req.body &&
                 typeof req.body === 'object' &&

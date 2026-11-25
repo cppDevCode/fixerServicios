@@ -33,7 +33,7 @@ const PESO_POPULARIDAD_BASE: Record<string, number> = {
 };
 
 export interface ISugerenciaCategoria {
-    categoriaId: string;
+    categoriaId: number;
     nombre: string;
     etiqueta: string;
     busquedas: number;
@@ -48,7 +48,7 @@ export function calcularCategoriasMasBuscadas(
     const listaBase =
         categorias.length > 0 ? categorias : CATEGORIAS_POR_DEFECTO;
 
-    const conteoPorRubro: Record<string, number> = {};
+    const conteoPorRubro: Record<number, number> = {};
     for (const p of prestadores) {
         conteoPorRubro[p.categoriaId] =
             (conteoPorRubro[p.categoriaId] ?? 0) + 1;
@@ -57,15 +57,18 @@ export function calcularCategoriasMasBuscadas(
     return listaBase
         .map((cat) => {
             const cantidadPrestadores = conteoPorRubro[cat.id] ?? 0;
-            const busquedasUsuario = conteoBusquedas[cat.id] ?? 0;
-            const pesoBase = PESO_POPULARIDAD_BASE[cat.id] ?? 0;
+            const busquedasUsuario =
+                conteoBusquedas[cat.nombre] ??
+                conteoBusquedas[String(cat.id)] ??
+                0;
+            const pesoBase = PESO_POPULARIDAD_BASE[cat.nombre] ?? 0;
             const puntaje =
                 cantidadPrestadores * 10 + busquedasUsuario * 15 + pesoBase;
             return {
                 categoriaId: cat.id,
                 nombre: cat.nombre,
                 etiqueta:
-                    ETIQUETAS_SUGERENCIA_POR_RUBRO[cat.id] ?? cat.nombre,
+                    ETIQUETAS_SUGERENCIA_POR_RUBRO[cat.nombre] ?? cat.nombre,
                 busquedas: puntaje,
             };
         })
@@ -293,7 +296,7 @@ export function HomePage({
                         >
                             <option value="">Todos los rubros</option>
                             {categorias.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
+                                <option key={cat.id} value={cat.nombre}>
                                     {cat.nombre}
                                 </option>
                             ))}
@@ -354,12 +357,12 @@ export function HomePage({
                                 key={sugerencia.categoriaId}
                                 type="button"
                                 data-testid="sugerencia-categoria"
-                                data-categoria={sugerencia.categoriaId}
+                                data-categoria={sugerencia.nombre}
                                 title={`Rubro: ${sugerencia.nombre}`}
                                 className="home-frecuentes__chip"
                                 onClick={() =>
                                     navegarAlCatalogo({
-                                        rubro: sugerencia.categoriaId,
+                                        rubro: sugerencia.nombre,
                                         localidad:
                                             localidadSeleccionada || undefined,
                                     })

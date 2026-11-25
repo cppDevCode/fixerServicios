@@ -12,7 +12,7 @@ El desarrollo se estructuró verticalmente en **3 módulos autónomos**, donde c
 
 | Integrante | Módulo Asignado | Alcance Técnico Principal |Rama de Desarrollo |
 | :--- | :--- | :--- | :--- |
-| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores y Categorías** (`Prestador`, `Categoria`, `Rubro`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, API REST CRUD con soporte de foto de perfil (`fotoUrl`), provincia (`provincia`), localidad (`localidad`), filtros combinados y paginación (`/api/v1/prestadores`, `/api/v1/categorias`), vista Home (`/`) con buscador principal y sugerencia de categorías más buscadas, UI de catálogo público con tarjetas, filtro por localidad y filtros rápidos (`/prestadores/catalogo`), tabla de gestión paginada con avatar de foto o silueta de persona por defecto, ficha técnica y formulario reactivo con todas las provincias y localidades de Argentina (`/prestadores`, `/prestadores/:id`), exportación en `.pdf` y `.xlsx` (`ExcelJS`) y suite de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
+| **Alejandro Lucas Baldres** | **Módulo 1: Prestadores, Categorías, Mapa y Seguridad Profesional** (`Prestador`, `Categoria`, `Ubicacion`, `Email`) | Base de Docker/Compose, configuración unificada de ESLint y TypeScript, normalización del modelo de datos en 3FN (claves numéricas homogéneas, `UbicacionRepository` compartido, `CATEGORIA` con clave subrogada + `slug` y `ON DELETE RESTRICT`, `ratingPromedio` derivado dinámicamente desde `RESENA`), API REST CRUD con foto de perfil (`fotoUrl`), alta por `ADMIN` con email obligatorio, generación criptográfica de contraseña temporal y envío por correo (`EmailService`), cambio de contraseña obligatorio al primer ingreso y desde *"Mi Ficha Profesional"* con bloqueo de cuenta y edición por 30 minutos tras 3 intentos fallidos (`423 Locked`), geocodificación resiliente para Argentina (`Córdoba Capital`, capitales provinciales y `CABA`) con mapa de cobertura `Leaflet`, vista Home (`/`), catálogo público (`/prestadores/catalogo`), tabla paginada (`/prestadores`, `/prestadores/:id`), exportación `.pdf`/`.xlsx` (`ExcelJS`) y suite completa de pruebas (Unit, Integration, E2E). | `feat/baldres-prestadores` |
 | **Marianela Belardinelli Beker** | **Módulo 2: Reseñas y Calificaciones** (`Reseña`, `Puntuación`, `Comentario`) | Configuración de Vitest, Supertest y fixtures, API REST CRUD de reseñas (`/api/v1/resenas`) con cálculo automático de promedio de estrellas, UI de feed de opiniones y formulario de alta/edición, exportación de métricas en `.pdf` (`jsPDF`) y `.xlsx` (`ExcelJS`), y suite de pruebas (Unit, Integration, E2E). | `feat/belardinelli-resena` |
 | **Julieta Dabús** | **Módulo 3: Usuarios, Acceso y Ubicación** (`Usuario`, `Ubicacion`, `CodigoPostal`) | Configuración de Playwright, middleware global de manejo de errores HTTP, API REST de autenticación y usuarios (`/api/v1/auth/*`, `/api/v1/usuarios`) con filtro universal y radio de cobertura, layout global (Header, Sidebar, Footer, Router), vistas de Login, Registro, Recuperación de clave, padrón de usuarios y exportación en `.xlsx`. | `feat/dabus-usuarios-auth` |
 
@@ -40,12 +40,12 @@ fixerServicios/
 │       ├── app.ts                             # Punto de entrada de la aplicación
 │       ├── core/
 │       │   └── Servidor.ts                    # Configuración de Express, CORS, rutas y middlewares
-│       ├── interfaces/                        # Contratos TypeScript (IPrestador, ICategoria, IResena, IUsuario, RespuestaApi)
-│       ├── repository/                        # Persistencia en memoria (Mocks inicializados e inmutables)
-│       ├── service/                           # Lógica de negocio, filtrado normalizado, cálculo de promedios y paginación
-│       ├── controller/                        # Controladores HTTP y validación de payloads
+│       ├── interfaces/                        # Contratos TypeScript normalizados (IPrestador, ICategoria, IResena, IUsuario, IUbicacion, RespuestaApi)
+│       ├── repository/                        # Persistencia en memoria normalizada (prestador, categoria, ubicacion, resena, usuario)
+│       ├── service/                           # Lógica de negocio, geocobertura, rating derivado, bloqueo de cuentas y EmailService
+│       ├── controller/                        # Controladores HTTP, validación de payloads y envío de credenciales temporales
 │       ├── route/                             # Definición de rutas REST (/prestadores, /categorias, /resenas, /usuarios, /auth)
-│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts) y autorización por roles (autorizacion.middleware.ts)
+│       ├── middlewares/                       # Manejo centralizado de errores (errorHandler.ts) y autorización/bloqueo por roles (autorizacion.middleware.ts)
 │       └── __test__/                          # Pruebas Unitarias (*.unit.test.ts), Integración (*.integration.test.ts) y E2E (*.e2e.test.ts)
 │           ├── fixtures/                      # Fábricas de datos de prueba (prestadores y reseñas)
 │           └── helpers/                       # Instanciación de aplicación Express en memoria (crearApp.ts)
@@ -62,26 +62,29 @@ fixerServicios/
 │   ├── vite.config.ts                         # Configuración de Vite y proxy reverso automático (/api -> Backend)
 │   ├── vitest.config.ts                       # Configuración de Vitest para pruebas unitarias y de integración en cliente
 │   ├── assets/
+│   │   ├── fixer-logo.png                     # Logotipo institucional de Fixer Servicios
 │   │   └── silueta-persona.svg                # Recurso vectorial de silueta por defecto para prestadores sin foto
 │   ├── styles/
 │   │   └── variables.css                      # Sistema de diseño y tokens CSS globales
-│   ├── interfaces/                            # Contratos de datos en cliente (prestador.interface.ts, resena.interface.ts)
-│   ├── services/                              # Clientes HTTP, control de sesión/roles (sesion.service.ts) y exportación (.pdf / .xlsx)
+│   ├── interfaces/                            # Contratos de datos alineados con Backend (prestador, resena, usuario)
+│   ├── services/                              # Clientes HTTP, sesión/roles, geocoding Nominatim, cambio de clave y exportación (.pdf / .xlsx)
 │   ├── components/
-│   │   ├── layout/                            # Layout general (Header, Sidebar por módulo, Footer)
-│   │   ├── prestadores/                       # AvatarPrestador, CatalogoPrestadoresUsuario, TarjetaCatalogoPrestador, ListadoPrestadores, FormularioPrestador y estilos
+│   │   ├── layout/                            # Layout general (Header, Footer y compuerta de cambio obligatorio de contraseña)
+│   │   ├── mapa/                              # RadioMapa (mapa interactivo Leaflet con círculo de cobertura)
+│   │   ├── prestadores/                       # AvatarPrestador, CatalogoPrestadoresUsuario, TarjetaCatalogoPrestador, ListadoPrestadores, FormularioPrestador, FormularioCambioPassword
 │   │   └── resenas/                           # ListadoResenas, FormularioResena, TarjetaResena, Estrellas y estilos
-│   ├── pages/                                 # Vistas de página (HomePage, PrestadoresPage, PrestadorDetallePage, ResenaPage, UsuariosPage, UsuarioDetallePage, LoginPage, RegistroPage, RecuperarPasswordPage)
+│   ├── pages/                                 # HomePage, PrestadoresPage, PrestadorDetallePage, ResenaPage, UsuariosPage, UsuarioDetallePage, LoginPage, RegistroPage, RecuperarPasswordPage, ComoFuncionaPage, GarantiaPage, PanelProPage
 │   ├── src/
 │   │   ├── main.tsx                           # Punto de montaje React DOM
 │   │   ├── App.tsx                            # Definición de rutas con React Router v6
-│   │   └── __test__/                          # Pruebas unitarias y de integración del Frontend
-│   └── e2e/                                   # Especificaciones End-to-End con Playwright (layout.spec.ts, prestadores.spec.ts)
+│   │   └── __test__/                          # Pruebas unitarias y de integración del Frontend (prestador, geocoding, cambioPassword)
+│   └── e2e/                                   # Especificaciones End-to-End con Playwright (layout, prestadores, resenas, seguridad-flujo)
 │
 ├── postman/                                   # Colecciones Postman v2.1 para pruebas manuales y automatizadas de API
 │   ├── Fixer_Coleccion.json                   # Colección unificada de Postman del proyecto Fixer Servicios
-│   └── prestadores (alumno 1)/                # Carpeta Postman del Integrante 1 (GET lista/detalle, POST, PUT, DELETE)
-│       └── prestadores_alumno1.postman_collection.json
+│   ├── prestadores (alumno 1)/                # Carpeta Postman Módulo 1 (Prestadores y Categorías)
+│   ├── resenas (belardinelli)/                # Carpeta Postman Módulo 2 (Reseñas)
+│   └── usuarios (dabus)/                      # Carpeta Postman Módulo 3 (Usuarios y Auth)
 │
 └── docs/                                      # Documentación Técnica de Ingeniería por Fase e Integrante
     ├── fase1-baldres-infraestructura.md
@@ -91,7 +94,8 @@ fixerServicios/
     ├── fase2-belardinelli-resenas.md
     ├── fase2-dabus-usuarios-auth.md
     ├── fase3-baldres-prestadores.md
-    └── fase4-baldres-testing-postman.md
+    ├── fase4-baldres-testing-postman.md
+    └── fase5-baldres-arquitectura-normalizacion-seguridad.md
 ```
 
 ---
@@ -134,7 +138,8 @@ Para ejecutar el proyecto de manera reproducible se requiere contar con **una** 
 | `exceljs` | `^4.4.0` | Producción | Generación de reportes y catálogos en formato binario OpenXML `.xlsx` (Prestadores y Reseñas). |
 | `jspdf` / `jspdf-autotable` | `^4.2.1` / `^5.0.9` | Producción | Generación de reportes tabulares en formato `.pdf`. |
 | `xlsx` | `^0.18.5` | Producción | Exportación de padrón de usuarios a hoja de cálculo `.xlsx`. |
-| `lucide-react` | `^1.70.0` | Producción | Iconografía vectorial de interfaz de usuario. |
+| `leaflet` / `react-leaflet` | `1.9.4` / `4.2.1` | Producción | Mapa interactivo de zona y radio de cobertura profesional (`RadioMapa`). |
+| `lucide-react` / `react-icons` | `^1.70.0` / `^5.7.0` | Producción | Iconografía vectorial de interfaz de usuario. |
 | `vite` / `@vitejs/plugin-react` | `^5.4.1` / `^4.3.1` | Desarrollo | Servidor de desarrollo con HMR, proxy reverso `/api` y empaquetador de producción. |
 | `@playwright/test` | `^1.64.1` | Desarrollo | Automatización de pruebas End-to-End (E2E) en navegador real (Chromium). |
 | `typescript` / `eslint` | `^5.5.4` / `^10.14.0` | Desarrollo | Verificación de tipos (`tsc -b`) y linting de componentes React (`.ts`, `.tsx`). |
@@ -166,6 +171,9 @@ Para entorno de **desarrollo local o Docker Compose**, verificá que los archivo
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:5173
+# Opcional: webhook HTTP para envío externo de correos de credenciales temporales
+# Si no se configura, EmailService opera en modo simulado registrando el correo en consola
+# EMAIL_WEBHOOK_URL=https://tu-relay-email.ejemplo/send
 ```
 
 **`frontend/.env`:**
@@ -281,24 +289,41 @@ pnpm run build
 
 ---
 
+## 🔐 Modelo de Datos Normalizado y Políticas de Seguridad
+
+- **Normalización e Integridad Referencial (3FN):**
+  - Claves primarias y foráneas numéricas homogéneas (`number`) en `USUARIO`, `UBICACION`, `CATEGORIA`, `PRESTADOR` y `RESENA`.
+  - Geografía centralizada en [`UbicacionRepository`](./backend/src/repository/ubicacion.repository.ts) (`ubicacionId` compartido por `USUARIO` y `PRESTADOR`).
+  - `CATEGORIA` con clave subrogada inmutable (`id`), `slug` único y protección `ON DELETE RESTRICT` (`409 Conflict` si hay prestadores asociados).
+  - `ratingPromedio` derivado dinámicamente desde `RESENA`; la baja de un prestador ejecuta `ON DELETE CASCADE` sobre sus reseñas y `ON DELETE SET NULL` sobre `USUARIO.prestadorId`.
+- **Alta de Prestadores por `ADMIN` y Cambio Obligatorio de Contraseña:**
+  - Desde el panel administrador (`+ Nuevo Prestador`), se exige el correo electrónico del prestador; el backend genera una contraseña aleatoria criptográficamente segura (`crypto.randomInt`, 12 caracteres), crea la cuenta vinculada (`debeCambiarPassword: true`) y envía las credenciales vía [`EmailService`](./backend/src/service/email.service.ts).
+  - Al iniciar sesión con esa clave temporal, el sistema obliga a cambiarla (ingresándola 2 veces) antes de habilitar la navegación o la edición de *"Mi Ficha Profesional"*.
+- **Cambio de Contraseña en *"Mi Ficha Profesional"* y Bloqueo por 30 Minutos:**
+  - Disponible mediante `PATCH /api/v1/usuarios/:id/password` y [`FormularioCambioPassword`](./frontend/components/prestadores/FormularioCambioPassword.tsx).
+  - Solicita contraseña actual y nueva contraseña por duplicado. Tras **3 intentos fallidos** de contraseña actual, bloquea la cuenta por **30 minutos (`HTTP 423 Locked`)**, impidiendo el inicio de sesión, nuevos intentos de cambio y la edición de los datos en *"Mi Ficha Profesional"* hasta el vencimiento del plazo.
+
+---
+
 ## 📡 Resumen de Endpoints de la API REST (`/api/v1`)
 
 | Módulo | Método | Endpoint | Descripción |
 | :--- | :---: | :--- | :--- |
 | **Sistema** | `GET` | `/api/v1/health` | Verificación de estado del servidor (`{ code: 200, msg: 'Ok', data: { status: 'up' } }`). |
-| **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores` | Listado paginado con soporte para `?page=1&limit=10&rubro=Plomería&localidad=Córdoba%20Capital&search=...&sortBy=nombre&order=asc`. |
+| **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores` | Listado paginado con soporte para `?page=1&limit=10&rubro=Plomería&provincia=...&localidad=Córdoba%20Capital&search=...&sortBy=nombre&order=asc` (incluye `categoriaNombre`, geografía proyectada y `ratingPromedio` calculado dinámicamente). |
 | **Módulo 1: Prestadores** | `GET` | `/api/v1/prestadores/:id` | Obtiene la ficha técnica detallada de un prestador por su ID. |
-| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador en el catálogo (incluyendo soporte opcional de fotografía `fotoUrl`). |
-| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos y/o foto de perfil de un prestador (enviar `fotoUrl: ""` restaura la silueta por defecto). |
-| **Módulo 1: Prestadores** | `DELETE` | `/api/v1/prestadores/:id` | Elimina un prestador del catálogo. |
-| **Módulo 1: Categorías** | `GET` | `/api/v1/categorias` | Lista los rubros profesionales ordenados alfabéticamente (soporta `?search=`). |
-| **Módulo 1: Categorías** | `POST` / `PUT` / `DELETE` | `/api/v1/categorias` | Alta, modificación y baja de categorías profesionales. |
+| **Módulo 1: Prestadores** | `POST` | `/api/v1/prestadores` | Registra un nuevo prestador (`fotoUrl`, `ubicacionId` o `provincia`/`localidad`/`radio`). Con rol `ADMIN` exige `email`, crea la cuenta `PRESTADOR` (`debeCambiarPassword: true`), genera contraseña segura aleatoria y la envía por correo (`409` si el email ya existe). |
+| **Módulo 1: Prestadores** | `PUT` | `/api/v1/prestadores/:id` | Actualiza parcial o totalmente los datos y/o foto de perfil (`fotoUrl: ""` restaura la silueta). Rechaza con `403` si el prestador debe cambiar su contraseña temporal o con `423 Locked` si la cuenta está bloqueada. |
+| **Módulo 1: Prestadores** | `DELETE` | `/api/v1/prestadores/:id` | Elimina un prestador aplicando `ON DELETE CASCADE` en reseñas y `ON DELETE SET NULL` en `USUARIO.prestadorId`. |
+| **Módulo 1: Categorías** | `GET` | `/api/v1/categorias` | Lista los rubros profesionales (`{ id, slug, nombre }`) ordenados alfabéticamente (soporta `?search=`). |
+| **Módulo 1: Categorías** | `POST` / `PUT` / `DELETE` | `/api/v1/categorias` | Alta, modificación y baja de categorías con unicidad de `slug`/`nombre` y `ON DELETE RESTRICT` (`409 Conflict` si posee prestadores asociados). |
 | **Módulo 2: Reseñas** | `GET` | `/api/v1/resenas` | Lista reseñas paginadas por profesional (`?prestadorId=1&page=1&limit=5`) incluyendo el promedio calculado en `meta.promedio`. |
 | **Módulo 2: Reseñas** | `GET` | `/api/v1/resenas/:id` | Obtiene el detalle de una reseña específica. |
-| **Módulo 2: Reseñas** | `POST` / `PUT` / `DELETE` | `/api/v1/resenas/:id` | Creación, edición y eliminación de reseñas con validación de puntaje (1 a 5) y comentario obligatorio. |
-| **Módulo 3: Auth y Usuarios** | `POST` | `/api/v1/auth/login` | Autenticación de usuarios registrados. |
-| **Módulo 3: Auth y Usuarios** | `POST` | `/api/v1/auth/recuperar-password` | Recuperación de contraseña mediante validación de pregunta secreta. |
-| **Módulo 3: Auth y Usuarios** | `GET` / `POST` / `PATCH` | `/api/v1/usuarios` | Listado paginado con búsqueda universal, registro de nuevos usuarios y actualización de perfil/ubicación. |
+| **Módulo 2: Reseñas** | `POST` / `PUT` / `DELETE` | `/api/v1/resenas/:id` | Creación, edición y eliminación de reseñas con validación de FKs (`prestadorId`, `usuarioId`), puntaje entero (`1..5`) y comentario obligatorio. |
+| **Módulo 3: Auth y Usuarios** | `POST` | `/api/v1/auth/login` | Autenticación de usuarios registrados (retorna `debeCambiarPassword`; responde `423 Locked` si la cuenta está bloqueada). |
+| **Módulo 3: Auth y Usuarios** | `POST` | `/api/v1/auth/pregunta-secreta` / `recuperar-password` / `cambiar-password` | Flujo de recuperación de contraseña mediante pregunta secreta. |
+| **Módulo 3: Auth y Usuarios** | `GET` / `POST` / `PATCH` | `/api/v1/usuarios` | Listado paginado con búsqueda universal (sin exponer hashes), registro y actualización normalizada de perfil/ubicación. |
+| **Módulo 3: Seguridad** | `PATCH` | `/api/v1/usuarios/:id/password` | Cambio de contraseña autenticado con verificación de clave actual, doble confirmación de clave nueva y bloqueo de 30 minutos (`423 Locked`) tras 3 intentos fallidos. |
 
 ---
 
@@ -323,3 +348,4 @@ En el directorio [`docs/`](./docs) se encuentran los informes técnicos detallad
 - [Fase 2 — Desarrollo Backend: Módulo Usuarios, Auth y Middleware Global (Julieta Dabús)](./docs/fase2-dabus-usuarios-auth.md)
 - [Fase 3 — Desarrollo Frontend, Catálogo, Exportación y Seguridad por Roles: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase3-baldres-prestadores.md)
 - [Fase 4 — Estrategia Integral de Testing (Unit, Integration, E2E) y Colección Postman: Módulo Prestadores (Alejandro L. Baldres)](./docs/fase4-baldres-testing-postman.md)
+- [Fase 5 — Normalización 3FN, Geocodificación Resiliente y Seguridad de Cuentas (Alejandro L. Baldres)](./docs/fase5-baldres-arquitectura-normalizacion-seguridad.md)

@@ -15,5 +15,6 @@ router.get('/usuarios', verificarPermisoAdminUsuarios, controller.getAll);
 router.get('/usuarios/:id', controller.getById);
 router.post('/usuarios', controller.create);
 router.patch('/usuarios/:id', controller.update);
+router.patch('/usuarios/:id/password', controller.cambiarPasswordAutenticado);
 
 export default router;

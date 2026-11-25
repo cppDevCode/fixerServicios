@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AvatarPrestador } from '../components/prestadores/AvatarPrestador';
+import { FormularioCambioPassword } from '../components/prestadores/FormularioCambioPassword';
 import { FormularioPrestador } from '../components/prestadores/FormularioPrestador';
 import '../components/prestadores/Prestadores.css';
 import type { ICategoria, IPrestador } from '../interfaces/prestador.interface';
@@ -9,6 +10,7 @@ import {
     CATEGORIAS_POR_DEFECTO,
     eliminarPrestador,
     obtenerCategorias,
+    obtenerNombreCategoria,
     obtenerPrestadorPorId,
 } from '../services/prestador.service';
 import {
@@ -41,10 +43,9 @@ export function PrestadorDetallePage() {
         };
     }, []);
 
-    const idNumericoUsuario = usuarioActual ? Number(usuarioActual.id) : NaN;
     const usuarioId =
-        Number.isInteger(idNumericoUsuario) && idNumericoUsuario > 0
-            ? idNumericoUsuario
+        usuarioActual && Number.isInteger(usuarioActual.id) && usuarioActual.id > 0
+            ? usuarioActual.id
             : null;
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -58,6 +59,66 @@ export function PrestadorDetallePage() {
     const [error, setError] = useState<string | null>(null);
     const [versionResenas, setVersionResenas] = useState(0);
     const [resenaEditar, setResenaEditar] = useState<IResena | null>(null);
+    const [bloqueadoHasta, setBloqueadoHasta] = useState<string | null>(null);
+
+    const esPropietarioPrestador = esPrestador(usuarioActual);
+
+    useEffect(() => {
+        if (!esPropietarioPrestador || usuarioId === null) {
+            setBloqueadoHasta(null);
+            return;
+        }
+
+        let activo = true;
+        fetch(`/api/v1/usuarios/${usuarioId}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((body: { data?: { bloqueadoHasta?: string } } | null) => {
+                if (!activo) return;
+                const hasta = body?.data?.bloqueadoHasta;
+                if (hasta && new Date(hasta).getTime() > Date.now()) {
+                    setBloqueadoHasta(hasta);
+                } else {
+                    setBloqueadoHasta(null);
+                }
+            })
+            .catch(() => {
+                // Mantiene el estado local de bloqueo si no se puede consultar el usuario
+            });
+
+        return () => {
+            activo = false;
+        };
+    }, [esPropietarioPrestador, usuarioId]);
+
+    useEffect(() => {
+        if (!bloqueadoHasta) return;
+        const restanteMs = new Date(bloqueadoHasta).getTime() - Date.now();
+        if (restanteMs <= 0) {
+            setBloqueadoHasta(null);
+            return;
+        }
+        const timer = window.setTimeout(() => {
+            setBloqueadoHasta(null);
+        }, restanteMs);
+        return () => window.clearTimeout(timer);
+    }, [bloqueadoHasta]);
+
+    const cuentaBloqueada = Boolean(
+        esPropietarioPrestador &&
+            bloqueadoHasta &&
+            new Date(bloqueadoHasta).getTime() > Date.now()
+    );
+
+    const horaDesbloqueo = bloqueadoHasta
+        ? new Date(bloqueadoHasta).toLocaleTimeString('es-AR', {
+              hour: '2-digit',
+              minute: '2-digit',
+          })
+        : null;
+
+    const mensajeBloqueoFicha = horaDesbloqueo
+        ? `Tu cuenta está bloqueada hasta las ${horaDesbloqueo} por 3 intentos fallidos de contraseña. No podés editar los datos de tu ficha profesional hasta entonces.`
+        : 'Tu cuenta está bloqueada por 30 minutos debido a 3 intentos fallidos de contraseña. No podés editar los datos de tu ficha profesional hasta entonces.';
 
     useEffect(() => {
         let activo = true;
@@ -134,6 +195,13 @@ export function PrestadorDetallePage() {
     const actualizarResenas = () => {
         setVersionResenas((version) => version + 1);
         setResenaEditar(null);
+        if (prestador) {
+            obtenerPrestadorPorId(prestador.id)
+                .then((res) => setPrestador(res.datos))
+                .catch(() => {
+                    // Mantiene el estado actual si falla la recarga del promedio
+                });
+        }
     };
 
     const puedeEditar = prestador
@@ -244,7 +312,7 @@ export function PrestadorDetallePage() {
                                 </div>
 
                                 <span className="badge-prestador badge-prestador--rubro">
-                                    {prestador.categoriaId}
+                                    {obtenerNombreCategoria(prestador, categorias)}
                                 </span>
                             </div>
 
@@ -293,7 +361,7 @@ export function PrestadorDetallePage() {
 
                                 <div className="prestador-atributo">
                                     <span>Rubro principal</span>
-                                    <strong>{prestador.categoriaId}</strong>
+                                    <strong>{obtenerNombreCategoria(prestador, categorias)}</strong>
                                 </div>
 
                                 <div className="prestador-atributo">
@@ -335,7 +403,7 @@ export function PrestadorDetallePage() {
                                     {/* Columna derecha: Mapa */}
                                     <div style={{ width: '300px', flexShrink: 0 }}>
                                         <RadioMapa
-                                            codigoPostal={(prestador.codigoPostal ?? 5000).toString()}
+                                            codigoPostal={prestador.codigoPostal ?? '5000'}
                                             ciudad={prestador.localidad || 'Córdoba'}
                                             provincia={prestador.provincia || 'Córdoba'}
                                             radioKm={prestador.radio || 10}
@@ -348,16 +416,37 @@ export function PrestadorDetallePage() {
                         </article>
 
                         {puedeEditar && (
-                            <FormularioPrestador
-                                key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
-                                categorias={categorias}
-                                prestadorInicial={prestador}
-                                titulo="Editar datos del prestador"
-                                textoBoton="Guardar cambios"
-                                onGuardado={(actualizado) =>
-                                    setPrestador(actualizado)
-                                }
-                            />
+                            <div className="prestador-detalle-columna-edicion">
+                                <FormularioPrestador
+                                    key={`${prestador.id}-${prestador.nombre}-${prestador.aniosExperiencia}-${prestador.fotoUrl ?? 'sin-foto'}`}
+                                    categorias={categorias}
+                                    prestadorInicial={prestador}
+                                    titulo="Editar datos del prestador"
+                                    textoBoton={
+                                        cuentaBloqueada
+                                            ? 'Edición bloqueada (30 min)'
+                                            : 'Guardar cambios'
+                                    }
+                                    bloqueado={cuentaBloqueada}
+                                    mensajeBloqueo={mensajeBloqueoFicha}
+                                    onGuardado={(actualizado) =>
+                                        setPrestador(actualizado)
+                                    }
+                                />
+
+                                {esPropietarioPrestador &&
+                                    usuarioId !== null && (
+                                        <FormularioCambioPassword
+                                            usuarioId={usuarioId}
+                                            bloqueadoHastaInicial={
+                                                bloqueadoHasta
+                                            }
+                                            onCuentaBloqueada={(hasta) =>
+                                                setBloqueadoHasta(hasta)
+                                            }
+                                        />
+                                    )}
+                            </div>
                         )}
                     </div>
 

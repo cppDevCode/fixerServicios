@@ -1,12 +1,13 @@
 export type RolUsuario = 'ADMIN' | 'PRESTADOR' | 'USUARIO';
 
 export interface IUsuarioSesion {
-    id: string;
+    id: number;
     nombre: string;
     apellido?: string;
     email: string;
     rol: RolUsuario;
     prestadorId?: number;
+    debeCambiarPassword?: boolean;
 }
 
 export const EVENTO_CAMBIO_SESION = 'fixer-sesion-cambiada';
@@ -41,20 +42,39 @@ export function obtenerUsuarioActual(): IUsuarioSesion | null {
             return null;
         }
 
+        const idNumerico = Number(usuario.id);
+        if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+            return null;
+        }
+
         return {
-            id: String(usuario.id),
+            id: idNumerico,
             nombre: String(usuario.nombre ?? ''),
             apellido: usuario.apellido ? String(usuario.apellido) : undefined,
             email: String(usuario.email ?? ''),
             rol: rolNormalizado,
             prestadorId:
-                usuario.prestadorId !== undefined
+                usuario.prestadorId !== undefined && usuario.prestadorId !== null
                     ? Number(usuario.prestadorId)
                     : undefined,
+            debeCambiarPassword: Boolean(usuario.debeCambiarPassword),
         };
     } catch {
         return null;
     }
+}
+
+export function marcarPasswordCambiada(): void {
+    const actual = obtenerUsuarioActual();
+    if (!actual || typeof window === 'undefined' || !window.localStorage) {
+        return;
+    }
+    const actualizado: IUsuarioSesion = {
+        ...actual,
+        debeCambiarPassword: false,
+    };
+    window.localStorage.setItem('usuario', JSON.stringify(actualizado));
+    window.dispatchEvent(new Event(EVENTO_CAMBIO_SESION));
 }
 
 export function guardarSesionUsuario(

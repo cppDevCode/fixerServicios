@@ -40,7 +40,9 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
         expect(todas.datos).toHaveLength(9);
 
         const filtrada = await obtenerCategorias('plomeria', apiBaseUrl);
-        expect(filtrada.datos).toEqual([{ id: 'Plomería', nombre: 'Plomería' }]);
+        expect(filtrada.datos).toEqual([
+            { id: 1, slug: 'plomeria', nombre: 'Plomería' },
+        ]);
     });
 
     it('integra obtenerPrestadores con paginación dinámica, filtro de rubro, búsqueda y ordenamiento', async () => {
@@ -103,13 +105,13 @@ describe('Módulo Prestadores (Frontend <-> Backend) - Tests de Integración', (
                 aniosExperiencia: 9,
                 acercaDe: 'Instalación de tableros trifásicos y puesta a tierra',
                 ofreceGarantia: true,
-                categoriaId: 'Electricidad',
+                categoriaId: 2,
+                ubicacionId: 1,
                 telefono: {
                     codPais: '+54',
                     codArea: '11',
                     nroTelefono: '47778888',
                 },
-                ratingPromedio: 4.9,
                 fotoUrl: 'https://randomuser.me/api/portraits/men/64.jpg',
             },
             apiBaseUrl

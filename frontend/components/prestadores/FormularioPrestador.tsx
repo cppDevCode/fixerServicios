@@ -15,7 +15,6 @@ import {
     PROVINCIAS_ARGENTINA,
     PROVINCIAS_LOCALIDADES_ARGENTINA,
 } from '../../services/ubicacionesArgentina';
-import { esPrestador, obtenerUsuarioActual } from '../../services/sesion.service';
 import { AvatarPrestador } from './AvatarPrestador';
 import './Prestadores.css';
 
@@ -24,6 +23,8 @@ export interface FormularioPrestadorProps {
     prestadorInicial?: IPrestador;
     titulo?: string;
     textoBoton?: string;
+    bloqueado?: boolean;
+    mensajeBloqueo?: string;
     onGuardado?: (prestador: IPrestador) => void;
     onCancelar?: () => void;
 }
@@ -33,6 +34,8 @@ export function FormularioPrestador({
     prestadorInicial,
     titulo,
     textoBoton,
+    bloqueado = false,
+    mensajeBloqueo,
     onGuardado,
     onCancelar,
 }: FormularioPrestadorProps) {
@@ -41,8 +44,9 @@ export function FormularioPrestador({
 
     const [nombre, setNombre] = useState(prestadorInicial?.nombre ?? '');
     const [apellido, setApellido] = useState(prestadorInicial?.apellido ?? '');
-    const [categoriaId, setCategoriaId] = useState(
-        prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 'Plomería'
+    const [email, setEmail] = useState('');
+    const [categoriaId, setCategoriaId] = useState<number>(
+        prestadorInicial?.categoriaId ?? listaCategorias[0]?.id ?? 1
     );
     const provinciaInicial =
         prestadorInicial?.provincia ??
@@ -74,11 +78,6 @@ export function FormularioPrestador({
     const [nroTelefono, setNroTelefono] = useState(
         prestadorInicial?.telefono?.nroTelefono ?? ''
     );
-    const [ratingPromedio, setRatingPromedio] = useState(
-        prestadorInicial?.ratingPromedio !== undefined
-            ? String(prestadorInicial.ratingPromedio)
-            : '4.5'
-    );
     const [fotoUrl, setFotoUrl] = useState(prestadorInicial?.fotoUrl ?? '');
 
     const [enviando, setEnviando] = useState(false);
@@ -86,7 +85,7 @@ export function FormularioPrestador({
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esEdicion = Boolean(prestadorInicial?.id);
-    const ocultarCalificacion = esPrestador(obtenerUsuarioActual());
+    const deshabilitado = enviando || bloqueado;
 
     const manejarArchivoFoto = (evento: ChangeEvent<HTMLInputElement>) => {
         const archivo = evento.target.files?.[0];
@@ -103,16 +102,29 @@ export function FormularioPrestador({
 
     const manejarSubmit = async (evento: FormEvent<HTMLFormElement>) => {
         evento.preventDefault();
+        if (bloqueado) {
+            return;
+        }
         setError(null);
         setMensajeExito(null);
 
         const nombreLimpio = nombre.trim();
         const apellidoLimpio = apellido.trim();
-        const rubroLimpio = categoriaId.trim();
+        const emailLimpio = email.trim().toLowerCase();
 
-        if (!nombreLimpio || !apellidoLimpio || !rubroLimpio) {
+        if (!nombreLimpio || !apellidoLimpio || !Number.isInteger(categoriaId) || categoriaId <= 0) {
             setError('Los campos nombre, apellido y rubro son obligatorios.');
             return;
+        }
+
+        if (!esEdicion) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailLimpio || !emailRegex.test(emailLimpio)) {
+                setError(
+                    'Ingresá un correo electrónico válido del prestador para enviarle su contraseña temporal.'
+                );
+                return;
+            }
         }
 
         const experienciaNumero = Number(aniosExperiencia);
@@ -121,14 +133,11 @@ export function FormularioPrestador({
             return;
         }
 
-        const ratingNumero = ratingPromedio.trim()
-            ? Number(ratingPromedio)
-            : undefined;
-
         const payload: ICrearPrestador = {
             nombre: nombreLimpio,
             apellido: apellidoLimpio,
-            categoriaId: rubroLimpio,
+            ...(!esEdicion ? { email: emailLimpio } : {}),
+            categoriaId,
             provincia: provincia.trim() || undefined,
             localidad: localidad.trim() || undefined,
             radio: radioCobertura.trim()
@@ -143,11 +152,6 @@ export function FormularioPrestador({
                 codArea: codArea.trim() || '11',
                 nroTelefono: nroTelefono.trim(),
             },
-            ratingPromedio: ocultarCalificacion
-                ? prestadorInicial?.ratingPromedio
-                : ratingNumero !== undefined && !Number.isNaN(ratingNumero)
-                  ? ratingNumero
-                  : undefined,
             fotoUrl: fotoUrl.trim()
                 ? fotoUrl.trim()
                 : esEdicion
@@ -165,12 +169,14 @@ export function FormularioPrestador({
             setMensajeExito(
                 esEdicion
                     ? 'Datos del prestador actualizados correctamente.'
-                    : 'Prestador registrado exitosamente.'
+                    : respuesta.msj ||
+                          `Prestador registrado exitosamente. Se envió una contraseña temporal a ${emailLimpio}.`
             );
 
             if (!esEdicion) {
                 setNombre('');
                 setApellido('');
+                setEmail('');
                 setMatricula('');
                 setAcercaDe('');
                 setNroTelefono('');
@@ -202,6 +208,17 @@ export function FormularioPrestador({
                         : 'Registrar nuevo prestador')}
             </h3>
 
+            {bloqueado && (
+                <div
+                    className="prestadores-estado prestadores-estado--error"
+                    role="alert"
+                    data-testid="prestador-edicion-bloqueada"
+                >
+                    {mensajeBloqueo ??
+                        'Tu cuenta se encuentra bloqueada por 30 minutos debido a intentos fallidos de contraseña. La edición de tu ficha profesional está deshabilitada temporalmente.'}
+                </div>
+            )}
+
             <div className="formulario-prestador__grid">
                 <div className="prestadores-campo">
                     <label htmlFor="prestador-nombre">Nombre *</label>
@@ -212,7 +229,7 @@ export function FormularioPrestador({
                         value={nombre}
                         onChange={(e) => setNombre(e.target.value)}
                         placeholder="Ej: Carlos"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
 
@@ -225,9 +242,27 @@ export function FormularioPrestador({
                         value={apellido}
                         onChange={(e) => setApellido(e.target.value)}
                         placeholder="Ej: Gómez"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
+
+                {!esEdicion && (
+                    <div className="prestadores-campo">
+                        <label htmlFor="prestador-email">
+                            Correo electrónico * (recibirá contraseña temporal)
+                        </label>
+                        <input
+                            id="prestador-email"
+                            name="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Ej: profesional@ejemplo.com"
+                            autoComplete="email"
+                            disabled={deshabilitado}
+                        />
+                    </div>
+                )}
 
                 <div className="prestadores-campo">
                     <label htmlFor="prestador-rubro">Rubro / Categoría *</label>
@@ -235,8 +270,8 @@ export function FormularioPrestador({
                         id="prestador-rubro"
                         name="categoriaId"
                         value={categoriaId}
-                        onChange={(e) => setCategoriaId(e.target.value)}
-                        disabled={enviando}
+                        onChange={(e) => setCategoriaId(Number(e.target.value))}
+                        disabled={deshabilitado}
                     >
                         {listaCategorias.map((cat) => (
                             <option key={cat.id} value={cat.id}>
@@ -261,7 +296,7 @@ export function FormularioPrestador({
                                 setLocalidad(localidadesDeProvincia[0]);
                             }
                         }}
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     >
                         {PROVINCIAS_ARGENTINA.map((prov) => (
                             <option key={prov} value={prov}>
@@ -286,7 +321,7 @@ export function FormularioPrestador({
                                 setProvincia(provInferida);
                             }
                         }}
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     >
                         <optgroup label={`Localidades de ${provincia}`}>
                             {obtenerLocalidadesPorProvincia(provincia).map(
@@ -329,7 +364,7 @@ export function FormularioPrestador({
                         value={radioCobertura}
                         onChange={(e) => setRadioCobertura(e.target.value)}
                         placeholder="Ej: 15"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
 
@@ -342,7 +377,7 @@ export function FormularioPrestador({
                         value={matricula}
                         onChange={(e) => setMatricula(e.target.value)}
                         placeholder="Ej: MAT-1001"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
 
@@ -356,28 +391,9 @@ export function FormularioPrestador({
                         max="60"
                         value={aniosExperiencia}
                         onChange={(e) => setAniosExperiencia(e.target.value)}
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
-
-                {!ocultarCalificacion && (
-                    <div className="prestadores-campo">
-                        <label htmlFor="prestador-rating">
-                            Calificación inicial (1 a 5)
-                        </label>
-                        <input
-                            id="prestador-rating"
-                            name="ratingPromedio"
-                            type="number"
-                            step="0.1"
-                            min="1"
-                            max="5"
-                            value={ratingPromedio}
-                            onChange={(e) => setRatingPromedio(e.target.value)}
-                            disabled={enviando}
-                        />
-                    </div>
-                )}
             </div>
 
             <div className="prestadores-campo">
@@ -399,7 +415,7 @@ export function FormularioPrestador({
                             value={fotoUrl}
                             onChange={(e) => setFotoUrl(e.target.value)}
                             placeholder="URL de foto (ej: https://.../foto.jpg) o dejar vacío para silueta"
-                            disabled={enviando}
+                            disabled={deshabilitado}
                         />
                         <div className="formulario-prestador__foto-acciones">
                             <input
@@ -408,14 +424,14 @@ export function FormularioPrestador({
                                 accept="image/*"
                                 aria-label="Subir archivo de foto"
                                 onChange={manejarArchivoFoto}
-                                disabled={enviando}
+                                disabled={deshabilitado}
                             />
                             {fotoUrl.trim() && (
                                 <button
                                     type="button"
                                     className="btn-prestador btn-prestador--secundario"
                                     onClick={() => setFotoUrl('')}
-                                    disabled={enviando}
+                                    disabled={deshabilitado}
                                 >
                                     Quitar foto
                                 </button>
@@ -436,7 +452,7 @@ export function FormularioPrestador({
                         value={codPais}
                         onChange={(e) => setCodPais(e.target.value)}
                         placeholder="+54"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                     <input
                         id="prestador-cod-area"
@@ -446,7 +462,7 @@ export function FormularioPrestador({
                         value={codArea}
                         onChange={(e) => setCodArea(e.target.value)}
                         placeholder="11"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                     <input
                         id="prestador-nro-telefono"
@@ -456,7 +472,7 @@ export function FormularioPrestador({
                         value={nroTelefono}
                         onChange={(e) => setNroTelefono(e.target.value)}
                         placeholder="40001001"
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     />
                 </div>
             </div>
@@ -470,7 +486,7 @@ export function FormularioPrestador({
                     value={acercaDe}
                     onChange={(e) => setAcercaDe(e.target.value)}
                     placeholder="Describí experiencia, certificaciones y trabajos realizados..."
-                    disabled={enviando}
+                    disabled={deshabilitado}
                 />
             </div>
 
@@ -481,7 +497,7 @@ export function FormularioPrestador({
                     type="checkbox"
                     checked={ofreceGarantia}
                     onChange={(e) => setOfreceGarantia(e.target.checked)}
-                    disabled={enviando}
+                    disabled={deshabilitado}
                 />
                 Ofrece garantía escrita sobre los trabajos realizados
             </label>
@@ -504,7 +520,7 @@ export function FormularioPrestador({
                         type="button"
                         className="btn-prestador btn-prestador--secundario"
                         onClick={onCancelar}
-                        disabled={enviando}
+                        disabled={deshabilitado}
                     >
                         Cancelar
                     </button>
@@ -513,7 +529,7 @@ export function FormularioPrestador({
                 <button
                     type="submit"
                     className="btn-prestador btn-prestador--primario"
-                    disabled={enviando}
+                    disabled={deshabilitado}
                 >
                     {enviando
                         ? 'Guardando...'

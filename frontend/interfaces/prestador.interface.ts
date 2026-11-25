@@ -12,18 +12,21 @@ export interface IPrestador {
     aniosExperiencia: number;
     acercaDe: string;
     ofreceGarantia: boolean;
-    categoriaId: string;
+    categoriaId: number;
+    categoriaNombre?: string;
+    ubicacionId?: number;
     provincia?: string;
     localidad?: string;
+    codigoPostal?: string;
     radio?: number;
-    codigoPostal?: number;
     telefono: ITelefonoPrestador;
     ratingPromedio?: number;
     fotoUrl?: string;
 }
 
 export interface ICategoria {
-    id: string;
+    id: number;
+    slug: string;
     nombre: string;
 }
 
@@ -38,9 +41,16 @@ export interface IFiltrosPrestador {
     order?: 'asc' | 'desc';
 }
 
-export type ICrearPrestador = Omit<IPrestador, 'id'>;
+export type ICrearPrestador = Omit<
+    IPrestador,
+    'id' | 'categoriaNombre' | 'ratingPromedio'
+> & {
+    email?: string;
+};
 
-export type IActualizarPrestador = Partial<Omit<IPrestador, 'id'>>;
+export type IActualizarPrestador = Partial<
+    Omit<IPrestador, 'id' | 'categoriaNombre' | 'ratingPromedio'>
+>;
 
 export type FormatoExportacion = 'pdf' | 'xlsx';
 
