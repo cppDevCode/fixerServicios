@@ -155,13 +155,7 @@ export function Header() {
                                 <span>Iniciar Sesión</span>
                             </Link>
 
-                            <Link
-                                to="/panel-pro"
-                                className="fixer-header__publicar"
-                                onClick={cerrarMenu}
-                            >
-                                Publicar servicio
-                            </Link>
+                            
                         </>
                     )}
 

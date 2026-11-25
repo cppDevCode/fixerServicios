@@ -130,17 +130,7 @@
     font-size: 12px;
 }
 
-.fixer-footer__legales {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 24px;
-}
 
-.fixer-footer__legales span {
-    color: var(--color-text-secondary);
-    font-size: 12px;
-    }
 
 /* TABLET */
 
