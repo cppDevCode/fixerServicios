@@ -21,6 +21,7 @@ export const RegistroPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const API_URL = '/api/v1';
 
@@ -33,10 +34,11 @@ export const RegistroPage = () => {
     setFormData({ ...formData, [target.name]: value });
   };
 
-  const handleRegistro = async (e: React.FormEvent) => {
+    const handleRegistro = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const response = await fetch(`${API_URL}/usuarios`, {
@@ -49,13 +51,12 @@ export const RegistroPage = () => {
 
       if (result.code === 201) {
         if (result.data.prestador) {
-          localStorage.setItem(
-            'prestadorId',
-            result.data.prestador.id.toString()
-          );
+          localStorage.setItem('prestadorId', result.data.prestador.id.toString());
         }
-
-        navigate('/login');
+        
+        setSuccess('¡Registro exitoso! Redirigiendo al inicio de sesión...');
+        
+        setTimeout(() => navigate('/login'), 2000);
       } else {
         setError(result.msg || 'Error al registrar');
       }
@@ -72,9 +73,8 @@ export const RegistroPage = () => {
         <div className="registro-formulario">
           <div className="auth-header" style={{ textAlign: 'left' }}>
             <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>
-              🔧 Fixer
+              Fixer
             </h1>
-
             <h2 className="registro-titulo">Creá tu cuenta en Fixer</h2>
 
             <p className="auth-subtitle">
@@ -83,6 +83,7 @@ export const RegistroPage = () => {
           </div>
 
           {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
           <form onSubmit={handleRegistro} className="auth-form">
             <div className="checkbox-prestador">
@@ -177,7 +178,7 @@ export const RegistroPage = () => {
                   required
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                   autoComplete="new-password"
                 />
 

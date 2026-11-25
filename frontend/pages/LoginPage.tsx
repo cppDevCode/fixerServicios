@@ -89,13 +89,16 @@ export const LoginPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-header">
-          <h1 className="auth-logo">🔧 Fixer</h1>
-          <p className="auth-subtitle">Soluciones para tu hogar</p>
+        <div className="auth-header" style={{ textAlign: 'left' }}>
+          <h1 className="auth-logo" style={{ justifyContent: 'flex-start' }}>
+            Fixer
+          </h1>
+          <h2 className="registro-titulo">Iniciar Sesión</h2>
+          <p className="auth-subtitle">
+            Soluciones para tu hogar
+          </p>
         </div>
-
-        <h2 className="auth-title">Iniciar Sesión</h2>
-
+        
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleLogin} className="auth-form">
