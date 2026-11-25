@@ -1,9 +1,17 @@
 import { construirHeadersAutenticacion } from './sesion.service';
 
+export const PREGUNTAS_SECRETAS_OPCIONES = [
+    '¿Nombre de tu primera mascota?',
+    '¿Ciudad de nacimiento?',
+    '¿Nombre de tu mejor amigo de la infancia?',
+] as const;
+
 export interface IDatosCambioPassword {
     passwordActual: string;
     nuevaPassword: string;
     confirmarPassword: string;
+    preguntaSecreta?: string;
+    respuestaSecreta?: string;
 }
 
 export interface IResultadoCambioPassword {
@@ -16,7 +24,8 @@ export interface IResultadoCambioPassword {
 }
 
 export function validarCambioPassword(
-    datos: IDatosCambioPassword
+    datos: IDatosCambioPassword,
+    opciones?: { exigirPreguntaSecreta?: boolean }
 ): string | null {
     if (
         !datos.passwordActual ||
@@ -36,6 +45,16 @@ export function validarCambioPassword(
 
     if (datos.nuevaPassword === datos.passwordActual) {
         return 'La nueva contraseña debe ser diferente a la contraseña actual.';
+    }
+
+    if (opciones?.exigirPreguntaSecreta) {
+        if (!datos.preguntaSecreta || !datos.preguntaSecreta.trim()) {
+            return 'Debés seleccionar una pregunta secreta de recuperación.';
+        }
+
+        if (!datos.respuestaSecreta || !datos.respuestaSecreta.trim()) {
+            return 'Debés ingresar tu respuesta secreta de recuperación.';
+        }
     }
 
     return null;

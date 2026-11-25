@@ -197,5 +197,57 @@ describe('UsuarioService - Validaciones Unitarias', () => {
             );
             expect(loginOk.usuario.id).toBe(2);
         });
+
+        it('exige pregunta y respuesta secreta cuando el usuario tiene debeCambiarPassword activo (alta desde admin) y las persiste', async () => {
+            const repo = new UsuarioRepository();
+            const service = new UsuarioService(repo);
+            const nuevo = await repo.create({
+                nombre: 'Nicolás',
+                apellido: 'Onboarding',
+                email: 'nicolas.onboarding@example.com',
+                passwordHash: 'TempPass!2026',
+                rol: 'PRESTADOR',
+                prestadorId: 1,
+                debeCambiarPassword: true,
+            });
+
+            await expect(
+                service.cambiarPasswordAutenticado(nuevo.id, {
+                    passwordActual: 'TempPass!2026',
+                    nuevaPassword: 'MiClaveFinal#26',
+                    confirmarPassword: 'MiClaveFinal#26',
+                })
+            ).rejects.toThrow('pregunta secreta');
+
+            await expect(
+                service.cambiarPasswordAutenticado(nuevo.id, {
+                    passwordActual: 'TempPass!2026',
+                    nuevaPassword: 'MiClaveFinal#26',
+                    confirmarPassword: 'MiClaveFinal#26',
+                    preguntaSecreta: '¿Ciudad de nacimiento?',
+                    respuestaSecreta: '   ',
+                })
+            ).rejects.toThrow('respuesta secreta es obligatoria');
+
+            const res = await service.cambiarPasswordAutenticado(nuevo.id, {
+                passwordActual: 'TempPass!2026',
+                nuevaPassword: 'MiClaveFinal#26',
+                confirmarPassword: 'MiClaveFinal#26',
+                preguntaSecreta: '¿Ciudad de nacimiento?',
+                respuestaSecreta: 'Córdoba',
+            });
+            expect(res.mensaje).toContain('pregunta secreta');
+
+            const pregunta = await service.obtenerPreguntaSecreta(
+                'nicolas.onboarding@example.com'
+            );
+            expect(pregunta.preguntaSecreta).toBe('¿Ciudad de nacimiento?');
+
+            const rec = await service.recuperarPassword(
+                'nicolas.onboarding@example.com',
+                'Córdoba'
+            );
+            expect(rec.mensaje).toBe('Contraseña restablecida exitosamente');
+        });
     });
 });

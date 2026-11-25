@@ -57,6 +57,45 @@ describe('Cambio de contraseña desde Mi Ficha Profesional', () => {
                 confirmarPassword: 'nuevaPassword1',
             })
         ).toBeNull();
+
+        expect(
+            validarCambioPassword(
+                {
+                    passwordActual: '123456',
+                    nuevaPassword: 'nuevaPassword1',
+                    confirmarPassword: 'nuevaPassword1',
+                    preguntaSecreta: '',
+                    respuestaSecreta: 'Firulais',
+                },
+                { exigirPreguntaSecreta: true }
+            )
+        ).toContain('pregunta secreta');
+
+        expect(
+            validarCambioPassword(
+                {
+                    passwordActual: '123456',
+                    nuevaPassword: 'nuevaPassword1',
+                    confirmarPassword: 'nuevaPassword1',
+                    preguntaSecreta: '¿Nombre de tu primera mascota?',
+                    respuestaSecreta: '   ',
+                },
+                { exigirPreguntaSecreta: true }
+            )
+        ).toContain('respuesta secreta');
+
+        expect(
+            validarCambioPassword(
+                {
+                    passwordActual: '123456',
+                    nuevaPassword: 'nuevaPassword1',
+                    confirmarPassword: 'nuevaPassword1',
+                    preguntaSecreta: '¿Nombre de tu primera mascota?',
+                    respuestaSecreta: 'Firulais',
+                },
+                { exigirPreguntaSecreta: true }
+            )
+        ).toBeNull();
     });
 
     it('cambiarPasswordUsuario procesa respuestas 200, 401 (intentos restantes) y 423 (bloqueo 30 minutos)', async () => {
@@ -134,6 +173,8 @@ describe('Cambio de contraseña desde Mi Ficha Profesional', () => {
         expect(html).toContain('3 intentos fallidos');
         expect(html).toContain('30 minutos');
         expect(html).toContain('Actualizar contraseña');
+        expect(html).not.toContain('id="cambio-password-pregunta-secreta"');
+        expect(html).not.toContain('id="cambio-password-respuesta-secreta"');
     });
 
     it('deshabilita la edición de FormularioPrestador y FormularioCambioPassword cuando la cuenta está bloqueada', () => {
@@ -184,5 +225,13 @@ describe('Cambio de contraseña desde Mi Ficha Profesional', () => {
             'data-testid="cambio-password-obligatorio"'
         );
         expect(htmlObligatorio).toContain('contraseña temporal');
+        expect(htmlObligatorio).toContain(
+            'id="cambio-password-pregunta-secreta"'
+        );
+        expect(htmlObligatorio).toContain(
+            'id="cambio-password-respuesta-secreta"'
+        );
+        expect(htmlObligatorio).toContain('Pregunta secreta de recuperación');
+        expect(htmlObligatorio).toContain('Guardar contraseña y pregunta secreta');
     });
 });

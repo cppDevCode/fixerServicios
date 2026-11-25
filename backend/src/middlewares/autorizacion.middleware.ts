@@ -94,7 +94,7 @@ export function verificarPermisoEditarPrestador(
             ) {
                 const respuestaCambioObligatorio: RespuestaApi<null> = {
                     codigo: 403,
-                    msj: 'Debés cambiar tu contraseña temporal antes de editar tu ficha profesional',
+                    msj: 'Debés cambiar tu contraseña temporal y configurar tu pregunta secreta antes de editar tu ficha profesional',
                     datos: null,
                 };
                 res.status(403).json(respuestaCambioObligatorio);
